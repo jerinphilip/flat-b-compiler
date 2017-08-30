@@ -1,26 +1,49 @@
 %{
-#include "parser.tab.h"
+    #include "parser.tab.h"
 %}
 
 %%
-"declaration_list"			return declaration_list;
-"statement_list"		return statement_list;
-[0-9][0-9]*	{  
-			printf("Token type: Number, Lexeme/Token Value: %s\n", yytext);  
-			return NUMBER; 
-                }
-[a-zA-Z][a-zA-Z0-9]* {  
-			printf("Token type: Identifier, Lexeme/Token Value: %s\n", yytext);  
-			return IDENTIFIER; 
-		     } 
-"+"		return '+';
-"-"		return '-';
-"*"		return '*';
-"{"		return '{';
-"}"		return '}';
+"declblock"             return k_declaration;
+"codeblock"             return k_statement;
+"int"                   return k_integer;
+"for"                   return k_for;
+"while"                 return k_while;
+"if"                    return k_if;
+"else"                  return k_else;
+"print"                 return k_print;
+"println"               return k_println;
+"read"                  return k_read;
+"goto"                  return k_goto;
+[0-9][0-9]*	            {  
+                            printf("Token type: Number, Lexeme/Token Value: %s\n", yytext);  
+                            return NUMBER; 
+                        }
+[a-zA-Z][a-zA-Z0-9]*    {  
+                            printf("Token type: Identifier, Lexeme/Token Value: %s\n", yytext);  
+                            return IDENTIFIER; 
+                        } 
+"+"		                return '+';
+"-"		                return '-';
+"*"		                return '*';
+"/"		                return '/';
+"{"		                return '{';
+"}"		                return '}';
+"["		                return '[';
+"]"		                return ']';
+";"                     return EOS;
+":"                     return ':';
+"="                     return '=';
+"<"                     return '<';
+">"                     return '>';
+">="                    return GE;
+"<="                    return LE;
+"=="                    return EQ;
+"("                     return '(';
+")"                     return ')';
 
-[ \t]		{ /* Do nothing */ }
-.		{ 
-		  printf("Unexpected token encountered: %s\n", yytext); 
-		  return ETOK;
-		}
+[ \t\n]		            { /* Do nothing */ }
+","                     return ',';
+.		                { 
+                            printf("Unexpected token encountered: %s\n", yytext); 
+                            return ETOK;
+                        }
