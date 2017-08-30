@@ -13,7 +13,8 @@
 "print"                 return k_print;
 "println"               return k_println;
 "read"                  return k_read;
-"goto"                  return k_goto;
+"goto"                  return k_cond_goto;
+"got"                   return k_uncond_goto;
 [0-9][0-9]*	            {  
                             printf("Token type: Number, Lexeme/Token Value: %s\n", yytext);  
                             return NUMBER; 
@@ -40,9 +41,12 @@
 "=="                    return EQ;
 "("                     return '(';
 ")"                     return ')';
-
 [ \t\n]		            { /* Do nothing */ }
 ","                     return ',';
+\"(\\.|[^"])*\"         {
+                            printf("Token type: String, Lexeme/Token Value: %s\n", yytext);
+                            return STRING;
+                        }
 .		                { 
                             printf("Unexpected token encountered: %s\n", yytext); 
                             return ETOK;
