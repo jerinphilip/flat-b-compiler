@@ -52,6 +52,8 @@ statement: lval '=' arithExpr EOS
          | for
          | goto EOS
          | print EOS
+         | println EOS
+         | read EOS
 declaration: dtype id_list EOS
 id_list: var | var ',' id_list
 var: IDENTIFIER | id_loc
@@ -76,11 +78,11 @@ for: k_for lval '=' arithExpr ',' arithExpr block
    | k_for lval '=' arithExpr ',' arithExpr ',' arithExpr block
 goto: k_cond_goto IDENTIFIER k_if boolExpr | k_uncond_goto IDENTIFIER
 print: k_print printables
+println: k_println printables
 printables: printable | printable ',' printables
 printable: lval | STRING
+read: k_read lval
      
- 
-
 %%
 
 void yyerror (char const *s)
