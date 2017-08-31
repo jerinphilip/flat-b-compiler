@@ -39,12 +39,18 @@
 %%
 
 program            :  decl_block code_block
+                   ;
 decl_block         :  k_declaration '{' declaration_list '}'
+                   ;
 code_block         :  k_statement block
+                   ;
 block              : '{' statement_list '}'
+                   ;
 
 declaration_list   : declaration | declaration declaration_list
+                   ;
 statement_list     : statement | statement statement_list
+                   ;
 statement          : lval '=' arithExpr EOS
                    | while
                    | IDENTIFIER ':' 
@@ -54,12 +60,20 @@ statement          : lval '=' arithExpr EOS
                    | print EOS
                    | println EOS
                    | read EOS
+                   ;
 declaration        : dtype id_list EOS
+                   ;
 id_list            : var | var ',' id_list
+                   ;
+
 var                : IDENTIFIER 
                    | IDENTIFIER '[' NUMBER ']'
+                   ;
+
 id_loc             : IDENTIFIER '[' arithExpr ']' 
+                   ;
 dtype              : k_integer
+                   ;
 arithExpr          : arithExpr '+' arithExpr
                    | arithExpr '*' arithExpr 
                    | arithExpr '/' arithExpr
@@ -68,32 +82,45 @@ arithExpr          : arithExpr '+' arithExpr
                    | NUMBER
                    | IDENTIFIER
                    | id_loc
+                   ;
 
 
 boolExpr           :  arithExpr boolOp arithExpr 
-                   | '(' boolExpr ')';
+                   | '(' boolExpr ')'
+                   ;
 
 lval               : IDENTIFIER | id_loc
+                   ;
 
 boolOp             : '<' | '>' | GE | LE | EQ
+                   ;
 
 while              : k_while boolExpr block
+                   ;
 
 if                 : k_if boolExpr block 
                    | k_if boolExpr block k_else block
+                   ;
 
 for                : k_for lval '=' arithExpr ',' arithExpr block
                    | k_for lval '=' arithExpr ',' arithExpr ',' arithExpr block
+                   ;
 
 goto               : k_cond_goto IDENTIFIER k_if boolExpr 
                    | k_uncond_goto IDENTIFIER
+                   ;
 
 print              : k_print printables
+                   ;
 println            : k_println printables
+                   ;
 printables         : printable | printable ',' printables
+                   ;
 printable          : lval | STRING
+                   ;
 
 read               : k_read lval
+                   ;
      
 %%
 
