@@ -56,9 +56,8 @@ statement: lval '=' arithExpr EOS
          | read EOS
 declaration: dtype id_list EOS
 id_list: var | var ',' id_list
-var: IDENTIFIER | id_loc
-id_loc : IDENTIFIER '[' IDENTIFIER ']' | id_array
-id_array: IDENTIFIER '[' NUMBER ']'
+var: IDENTIFIER | IDENTIFIER '[' NUMBER ']'
+id_loc : IDENTIFIER '[' arithExpr ']' 
 dtype: k_integer
 arithExpr: arithExpr '+' arithExpr
          | arithExpr '*' arithExpr 
@@ -68,6 +67,7 @@ arithExpr: arithExpr '+' arithExpr
          | NUMBER
          | IDENTIFIER
          | id_loc
+
 
 boolExpr:  arithExpr boolOp arithExpr | '(' boolExpr ')';
 lval: IDENTIFIER | id_loc
