@@ -47,7 +47,7 @@ declaration_list: declaration | declaration declaration_list
 statement_list: statement | statement statement_list
 statement: lval '=' arithExpr EOS
          | while
-         | IDENTIFIER ':' statement
+         | IDENTIFIER ':' 
          | if
          | for
          | goto EOS
