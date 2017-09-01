@@ -47,10 +47,13 @@ code_block         :  k_statement block
 block              : '{' statement_list '}'
                    ;
 
-declaration_list   : declaration | declaration declaration_list
+declaration_list   : declaration declaration_list 
+                   | %empty
                    ;
-statement_list     : statement | statement statement_list
+statement_list     : statement statement_list 
+                   | %empty
                    ;
+
 statement          : lval '=' arithExpr EOS
                    | while
                    | IDENTIFIER ':' 
@@ -60,8 +63,10 @@ statement          : lval '=' arithExpr EOS
                    | print EOS
                    | println EOS
                    | read EOS
+                   | EOS
                    ;
 declaration        : dtype id_list EOS
+                   | EOS
                    ;
 id_list            : var | var ',' id_list
                    ;
