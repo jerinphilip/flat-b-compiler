@@ -18,11 +18,12 @@
     char* String;
     ast::program *program;
     ast::declarations *declarations;
-    vector<ast::typed_ids*> *tIds;
+    /*vector<ast::typed_ids*> *tIds;*/
+    ast::typed_ids *tIds;
     ast::statement *statement;
     vector<ast::statement*> *statements;
     ast::id *id;
-    vector<ast::id> *ids;
+    vector<ast::id*> *ids;
     ast::expr *expr;
     ast::code *code;
     type *dtype;
@@ -73,7 +74,7 @@
 
 %%
 
-program            :  decl_block code_block { $$ = new ast::program($1, $2); root = $$; }
+program            :  decl_block code_block { $$ = new ast::program($1, $2); }
                    ;
 decl_block         :  k_declaration '{' declaration_list '}' { $$ = new ast::declarations($3); }
                    ;
@@ -82,7 +83,7 @@ code_block         :  k_statement block { /*$$ = $1;*/ }
 block              : '{' statement_list '}' { /*$$ =  ast::code($2); */}
                    ;
 
-declaration_list   : declaration declaration_list {$$ = $2.push_back($1);}
+declaration_list   : declaration declaration_list {$$ = $2->push_back($1);}
                    | %empty {$$ = new vector<ast::typed_ids*>;}
                    ;
 statement_list     : statement statement_list  {}

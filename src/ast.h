@@ -13,7 +13,7 @@ enum opr {
     add,
     sub,
     mul,
-    div
+    quot
 };
 
 
@@ -70,7 +70,7 @@ namespace ast {
         type dtype;
         vector<id*> *t_ids;
         typed_ids(type d, vector<id*> *v): 
-            dtype(d) t_ids(v) {}
+            dtype(d), t_ids(v) {}
     };
 
 
@@ -82,7 +82,7 @@ namespace ast {
     struct Int: public node {
         int value;
         Int(int v): value(v){}
-    } 
+    };
 
     struct binOp: public expr {
         opr op;
