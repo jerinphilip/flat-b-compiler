@@ -1,5 +1,6 @@
 bcc:	parser.tab.c lex.yy.c
-	gcc parser.tab.c lex.yy.c -lfl -o bcc
+	#g++ parser.tab.c lex.yy.c -lfl -o bcc
+	g++ parser.tab.c -lfl -o bcc
 parser.tab.c: parser.y 
 	bison -d --debug --verbose parser.y 
 parser.tab.h: parser.y

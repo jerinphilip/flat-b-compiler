@@ -1,10 +1,45 @@
 %{
   #include <stdio.h>
-  #include <stdlib.h>
-  FILE *yyin;
-  int yylex (void);
+  #include <stdlib.h>   
+  #include <iostream>
+  extern "C" FILE *yyin;
+  extern "C" int yylex (void);
+  extern "C" int yyparse (void);
   void yyerror (char const *s);
+  using namespace std;
+
+  #include "ast.h"
+  #include "lex.yy.c"
 %}
+
+
+%union {
+    int Int;
+    char* String;
+    ast::program *program;
+    ast::declarations *declarations;
+    vector<ast::typed_ids*> *tIds;
+    ast::statement *statement;
+    vector<ast::statement*> *statements;
+    ast::id *id;
+    vector<ast::id> *ids;
+    ast::expr *expr;
+    ast::code *code;
+    type *dtype;
+}
+
+%type <Int> NUMBER;
+%type <id> IDENTIFIER;
+%type <program> program;
+%type <declarations> decl_block;
+%type <code> code_block;
+%type <code> block;
+%type <ids> declaration;
+%type <ids> id_list;
+%type <statements> statement_list;
+%type <dtype> dtype;
+%type <id> var;
+%type <tIds> declaration_list;
 
 /*%token declaration_list*/
 /*%token statement_list*/
@@ -38,20 +73,20 @@
 
 %%
 
-program            :  decl_block code_block
+program            :  decl_block code_block { $$ = new ast::program($1, $2); root = $$; }
                    ;
-decl_block         :  k_declaration '{' declaration_list '}'
+decl_block         :  k_declaration '{' declaration_list '}' { $$ = new ast::declarations($3); }
                    ;
-code_block         :  k_statement block
+code_block         :  k_statement block { /*$$ = $1;*/ }
                    ;
-block              : '{' statement_list '}'
+block              : '{' statement_list '}' { /*$$ =  ast::code($2); */}
                    ;
 
-declaration_list   : declaration declaration_list 
-                   | %empty
+declaration_list   : declaration declaration_list {$$ = $2.push_back($1);}
+                   | %empty {$$ = new vector<ast::typed_ids*>;}
                    ;
-statement_list     : statement statement_list 
-                   | %empty
+statement_list     : statement statement_list  {}
+                   | %empty {}
                    ;
 
 statement          : lval '=' arithExpr EOS
@@ -65,19 +100,20 @@ statement          : lval '=' arithExpr EOS
                    | read EOS
                    | EOS
                    ;
-declaration        : dtype id_list EOS
-                   | EOS
+declaration        : dtype id_list EOS { $$ = new ast::typed_ids($1, $2); }
+                   /*| EOS {$$ */
                    ;
-id_list            : var | var ',' id_list
+id_list            : var { $$ = new vector<ast::id*>; $$.push_back($1); }
+                   | var ',' id_list { $3.push_back($1); $$ = $3; }
                    ;
 
-var                : IDENTIFIER 
-                   | IDENTIFIER '[' NUMBER ']'
+var                : IDENTIFIER { $$ = new ast::id($1); }
+                   | IDENTIFIER '[' NUMBER ']' { ast::expr* e = new ast::Int($3); $$ = new ast::id_(x, e); }
                    ;
 
 id_loc             : IDENTIFIER '[' arithExpr ']' 
                    ;
-dtype              : k_integer
+dtype              : k_integer { $$ = type::Int }
                    ;
 arithExpr          : arithExpr '+' arithExpr
                    | arithExpr '*' arithExpr 
