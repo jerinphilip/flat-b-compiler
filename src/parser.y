@@ -18,8 +18,8 @@
     char* String;
     ast::program *program;
     ast::declarations *declarations;
-    /*vector<ast::typed_ids*> *tIds;*/
-    ast::typed_ids *tIds;
+    vector<ast::typed_ids*> *tIds;
+    ast::typed_ids *tId;
     ast::statement *statement;
     vector<ast::statement*> *statements;
     ast::id *id;
@@ -30,12 +30,12 @@
 }
 
 %type <Int> NUMBER;
-%type <id> IDENTIFIER;
+%type <String> IDENTIFIER;
 %type <program> program;
 %type <declarations> decl_block;
 %type <code> code_block;
 %type <code> block;
-%type <ids> declaration;
+%type <tId> declaration;
 %type <ids> id_list;
 %type <statements> statement_list;
 %type <dtype> dtype;
@@ -83,7 +83,7 @@ code_block         :  k_statement block { /*$$ = $1;*/ }
 block              : '{' statement_list '}' { /*$$ =  ast::code($2); */}
                    ;
 
-declaration_list   : declaration declaration_list {$$ = $2->push_back($1);}
+declaration_list   : declaration declaration_list { $2->push_back($1); $$ = $2;}
                    | %empty {$$ = new vector<ast::typed_ids*>;}
                    ;
 statement_list     : statement statement_list  {}
@@ -104,12 +104,12 @@ statement          : lval '=' arithExpr EOS
 declaration        : dtype id_list EOS { $$ = new ast::typed_ids($1, $2); }
                    /*| EOS {$$ */
                    ;
-id_list            : var { $$ = new vector<ast::id*>; $$.push_back($1); }
-                   | var ',' id_list { $3.push_back($1); $$ = $3; }
+id_list            : var { $$ = new vector<ast::id*>; $$->push_back($1); }
+                   | var ',' id_list { $3->push_back($1); $$ = $3; }
                    ;
 
 var                : IDENTIFIER { $$ = new ast::id($1); }
-                   | IDENTIFIER '[' NUMBER ']' { ast::expr* e = new ast::Int($3); $$ = new ast::id_(x, e); }
+                   | IDENTIFIER '[' NUMBER ']' { $$ = new ast::id_(new ast::id($1), new ast::expr(new ast::Int($3)); }
                    ;
 
 id_loc             : IDENTIFIER '[' arithExpr ']' 

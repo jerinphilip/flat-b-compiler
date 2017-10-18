@@ -67,9 +67,9 @@ namespace ast {
     };
     
     struct typed_ids : public node {
-        type dtype;
+        type *dtype;
         vector<id*> *t_ids;
-        typed_ids(type d, vector<id*> *v): 
+        typed_ids(type *d, vector<id*> *v): 
             dtype(d), t_ids(v) {}
     };
 
