@@ -12,6 +12,8 @@
   #include "lex.yy.c"
   using namespace std;
 
+  ast::program *pgm = NULL;
+
 %}
 
 
@@ -76,7 +78,7 @@
 
 %%
 
-program            :  decl_block code_block { $$ = new ast::program($1, $2); }
+program            :  decl_block code_block { $$ = new ast::program($1, $2); pgm = $$;}
                    ;
 decl_block         :  k_declaration '{' declaration_list '}' { $$ = new ast::declarations($3); }
                    ;
@@ -188,6 +190,6 @@ int main(int argc, char *argv[])
 	yyin = fopen(argv[1], "r");
 
     visitor::pprinter print;
-
 	yyparse();
+    print.visit(pgm);
 }

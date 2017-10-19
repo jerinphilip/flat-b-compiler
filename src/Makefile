@@ -1,5 +1,5 @@
 bcc: parser.tab.c printer.cpp ast.cpp lex.yy.c ast.h visitor.h
-	g++ parser.tab.c ast.cpp printer.cpp -lfl -o bcc
+	g++ -g parser.tab.c ast.cpp printer.cpp -lfl -o bcc
 	# g++ parser.tab.c -lfl -o bcc
 parser.tab.c: parser.y 
 	bison -d --debug --verbose parser.y 

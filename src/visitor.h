@@ -8,8 +8,8 @@ using namespace std;
 namespace visitor {
     struct pprinter {
         void visit(ast::node *node_);
-        void visit(ast::program *program_);
-        void visit(ast::declarations *declarations_);
+        void visit(ast::program *program);
+        void visit(ast::declarations *declarations);
         void visit(ast::id *id);
         void visit(ast::id_ *id_);
         void visit(ast::expr *e);
