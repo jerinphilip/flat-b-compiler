@@ -10,11 +10,9 @@ void ast::declarations::accept(visitor::pprinter *p){
 void ast::id::accept(visitor::pprinter *p){ 
     p->visit(this);
 }
-
 void ast::id_::accept(visitor::pprinter *p){
     p->visit(this);
 }
-//void ast::expr::accept(visitor::pprinter *p){ }
 void ast::code::accept(visitor::pprinter *p){
     p->visit(this);
 }

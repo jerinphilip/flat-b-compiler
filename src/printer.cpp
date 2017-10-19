@@ -8,7 +8,7 @@ void visitor::pprinter::visit(ast::node *node){
 void visitor::pprinter::visit(ast::program *program){
     cout << "Program" << endl;
     program->decl->accept(this);
-    program->block->accept(this);
+    //program->block->accept(this);
 }
 
 void visitor::pprinter::visit(ast::declarations *declarations){
