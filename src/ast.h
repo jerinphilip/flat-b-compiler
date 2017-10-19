@@ -126,8 +126,8 @@ namespace ast {
 
     /* statements */
     struct code : public node {
-        vector<statement*> statements;
-        code(vector<statement*> s):statements(s) {}
+        vector<statement*> *statements;
+        code(vector<statement*> *s):statements(s) {}
         void accept(visitor::pprinter *p);
         void accept(visitor::interpreter *p);
     };
@@ -139,6 +139,10 @@ namespace ast {
     };
 
     struct assign: public statement {
+        id *ref;
+        expr *value;
+
+        assign(id *ref, expr *value): ref(ref), value(value) {}
     
         void accept(visitor::pprinter *p);
         void accept(visitor::interpreter *p);
@@ -159,7 +163,9 @@ namespace ast {
     };
 
     struct if_: public cblock {
-        if_(expr *c, code *b): cblock(c, b){}
+        code *otherwise;
+        if_(expr *c, code *b, code *o = NULL): 
+            cblock(c, b), otherwise(o) { }
         void accept(visitor::pprinter *p);
         void accept(visitor::interpreter *p);
     };
@@ -176,6 +182,12 @@ namespace ast {
         void accept(visitor::interpreter *p);
     };
 
+    struct goto_: public id, statement {
+       goto_ (string label): id(label) {}
+        void accept(visitor::pprinter *p);
+        void accept(visitor::interpreter *p);
+    };
+
     struct print: public statement {
     
         void accept(visitor::pprinter *p);
@@ -186,6 +198,14 @@ namespace ast {
         void accept(visitor::pprinter *p);
         void accept(visitor::interpreter *p);
     };
+
+    struct no_op: public statement {
+        no_op(){}
+        void accept(visitor::pprinter *p);
+        void accept(visitor::interpreter *p);
+    };
+
+
 }
 
 

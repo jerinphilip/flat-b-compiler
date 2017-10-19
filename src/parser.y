@@ -32,6 +32,9 @@
     ast::code *code;
     type dtype;
     opr op;
+    ast::while_ *while_;
+    ast::for_ *for_;
+    ast::if_ *if_;
 }
 
 %type <Int> NUMBER;
@@ -43,13 +46,18 @@
 %type <tId> declaration;
 %type <ids> id_list;
 %type <statements> statement_list;
+%type <statement> statement;
 %type <dtype> dtype;
 %type <id> var;
 %type <id> id_loc;
+%type <id> lval;
 %type <tIds> declaration_list;
 %type <op> boolOp;
 %type <expr> boolExpr;
 %type <expr> arithExpr;
+%type <while_> while;
+%type <for_> for;
+%type <if_> if;
 
 /*%token declaration_list*/
 /*%token statement_list*/
@@ -87,28 +95,28 @@ program            :  decl_block code_block { $$ = new ast::program($1, $2); pgm
                    ;
 decl_block         :  k_declaration '{' declaration_list '}' { $$ = new ast::declarations($3); }
                    ;
-code_block         :  k_statement block { /*$$ = $1;*/ }
+code_block         :  k_statement block { $$ = $2; }
                    ;
-block              : '{' statement_list '}' { /*$$ =  ast::code($2); */}
+block              : '{' statement_list '}' { $$ =  new ast::code($2); }
                    ;
 
-declaration_list   : declaration declaration_list { $2->push_back($1); $$ = $2;}
+declaration_list   : declaration_list declaration { $1->push_back($2); $$ = $1;}
                    | %empty {$$ = new vector<ast::typed_ids*>;}
                    ;
-statement_list     : statement statement_list  {}
-                   | %empty {}
+statement_list     : statement_list statement { $1->push_back($2); $$ = $1;}
+                   | %empty {$$ = new vector<ast::statement*>;} 
                    ;
 
-statement          : lval '=' arithExpr EOS
-                   | while
-                   | IDENTIFIER ':' 
-                   | if
-                   | for
-                   | goto EOS
-                   | print EOS
-                   | println EOS
-                   | read EOS
-                   | EOS
+statement          : lval '=' arithExpr EOS { $$ = new ast::assign($1, $3); }  
+                   | while                  { $$ = $1; }   
+                   | IDENTIFIER ':'         { string sId = string($1); $$ = new ast::goto_(sId); } 
+                   | if                     { $$ = $1; } 
+                   | for                    { $$ = $1; }  
+                   | goto EOS               {}    
+                   | print EOS             /* { $$ = $1; }               */    
+                   | println EOS           /* { $$ = $1; }               */      
+                   | read EOS              /* { $$ = $1; }               */   
+                   | EOS                   /* { $$ = new ast::no_op(); } */
                    ;
 declaration        : dtype id_list EOS { $$ = new ast::typed_ids($1, $2); }
                    /*| EOS {$$ */
@@ -140,8 +148,8 @@ boolExpr           :  arithExpr boolOp arithExpr  { $$ = new ast::binOp($2, $1, 
                    | '(' boolExpr ')'       { $$ = $2; }
                    ;
 
-lval               : IDENTIFIER 
-                   | id_loc
+lval               : IDENTIFIER              { $$ = new ast::id($1); } 
+                   | id_loc                  { $$ = $1; }
                    ;
 
 boolOp             : '<'  { $$ = opr::lt; }
@@ -151,11 +159,11 @@ boolOp             : '<'  { $$ = opr::lt; }
                    | EQ   { $$ = opr::eq; }
                    ;
 
-while              : k_while boolExpr block
+while              : k_while boolExpr block     { $$ = new ast::while_($2, $3); }
                    ;
 
-if                 : k_if boolExpr block 
-                   | k_if boolExpr block k_else block
+if                 : k_if boolExpr block        { $$ = new ast::if_($2, $3); }
+                   | k_if boolExpr block k_else block { $$ = new ast::if_($2, $3, $5); }
                    ;
 
 for                : k_for lval '=' arithExpr ',' arithExpr block

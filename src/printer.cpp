@@ -60,4 +60,13 @@ void visitor::pprinter::visit(ast::print *print){
 
 void visitor::pprinter::visit(ast::typed_ids *t_ids){
     cout << "Typed ids" << endl;
+
+}
+
+void visitor::pprinter::visit(ast::no_op *no_op){
+    cout << "No-Op" << endl;
+}
+
+void visitor::pprinter::visit(ast::goto_ *goto_){
+    cout << "Go-To" << endl;
 }
