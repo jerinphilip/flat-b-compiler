@@ -35,6 +35,8 @@
     ast::while_ *while_;
     ast::for_ *for_;
     ast::if_ *if_;
+    ast::no_op *no_op;
+    ast::goto_ *goto_;
 }
 
 %type <Int> NUMBER;
@@ -58,6 +60,11 @@
 %type <while_> while;
 %type <for_> for;
 %type <if_> if;
+%type <goto_> goto;
+
+%type <no_op> print;
+%type <no_op> println;
+%type <no_op> read;
 
 /*%token declaration_list*/
 /*%token statement_list*/
@@ -91,100 +98,103 @@
 
 %%
 
-program            :  decl_block code_block { $$ = new ast::program($1, $2); pgm = $$;}
+program            :  decl_block code_block                                     { $$ = new ast::program($1, $2); pgm = $$;}
                    ;
-decl_block         :  k_declaration '{' declaration_list '}' { $$ = new ast::declarations($3); }
+decl_block         :  k_declaration '{' declaration_list '}'                    { $$ = new ast::declarations($3); }
                    ;
-code_block         :  k_statement block { $$ = $2; }
+code_block         :  k_statement block                                         { $$ = $2; }
                    ;
-block              : '{' statement_list '}' { $$ =  new ast::code($2); }
-                   ;
-
-declaration_list   : declaration_list declaration { $1->push_back($2); $$ = $1;}
-                   | %empty {$$ = new vector<ast::typed_ids*>;}
-                   ;
-statement_list     : statement_list statement { $1->push_back($2); $$ = $1;}
-                   | %empty {$$ = new vector<ast::statement*>;} 
+block              : '{' statement_list '}'                                     { $$ =  new ast::code($2); }
                    ;
 
-statement          : lval '=' arithExpr EOS { $$ = new ast::assign($1, $3); }  
-                   | while                  { $$ = $1; }   
-                   | IDENTIFIER ':'         { string sId = string($1); $$ = new ast::goto_(sId); } 
-                   | if                     { $$ = $1; } 
-                   | for                    { $$ = $1; }  
-                   | goto EOS               {}    
-                   | print EOS             /* { $$ = $1; }               */    
-                   | println EOS           /* { $$ = $1; }               */      
-                   | read EOS              /* { $$ = $1; }               */   
-                   | EOS                   /* { $$ = new ast::no_op(); } */
+declaration_list   : declaration_list declaration                               { $1->push_back($2); $$ = $1; }
+                   | %empty                                                     { $$ = new vector<ast::typed_ids*>; }
                    ;
-declaration        : dtype id_list EOS { $$ = new ast::typed_ids($1, $2); }
+statement_list     : statement_list statement                                   { $1->push_back($2); $$ = $1; }
+                   | %empty                                                     { $$ = new vector<ast::statement*>; } 
+                   ;
+
+statement          : lval '=' arithExpr EOS                                     { $$ = new ast::assign($1, $3); }  
+                   | while                                                      { $$ = $1; }   
+                   | IDENTIFIER ':'                                             { string sId = string($1); $$ = new ast::goto_(sId); } 
+                   | if                                                         { $$ = $1; } 
+                   | for                                                        { $$ = $1; }  
+                   | goto EOS                                                   { $$ = $1; }    
+                   | print EOS                                                  { $$ = $1; }                   
+                   | println EOS                                                { $$ = $1; }                     
+                   | read EOS                                                   { $$ = $1; }                  
+                   | EOS                                                        { $$ = new ast::no_op(); } 
+                   ;
+declaration        : dtype id_list EOS                                          { $$ = new ast::typed_ids($1, $2); }
                    /*| EOS {$$ */
                    ;
-id_list            : var { $$ = new vector<ast::id*>; $$->push_back($1); }
-                   | var ',' id_list { $3->push_back($1); $$ = $3; }
+id_list            : var                                                        { $$ = new vector<ast::id*>; $$->push_back($1); }
+                   | var ',' id_list                                            { $3->push_back($1); $$ = $3; }
                    ;
 
-var                : IDENTIFIER { $$ = new ast::id($1); }
-                   | IDENTIFIER '[' NUMBER ']' { string sId = string($1); $$ = new ast::id_(sId, new ast::integer($3)); }
+var                : IDENTIFIER                                                 { $$ = new ast::id($1); }
+                   | IDENTIFIER '[' NUMBER ']'                                  { string sId = string($1); $$ = new ast::id_(sId, new ast::integer($3)); }
                    ;
 
-id_loc             : IDENTIFIER '[' arithExpr ']' { string sId = string($1); $$ = new ast::id_(sId, $3); }
+id_loc             : IDENTIFIER '[' arithExpr ']'                               { string sId = string($1); $$ = new ast::id_(sId, $3); }
                    ;
-dtype              : k_integer { $$ = type::Int; }
+dtype              : k_integer                                                  { $$ = type::Int; }
                    ;
-arithExpr          : arithExpr '+' arithExpr  { $$ = new ast::binOp(opr::add, $1, $3);  }
-                   | arithExpr '*' arithExpr  { $$ = new ast::binOp(opr::mul, $1, $3);  }  
-                   | arithExpr '/' arithExpr  { $$ = new ast::binOp(opr::quot, $1, $3);  }
-                   | arithExpr '-' arithExpr  { $$ = new ast::binOp(opr::sub, $1, $3);  }
-                   | '(' arithExpr ')'        { $$ = $2; }
-                   | NUMBER                   { $$ = new ast::integer($1); }
-                   | IDENTIFIER               { $$ = new ast::id($1); }
-                   | id_loc                   { $$ = $1; }
-                   ;
-
-
-boolExpr           :  arithExpr boolOp arithExpr  { $$ = new ast::binOp($2, $1, $3); }
-                   | '(' boolExpr ')'       { $$ = $2; }
+arithExpr          : arithExpr '+' arithExpr                                    { $$ = new ast::binOp(opr::add, $1, $3);  }
+                   | arithExpr '*' arithExpr                                    { $$ = new ast::binOp(opr::mul, $1, $3);  }  
+                   | arithExpr '/' arithExpr                                    { $$ = new ast::binOp(opr::quot, $1, $3);  }
+                   | arithExpr '-' arithExpr                                    { $$ = new ast::binOp(opr::sub, $1, $3);  }
+                   | '(' arithExpr ')'                                          { $$ = $2; }
+                   | NUMBER                                                     { $$ = new ast::integer($1); }
+                   | IDENTIFIER                                                 { $$ = new ast::id($1); }
+                   | id_loc                                                     { $$ = $1; }
                    ;
 
-lval               : IDENTIFIER              { $$ = new ast::id($1); } 
-                   | id_loc                  { $$ = $1; }
+
+boolExpr           :  arithExpr boolOp arithExpr                                { $$ = new ast::binOp($2, $1, $3); }
+                   | '(' boolExpr ')'                                           { $$ = $2; }
                    ;
 
-boolOp             : '<'  { $$ = opr::lt; }
-                   | '>'  { $$ = opr::gt; }
-                   | GE   { $$ = opr::ge; }
-                   | LE   { $$ = opr::le; }
-                   | EQ   { $$ = opr::eq; }
+lval               : IDENTIFIER                                                 { $$ = new ast::id($1); } 
+                   | id_loc                                                     { $$ = $1; }
                    ;
 
-while              : k_while boolExpr block     { $$ = new ast::while_($2, $3); }
+boolOp             : '<'                                                        { $$ = opr::lt; }
+                   | '>'                                                        { $$ = opr::gt; }
+                   | GE                                                         { $$ = opr::ge; }
+                   | LE                                                         { $$ = opr::le; }
+                   | EQ                                                         { $$ = opr::eq; }
                    ;
 
-if                 : k_if boolExpr block        { $$ = new ast::if_($2, $3); }
-                   | k_if boolExpr block k_else block { $$ = new ast::if_($2, $3, $5); }
+while              : k_while boolExpr block                                     { $$ = new ast::while_($2, $3); }
                    ;
 
-for                : k_for lval '=' arithExpr ',' arithExpr block
-                   | k_for lval '=' arithExpr ',' arithExpr ',' arithExpr block
+if                 : k_if boolExpr block                                        { $$ = new ast::if_($2, $3); }
+                   | k_if boolExpr block k_else block                           { $$ = new ast::if_($2, $3, $5); }
                    ;
 
-goto               : k_cond_goto IDENTIFIER k_if boolExpr 
-                   | k_uncond_goto IDENTIFIER
+for                : k_for lval '=' arithExpr ',' arithExpr block               { $$ = new ast::for_($2, $4, (new ast::integer(1)), $6, $7); }
+                   | k_for lval '=' arithExpr ',' arithExpr ',' arithExpr block { $$ = new ast::for_($2, $4, $6, $8, $9); }
                    ;
 
-print              : k_print printables
-                   ;
-println            : k_println printables
-                   ;
-printables         : printable | printable ',' printables
-                   ;
-printable          : lval | STRING
-                   ;
+goto               : k_cond_goto IDENTIFIER k_if boolExpr                       { string sId = string($2); $$ = new ast::goto_(sId, $4); }
+                   | k_uncond_goto IDENTIFIER                                   { string sId = string($2); $$ = new ast::goto_(sId); }
+                   ;                                                            
+                                                                                 
+print              : k_print printables                                         { $$ = new ast::no_op(); } 
+                   ;                                                            
+println            : k_println printables                                       { $$ = new ast::no_op(); }
+                   ;                                                            
+printables         : printable                                                  { }
+                   | printable ',' printables                                   { }
+                   ;                                                            
+printable          : lval                                                       { } 
+                   | STRING                                                     { }
+                   | NUMBER                                                     { }
+                   ;                                                            
 
-read               : k_read lval
-                   ;
+read               : k_read lval                                                { }
+                   ;                                            
      
 %%
 

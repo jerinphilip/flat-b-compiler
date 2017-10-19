@@ -42,7 +42,6 @@ namespace ast {
     struct if_;
     struct for_;
     struct print;
-    struct println;
     struct typed_ids;
 
 
@@ -171,19 +170,21 @@ namespace ast {
     };
 
     struct for_: public statement {
-        statement* init;
-        expr* cond;
-        expr* step;
+        id *var;
+        expr *start;
+        expr *step;
+        expr *end;
         code* block;
 
-        for_(statement *i, expr *c, expr *s, code *b): 
-            init(i), cond(c), step(s), block(b){}
+        for_(id *i, expr *init, expr *delta, expr *end, code *b): 
+            var(i), start(init), step(delta), end(end), block(b){}
         void accept(visitor::pprinter *p);
         void accept(visitor::interpreter *p);
     };
 
     struct goto_: public id, statement {
-       goto_ (string label): id(label) {}
+        expr *cond;
+        goto_ (string label, expr* e=NULL): id(label), cond(e) {}
         void accept(visitor::pprinter *p);
         void accept(visitor::interpreter *p);
     };
@@ -194,10 +195,6 @@ namespace ast {
         void accept(visitor::interpreter *p);
     };
 
-    struct println: public statement {
-        void accept(visitor::pprinter *p);
-        void accept(visitor::interpreter *p);
-    };
 
     struct no_op: public statement {
         no_op(){}

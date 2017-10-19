@@ -41,9 +41,6 @@ void ast::for_::accept(visitor::pprinter *p){
 void ast::print::accept(visitor::pprinter *p){
     p->visit(this);
 }
-void ast::println::accept(visitor::pprinter *p){
-    p->visit(this);
-}
 void ast::typed_ids::accept(visitor::pprinter *p){
     p->visit(this);
 }
@@ -98,9 +95,6 @@ void ast::for_::accept(visitor::interpreter *p){
     p->visit(this);
 }
 void ast::print::accept(visitor::interpreter *p){
-    p->visit(this);
-}
-void ast::println::accept(visitor::interpreter *p){
     p->visit(this);
 }
 void ast::typed_ids::accept(visitor::interpreter *p){
