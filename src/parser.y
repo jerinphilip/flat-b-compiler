@@ -217,7 +217,7 @@ int main(int argc, char *argv[])
 
 	yyin = fopen(argv[1], "r");
 
-    //visitor::pprinter print;
+    visitor::pprinter print;
 	yyparse();
-    //print.visit(pgm);
+    print.visit(pgm);
 }

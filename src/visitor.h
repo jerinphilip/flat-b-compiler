@@ -23,6 +23,7 @@ namespace visitor {
         void visit(ast::typed_ids *t_ids);
         void visit(ast::no_op *no_op);
         void visit(ast::goto_ *goto_);
+        void visit(ast::integer *integer);
     };
 
 
@@ -44,6 +45,7 @@ namespace visitor {
         void visit(ast::typed_ids *t_ids);
         void visit(ast::no_op *no_op);
         void visit(ast::goto_ *goto_);
+        void visit(ast::integer *integer);
     };
 }
 

@@ -67,3 +67,6 @@ void visitor::interpreter::visit(ast::no_op *no_op){
 void visitor::interpreter::visit(ast::goto_ *no_op){
     cout << "goto_" << endl;
 }
+
+void visitor::interpreter::visit(ast::integer *integer){
+}
