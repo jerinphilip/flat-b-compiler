@@ -6,7 +6,9 @@
 using namespace std;
 
 enum type {
-    Int
+    Int,
+    Bool,
+    Char
 };
 
 enum opr {
@@ -110,6 +112,7 @@ namespace ast {
         void accept(visitor::interpreter *p);
     };
 
+
     struct binOp: public expr {
         opr op;
         expr *left;
@@ -139,9 +142,9 @@ namespace ast {
 
     struct assign: public statement {
         id *ref;
-        expr *value;
+        expr *tree;
 
-        assign(id *ref, expr *value): ref(ref), value(value) {}
+        assign(id *ref, expr *e): ref(ref), tree(e){}
     
         void accept(visitor::pprinter *p);
         void accept(visitor::interpreter *p);

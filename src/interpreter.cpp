@@ -1,7 +1,7 @@
 #include "visitor.h"
 
-
 void visitor::interpreter::visit(ast::node *node){
+
 }
 
 void visitor::interpreter::visit(ast::program *program){
@@ -57,7 +57,7 @@ void visitor::interpreter::visit(ast::print *print){
 }
 
 void visitor::interpreter::visit(ast::typed_ids *t_ids){
-    cout << "Typed ids" << endl;
+    cout << "typed_ids" << endl;
 }
 
 void visitor::interpreter::visit(ast::no_op *no_op){
