@@ -56,6 +56,12 @@ void ast::no_op::accept(visitor::pprinter *p){
 void ast::goto_::accept(visitor::pprinter *p){
     p->visit(this);
 }
+void ast::id_def::accept(visitor::pprinter *p){
+    p->visit(this);
+}
+void ast::idA_def::accept(visitor::pprinter *p){
+    p->visit(this);
+}
 
 /* INTERPRETER */
 void ast::program::accept(visitor::interpreter *p){
@@ -110,5 +116,11 @@ void ast::no_op::accept(visitor::interpreter *p){
     p->visit(this);
 }
 void ast::goto_::accept(visitor::interpreter *p){
+    p->visit(this);
+}
+void ast::id_def::accept(visitor::interpreter *p){
+    p->visit(this);
+}
+void ast::idA_def::accept(visitor::interpreter *p){
     p->visit(this);
 }

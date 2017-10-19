@@ -28,6 +28,8 @@
     vector<ast::statement*> *statements;
     ast::id *id;
     vector<ast::id*> *ids;
+    vector<ast::id_def*> *defs; 
+    ast::id_def *def;
     ast::expr *expr;
     ast::code *code;
     type dtype;
@@ -46,11 +48,11 @@
 %type <code> code_block;
 %type <code> block;
 %type <tId> declaration;
-%type <ids> id_list;
+%type <defs> id_list;
 %type <statements> statement_list;
 %type <statement> statement;
 %type <dtype> dtype;
-%type <id> var;
+%type <def> var;
 %type <id> id_loc;
 %type <id> lval;
 %type <tIds> declaration_list;
@@ -108,10 +110,10 @@ block              : '{' statement_list '}'                                     
                    ;
 
 declaration_list   : declaration_list declaration                               { $1->push_back($2); $$ = $1; }
-                   | %empty                                                     { $$ = new vector<ast::typed_ids*>; }
+                   | %empty                                                     { $$ = new vector<ast::typed_ids*>(); }
                    ;
 statement_list     : statement_list statement                                   { $1->push_back($2); $$ = $1; }
-                   | %empty                                                     { $$ = new vector<ast::statement*>; } 
+                   | %empty                                                     { $$ = new vector<ast::statement*>(); } 
                    ;
 
 statement          : lval '=' arithExpr EOS                                     { $$ = new ast::assign($1, $3); }  
@@ -128,12 +130,12 @@ statement          : lval '=' arithExpr EOS                                     
 declaration        : dtype id_list EOS                                          { $$ = new ast::typed_ids($1, $2); }
                    /*| EOS {$$ */
                    ;
-id_list            : var                                                        { $$ = new vector<ast::id*>; $$->push_back($1); }
+id_list            : var                                                        { $$ = new vector<ast::id_def*>(); $$->push_back($1); }
                    | var ',' id_list                                            { $3->push_back($1); $$ = $3; }
                    ;
 
-var                : IDENTIFIER                                                 { $$ = new ast::id($1); }
-                   | IDENTIFIER '[' NUMBER ']'                                  { string sId = string($1); $$ = new ast::id_(sId, new ast::integer($3)); }
+var                : IDENTIFIER                                                 { $$ = new ast::id_def(string($1)); }
+                   | IDENTIFIER '[' NUMBER ']'                                  { string sId = string($1); $$ = new ast::idA_def(sId, $3); }
                    ;
 
 id_loc             : IDENTIFIER '[' arithExpr ']'                               { string sId = string($1); $$ = new ast::id_(sId, $3); }
@@ -217,7 +219,8 @@ int main(int argc, char *argv[])
 
 	yyin = fopen(argv[1], "r");
 
-    visitor::pprinter print;
+    //visitor::pprinter V;
+    visitor::interpreter V;
 	yyparse();
-    print.visit(pgm);
+    V.visit(pgm);
 }

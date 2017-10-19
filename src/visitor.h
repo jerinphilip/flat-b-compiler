@@ -24,11 +24,21 @@ namespace visitor {
         void visit(ast::no_op *no_op);
         void visit(ast::goto_ *goto_);
         void visit(ast::integer *integer);
+        void visit(ast::id_def *id_def);
+        void visit(ast::idA_def *idA_def);
     };
 
 
     struct interpreter{
-        map<string, ast::node> table;
+        map<string, dataType> env;
+        enum status{
+            declare,
+            eval
+        };
+
+        type currentType;
+        int currentStatus;
+
         void visit(ast::node *node_);
         void visit(ast::program *program);
         void visit(ast::declarations *declarations);
@@ -46,6 +56,8 @@ namespace visitor {
         void visit(ast::no_op *no_op);
         void visit(ast::goto_ *goto_);
         void visit(ast::integer *integer);
+        void visit(ast::id_def *id_def);
+        void visit(ast::idA_def *idA_def);
     };
 }
 

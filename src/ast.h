@@ -3,12 +3,15 @@
 
 #include <vector>
 #include <string>
+#include <iostream>
 using namespace std;
 
 enum type {
     Int,
     Bool,
-    Char
+    Char,
+    CharArray,
+    IntArray
 };
 
 enum opr {
@@ -27,6 +30,16 @@ namespace visitor {
     struct pprinter;
     struct interpreter;
 }
+
+struct dataType {
+    type dtype;
+    union {
+        int *A;
+        int i;
+        bool b;
+    } T;
+
+};
 
 namespace ast {
 
@@ -80,30 +93,46 @@ namespace ast {
 
     struct id : public expr {
         string name;
-        id (string s): name(s) {}
+        id (string s): name(s) {
+            //cerr << "Initializing: " << name << endl;
+        }
+        void accept(visitor::pprinter *p);
+        void accept(visitor::interpreter *p);
+    };
+
+    struct id_def : public node {
+        string name;
+        id_def (string s): name(s) {
+        }
+        void accept(visitor::pprinter *p);
+        void accept(visitor::interpreter *p);
+    };
+    
+    struct idA_def : public id_def {
+        int size;
+        idA_def (string s, int sz): id_def(s), size(sz) {}
         void accept(visitor::pprinter *p);
         void accept(visitor::interpreter *p);
     };
     
     struct id_ : public id {
-        string name;
         expr* subscript;
-        id_(string s, expr *e): id(s), subscript(e){}
+        id_(string s, expr *e): id(s), subscript(e){
+            //cerr << "Initializing: " << s << endl;
+            //cerr << "Other: "<< name << endl;
+        }
         void accept(visitor::pprinter *p);
         void accept(visitor::interpreter *p);
     };
     
     struct typed_ids : public node {
         type dtype;
-        vector<id*> *t_ids;
-        typed_ids(type d, vector<id*> *v): 
+        vector<id_def*> *t_ids;
+        typed_ids(type d, vector<id_def*> *v): 
             dtype(d), t_ids(v) {}
         void accept(visitor::pprinter *p);
         void accept(visitor::interpreter *p);
     };
-
-
-
 
     struct integer: public expr {
         int value;

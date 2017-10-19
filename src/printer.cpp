@@ -69,14 +69,16 @@ void visitor::pprinter::visit(ast::typed_ids *tIdWrapper){
         case type::Int : dtype = "int"; break;
         case type::Bool: dtype = "bool"; break;
         case type::Char: dtype = "char"; break;
+        default: break;
     }
     cout << dtype << " ";
     bool first = true;
-    for (auto &p: *(tIdWrapper->t_ids)){
-        if (not first){
-            cout << ",";
-            first = false;
-        }
+    auto *ps = tIdWrapper->t_ids;
+    reverse(ps->begin(), ps->end());
+    for (auto &p: *ps){
+        if (not first)
+            cout << ", ";
+        first = false;
         p->accept(this);
 
     }
@@ -94,4 +96,10 @@ void visitor::pprinter::visit(ast::goto_ *goto_){
 
 void visitor::pprinter::visit(ast::integer *integer){
     cout << integer->value;
+}
+
+void visitor::pprinter::visit(ast::id_def *id_def){
+}
+
+void visitor::pprinter::visit(ast::idA_def *idA_def){
 }

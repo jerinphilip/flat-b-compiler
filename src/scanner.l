@@ -18,13 +18,13 @@
 "goto"                  return k_cond_goto;
 "got"                   return k_uncond_goto;
 [0-9][0-9]*	            {  
-                            printf("Token type: Number, Lexeme/Token Value: %s\n", yytext);  
+                            //printf("Token type: Number, Lexeme/Token Value: %s\n", yytext);  
                             yylval.Int = atoi(yytext);
                             return NUMBER; 
                         }
 [a-zA-Z][a-zA-Z0-9]*    {  
-                            printf("Token type: Identifier, Lexeme/Token Value: %s\n", yytext);  
-                            yylval.String = yytext;
+                            //printf("Token type: Identifier, Lexeme/Token Value: %s\n", yytext);  
+                            yylval.String = strdup(yytext);
                             return IDENTIFIER; 
                         } 
 "+"		                return '+';
@@ -48,7 +48,7 @@
 [ \t\n]		            { /* Do nothing */ }
 ","                     return ',';
 \"(\\.|[^"])*\"         {
-                            printf("Token type: String, Lexeme/Token Value: %s\n", yytext);
+                            //printf("Token type: String, Lexeme/Token Value: %s\n", yytext);
                             return STRING;
                         }
 .		                { 
