@@ -31,6 +31,7 @@
     ast::expr *expr;
     ast::code *code;
     type dtype;
+    opr op;
 }
 
 %type <Int> NUMBER;
@@ -44,7 +45,11 @@
 %type <statements> statement_list;
 %type <dtype> dtype;
 %type <id> var;
+%type <id> id_loc;
 %type <tIds> declaration_list;
+%type <op> boolOp;
+%type <expr> boolExpr;
+%type <expr> arithExpr;
 
 /*%token declaration_list*/
 /*%token statement_list*/
@@ -116,29 +121,34 @@ var                : IDENTIFIER { $$ = new ast::id($1); }
                    | IDENTIFIER '[' NUMBER ']' { string sId = string($1); $$ = new ast::id_(sId, new ast::integer($3)); }
                    ;
 
-id_loc             : IDENTIFIER '[' arithExpr ']' 
+id_loc             : IDENTIFIER '[' arithExpr ']' { string sId = string($1); $$ = new ast::id_(sId, $3); }
                    ;
 dtype              : k_integer { $$ = type::Int; }
                    ;
-arithExpr          : arithExpr '+' arithExpr
-                   | arithExpr '*' arithExpr 
-                   | arithExpr '/' arithExpr
-                   | arithExpr '-' arithExpr
-                   | '(' arithExpr ')'
-                   | NUMBER
-                   | IDENTIFIER
+arithExpr          : arithExpr '+' arithExpr  { $$ = new ast::binOp(opr::add, $1, $3);  }
+                   | arithExpr '*' arithExpr  { $$ = new ast::binOp(opr::mul, $1, $3);  }  
+                   | arithExpr '/' arithExpr  { $$ = new ast::binOp(opr::quot, $1, $3);  }
+                   | arithExpr '-' arithExpr  { $$ = new ast::binOp(opr::sub, $1, $3);  }
+                   | '(' arithExpr ')'        { $$ = $2; }
+                   | NUMBER                   { $$ = new ast::integer($1); }
+                   | IDENTIFIER               { $$ = new ast::id($1); }
+                   | id_loc                   { $$ = $1; }
+                   ;
+
+
+boolExpr           :  arithExpr boolOp arithExpr  { $$ = new ast::binOp($2, $1, $3); }
+                   | '(' boolExpr ')'       { $$ = $2; }
+                   ;
+
+lval               : IDENTIFIER 
                    | id_loc
                    ;
 
-
-boolExpr           :  arithExpr boolOp arithExpr 
-                   | '(' boolExpr ')'
-                   ;
-
-lval               : IDENTIFIER | id_loc
-                   ;
-
-boolOp             : '<' | '>' | GE | LE | EQ
+boolOp             : '<'  { $$ = opr::lt; }
+                   | '>'  { $$ = opr::gt; }
+                   | GE   { $$ = opr::ge; }
+                   | LE   { $$ = opr::le; }
+                   | EQ   { $$ = opr::eq; }
                    ;
 
 while              : k_while boolExpr block
@@ -189,7 +199,7 @@ int main(int argc, char *argv[])
 
 	yyin = fopen(argv[1], "r");
 
-    visitor::pprinter print;
+    //visitor::pprinter print;
 	yyparse();
-    print.visit(pgm);
+    //print.visit(pgm);
 }

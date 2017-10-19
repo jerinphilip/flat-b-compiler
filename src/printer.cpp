@@ -13,6 +13,9 @@ void visitor::pprinter::visit(ast::program *program){
 
 void visitor::pprinter::visit(ast::declarations *declarations){
     cout << "Declarations" << endl;
+    for (auto &p : *(declarations->ds)){
+        p->accept(this);
+    }
 }
 
 void visitor::pprinter::visit(ast::code *code){
@@ -53,4 +56,8 @@ void visitor::pprinter::visit(ast::for_ *for_){
 
 void visitor::pprinter::visit(ast::print *print){
     cout << "Code" << endl;
+}
+
+void visitor::pprinter::visit(ast::typed_ids *t_ids){
+    cout << "Typed ids" << endl;
 }
