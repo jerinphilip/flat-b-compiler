@@ -2,14 +2,16 @@
   #include <stdio.h>
   #include <stdlib.h>   
   #include <iostream>
+  #include <vector>
   extern "C" FILE *yyin;
   extern "C" int yylex (void);
   extern "C" int yyparse (void);
   void yyerror (char const *s);
+  #include "ast.h"
+  #include "visitor.h"
+  #include "lex.yy.c"
   using namespace std;
 
-  #include "ast.h"
-  #include "lex.yy.c"
 %}
 
 
@@ -26,7 +28,7 @@
     vector<ast::id*> *ids;
     ast::expr *expr;
     ast::code *code;
-    type *dtype;
+    type dtype;
 }
 
 %type <Int> NUMBER;
@@ -109,12 +111,12 @@ id_list            : var { $$ = new vector<ast::id*>; $$->push_back($1); }
                    ;
 
 var                : IDENTIFIER { $$ = new ast::id($1); }
-                   | IDENTIFIER '[' NUMBER ']' { $$ = new ast::id_(new ast::id($1), new ast::expr(new ast::Int($3)); }
+                   | IDENTIFIER '[' NUMBER ']' { string sId = string($1); $$ = new ast::id_(sId, new ast::integer($3)); }
                    ;
 
 id_loc             : IDENTIFIER '[' arithExpr ']' 
                    ;
-dtype              : k_integer { $$ = type::Int }
+dtype              : k_integer { $$ = type::Int; }
                    ;
 arithExpr          : arithExpr '+' arithExpr
                    | arithExpr '*' arithExpr 
@@ -184,6 +186,8 @@ int main(int argc, char *argv[])
 	}
 
 	yyin = fopen(argv[1], "r");
+
+    visitor::pprinter print;
 
 	yyparse();
 }

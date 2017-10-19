@@ -2,8 +2,8 @@
 #define AST_H
 
 #include <vector>
+#include <string>
 using namespace std;
-
 
 enum type {
     Int
@@ -16,6 +16,9 @@ enum opr {
     quot
 };
 
+namespace visitor {
+    struct pprinter;
+}
 
 namespace ast {
 
@@ -39,12 +42,14 @@ namespace ast {
 
     struct node {
         /* Base struct */
+        virtual void accept(visitor::pprinter &) = 0;
     };
 
     struct program : public node {
         declarations* decl;
         code* block;
         program(declarations *d, code* c): decl(d), block(c){}
+        void accept(visitor::pprinter &p);
     };
 
     /* declarations */
@@ -52,36 +57,41 @@ namespace ast {
     struct declarations : public node {
         vector<typed_ids*> *ds;
         declarations(vector<typed_ids*> *v): ds(v) {}
+
+        void accept(visitor::pprinter &p);
     };
 
     /* Auxiliary types for declations and onward */
     struct id : public node {
         string name;
         id (string s): name(s) {}
+        void accept(visitor::pprinter &p);
     };
     
     struct id_ : public id {
         string name;
         expr* subscript;
         id_(string s, expr *e): id(s), subscript(e){}
+        void accept(visitor::pprinter &p);
     };
     
     struct typed_ids : public node {
-        type *dtype;
+        type dtype;
         vector<id*> *t_ids;
-        typed_ids(type *d, vector<id*> *v): 
+        typed_ids(type d, vector<id*> *v): 
             dtype(d), t_ids(v) {}
+        void accept(visitor::pprinter &p);
     };
 
 
 
     struct expr: public node{
-    
     };
 
-    struct Int: public node {
+    struct integer: public expr {
         int value;
-        Int(int v): value(v){}
+        integer(int v): value(v){}
+        void accept(visitor::pprinter &p);
     };
 
     struct binOp: public expr {
@@ -91,6 +101,7 @@ namespace ast {
 
         binOp(opr op, expr *l, expr *r): 
             op(op), left(l), right(r) {}
+        void accept(visitor::pprinter &p);
     };
 
 
@@ -99,28 +110,34 @@ namespace ast {
     struct code : public node {
         vector<statement*> statements;
         code(vector<statement*> s):statements(s) {}
+        void accept(visitor::pprinter &p);
     };
 
     struct statement: public node {
     
+        void accept(visitor::pprinter &p);
     };
 
     struct assign: public statement {
     
+        void accept(visitor::pprinter &p);
     };
 
     struct cblock: public statement{
         expr *cond;
         code *block;
         cblock(expr *c, code *b): cond(c), block(b){}
+        void accept(visitor::pprinter &p);
     };
 
     struct while_: public cblock{
         while_(expr *c, code *b): cblock(c, b){}
+        void accept(visitor::pprinter &p);
     };
 
     struct if_: public cblock {
         if_(expr *c, code *b): cblock(c, b){}
+        void accept(visitor::pprinter &p);
     };
 
     struct for_: public statement {
@@ -131,16 +148,19 @@ namespace ast {
 
         for_(statement *i, expr *c, expr *s, code *b): 
             init(i), cond(c), step(s), block(b){}
+        void accept(visitor::pprinter &p);
     };
 
     struct print: public statement {
     
+        void accept(visitor::pprinter &p);
     };
 
     struct println: public statement {
-    
+        void accept(visitor::pprinter &p);
     };
-
 }
+
+
 
 #endif
