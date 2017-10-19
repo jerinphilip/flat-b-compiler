@@ -1,4 +1,6 @@
 %{
+    #include <vector>
+    #include "ast.h"
     #include "parser.tab.h"
 %}
 
