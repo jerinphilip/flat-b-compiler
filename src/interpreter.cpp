@@ -110,6 +110,16 @@ void visitor::interpreter::visit(ast::assign *assign){
 
 void visitor::interpreter::visit(ast::while_ *while_){
     cerr << "Evaluating While" << endl;
+    dataType cond;
+    while_->cond->accept(this);
+    cond = evalStack.top(); evalStack.pop();
+    while (cond.T.i){
+        while_->block->accept(this);
+
+        /* Step */
+        while_->cond->accept(this);
+        cond = evalStack.top(); evalStack.pop();
+    }
     cerr << "While, Done" << endl;
 }
 

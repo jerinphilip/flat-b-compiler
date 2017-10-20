@@ -225,6 +225,7 @@ int main(int argc, char *argv[])
 
     //visitor::pprinter V;
     visitor::interpreter V;
-	yyparse();
-    V.visit(pgm);
+	if(yyparse() == 0){
+        V.visit(pgm);
+    }
 }
