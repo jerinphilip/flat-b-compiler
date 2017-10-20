@@ -49,6 +49,7 @@
 ","                     return ',';
 \"(\\.|[^"])*\"         {
                             //printf("Token type: String, Lexeme/Token Value: %s\n", yytext);
+                            yylval.String = strdup(yytext);
                             return STRING;
                         }
 .		                { 

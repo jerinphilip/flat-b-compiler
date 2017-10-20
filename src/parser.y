@@ -40,10 +40,13 @@
     ast::if_ *if_;
     ast::no_op *no_op;
     ast::goto_ *goto_;
+    vector<ast::expr*> *exprs;
+    ast::print *print;
 }
 
 %type <Int> NUMBER;
 %type <String> IDENTIFIER;
+%type <String> STRING;
 %type <program> program;
 %type <declarations> decl_block;
 %type <code> code_block;
@@ -64,10 +67,11 @@
 %type <if_> if;
 %type <goto_> goto;
 %type <ref> lval;
-
-%type <no_op> print;
-%type <no_op> println;
 %type <no_op> read;
+%type <exprs> printables;
+%type <expr> printable;
+%type <print> print;
+%type <print> println;
 
 /*%token declaration_list*/
 /*%token statement_list*/
@@ -184,16 +188,16 @@ goto               : k_cond_goto IDENTIFIER k_if boolExpr                       
                    | k_uncond_goto IDENTIFIER                                   { string sId = string($2); $$ = new ast::goto_(sId); }
                    ;                                                            
                                                                                  
-print              : k_print printables                                         { $$ = new ast::no_op(); } 
+print              : k_print printables                                         { $$ = new ast::print($2, false); } 
                    ;                                                            
-println            : k_println printables                                       { $$ = new ast::no_op(); }
+println            : k_println printables                                       { $$ = new ast::print($2, true); }
                    ;                                                            
-printables         : printable                                                  { }
-                   | printable ',' printables                                   { }
+printables         : printable                                                  { $$ = new vector<ast::expr*>(); $$->push_back($1); }
+                   | printable ',' printables                                   { $3->push_back($1);  $$ = $3;}
                    ;                                                            
 printable          : IDENTIFIER                                                 { $$ = new ast::id($1); }
                    | IDENTIFIER '[' arithExpr ']'                               { string sId = string($1); $$ = new ast::id_(sId, $3); }
-                   | STRING                                                     { $$ = new ast::string($1); }
+                   | STRING                                                     { $$ = new ast::literal($1); }
                    | NUMBER                                                     { $$ = new ast::integer($1); }
                    ;                                                            
 

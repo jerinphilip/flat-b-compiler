@@ -39,6 +39,7 @@ struct dataType {
         int i;
         bool b;
         int *p;
+        char *s;
     } T;
 
     dataType operator+(dataType x){
@@ -375,6 +376,11 @@ namespace ast {
     };
 
     struct print: public statement {
+        vector<ast::expr*> *args;
+        bool newline;
+
+        print(vector<ast::expr*> *args, bool newline):
+            args(args), newline(newline){}
     
         void accept(visitor::pprinter *p);
         void accept(visitor::interpreter *p);
@@ -383,6 +389,15 @@ namespace ast {
 
     struct no_op: public statement {
         no_op(){}
+        void accept(visitor::pprinter *p);
+        void accept(visitor::interpreter *p);
+    };
+
+    struct literal: public expr {
+        string value;
+        literal(string s){
+            value = s.substr(1, s.size()-2);
+        }
         void accept(visitor::pprinter *p);
         void accept(visitor::interpreter *p);
     };

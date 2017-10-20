@@ -68,6 +68,9 @@ void ast::idA_def::accept(visitor::pprinter *p){
 void ast::idA_ref::accept(visitor::pprinter *p){
     p->visit(this);
 }
+void ast::literal::accept(visitor::pprinter *p){
+    p->visit(this);
+}
 
 /* INTERPRETER */
 void ast::program::accept(visitor::interpreter *p){
@@ -136,3 +139,8 @@ void ast::idA_def::accept(visitor::interpreter *p){
 void ast::idA_ref::accept(visitor::interpreter *p){
     p->visit(this);
 }
+void ast::literal::accept(visitor::interpreter *p){
+    p->visit(this);
+}
+
+

@@ -149,7 +149,35 @@ void visitor::interpreter::visit(ast::for_ *for_){
 
 void visitor::interpreter::visit(ast::print *print){
     cerr << "[ print ---" << endl;
+    bool first = true;
+    cerr << "[size] " << print->args->size() << endl;
+    auto ts = *print->args;
+    reverse(ts.begin(), ts.end());
+    for (auto &p: ts){
+        if (not first){
+            cout << " ";
+        }
+        first = false;
+        p->accept(this);
+        dataType dt = evalStack.top(); evalStack.pop();
+        switch(dt.dtype){
+            case type::Int: 
+                cout << dt.T.i;
+                break;
+            case type::CharArray:
+                cout << dt.T.s ;
+                break;
+            case type::Bool:
+                cout << dt.T.b ;
+                break;
+            default:
+                break;
+        }
+    }
 
+    if (print->newline){
+        cout << "\n";
+    }
 
     cerr << "--- print ]" << endl;
 }
@@ -253,3 +281,12 @@ void visitor::interpreter::visit(ast::idA_def *idA_def){
 
     env[name] = dt;
 }
+
+void visitor::interpreter::visit(ast::literal *literal){
+    dataType dt;
+    dt.dtype = type::CharArray;
+    dt.T.s = (char*)literal->value.c_str();
+    cerr << "Literal: " << literal->value << endl;
+    evalStack.push(dt);
+}
+
