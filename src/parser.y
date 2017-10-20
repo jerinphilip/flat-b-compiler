@@ -177,7 +177,7 @@ if                 : k_if boolExpr block                                        
                    | k_if boolExpr block k_else block                           { $$ = new ast::if_($2, $3, $5); }
                    ;
 for                : k_for lval '=' arithExpr ',' arithExpr block               { $$ = new ast::for_(new ast::assign($2, $4), (new ast::integer(1)), $6, $7); }
-                   | k_for lval '=' arithExpr ',' arithExpr ',' arithExpr block { $$ = new ast::for_(new ast::assign($2, $4), $6, $8, $9); }
+                   | k_for lval '=' arithExpr ',' arithExpr ',' arithExpr block { $$ = new ast::for_(new ast::assign($2, $4), $8, $6, $9); }
                    ;
 goto               : k_cond_goto IDENTIFIER k_if boolExpr                       { string sId = string($2); $$ = new ast::goto_(sId, $4); }
                    | k_uncond_goto IDENTIFIER                                   { string sId = string($2); $$ = new ast::goto_(sId); }
