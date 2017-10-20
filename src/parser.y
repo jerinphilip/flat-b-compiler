@@ -58,7 +58,6 @@
 %type <statement> statement;
 %type <dtype> dtype;
 %type <def> var;
-%type <id> id_loc;
 %type <tIds> declaration_list;
 %type <op> boolOp;
 %type <expr> boolExpr;
