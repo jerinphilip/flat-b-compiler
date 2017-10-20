@@ -116,4 +116,6 @@ void visitor::pprinter::visit(ast::idA_ref *idA_ref){
 }
 void visitor::pprinter::visit(ast::literal *literal){}
 void visitor::pprinter::visit(ast::read *read){}
+void visitor::pprinter::visit(ast::labelled *labelled){}
+
 

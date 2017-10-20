@@ -6,11 +6,11 @@ declblock {
 
 codeblock {
     read n;
-    for i=1,n {
+    for i=0,(n-1) {
         A[i] = i;
     }
 
-    for i=1,n {
+    for i=0,(n-1) {
         print A[i], "";
     }
 
@@ -18,15 +18,15 @@ codeblock {
 
     mid = n/2;
 
-    for i=1,mid {
-        j = (n-i)+1;
+    for i=0,(mid-1) {
+        j = n-1-i;
         println "Swapping", i, j;
         t = A[i];
         A[i] = A[j];
         A[j] = t;
     }
 
-    for i=1,n {
+    for i=0,(n-1) {
         print A[i], "";
     }
 

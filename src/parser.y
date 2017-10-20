@@ -13,6 +13,9 @@
   using namespace std;
 
   ast::program *pgm = NULL;
+  ast::code *code = NULL;
+
+  map<string, ast::code*> labels;
 
 %}
 
@@ -43,6 +46,7 @@
     vector<ast::expr*> *exprs;
     ast::print *print;
     ast::read *read;
+    ast::labelled *labelled;
 }
 
 %type <Int> NUMBER;
@@ -72,6 +76,7 @@
 %type <print> print;
 %type <read> read;
 %type <print> println;
+%type <labelled> labelled_block;
 
 /*%token declaration_list*/
 /*%token statement_list*/
@@ -116,13 +121,16 @@ block              : '{' statement_list '}'                                     
 declaration_list   : declaration_list declaration                               { $1->push_back($2); $$ = $1; }
                    | %empty                                                     { $$ = new vector<ast::typed_ids*>(); }
                    ;
+
+labelled_block     : IDENTIFIER ':' statement_list                              { code = new ast::code($3); $$ = new ast::labelled($1, code); labels[($1)] = code;}
 statement_list     : statement_list statement                                   { $1->push_back($2); $$ = $1; }
+                   | statement_list labelled_block                              { $1->push_back($2); $$ = $1; }
                    | %empty                                                     { $$ = new vector<ast::statement*>(); } 
                    ;
 statement          : lval '=' arithExpr EOS                                     { $$ = new ast::assign($1, $3); }  
-                   | lval '=' boolExpr EOS                                     { $$ = new ast::assign($1, $3); }  
+                   | lval '=' boolExpr EOS                                      { $$ = new ast::assign($1, $3); }  
                    | while                                                      { $$ = $1; }   
-                   | IDENTIFIER ':'                                             { string sId = string($1); $$ = new ast::goto_(sId); } 
+                   /*| IDENTIFIER ':'                                             { string sId = string($1); $$ = new ast::goto_(sId); } */
                    | if                                                         { $$ = $1; } 
                    | for                                                        { $$ = $1; }  
                    | goto EOS                                                   { $$ = $1; }    
@@ -211,6 +219,7 @@ int main(int argc, char *argv[])
     //visitor::pprinter V;
     visitor::interpreter V;
 	if(yyparse() == 0){
+        V.label(labels);
         V.visit(pgm);
     }
 }

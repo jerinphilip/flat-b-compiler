@@ -31,20 +31,29 @@ namespace visitor {
         void visit(ast::idA_ref *idA_ref);
         void visit(ast::literal *literal);
         void visit(ast::read *read);
+        void visit(ast::labelled *labelled);
     };
 
 
     struct interpreter{
         map<string, dataType> env;
-        enum status{
-            declare,
-            eval
-        };
-
         stack <dataType> evalStack;
+        ast::program *root;
 
         type currentType;
         int currentStatus;
+        map <string, ast::code*> table;
+
+        void label(map<string, ast::code*> m){
+            table = m;
+            /*
+            cerr << "labels: ";
+            for(auto p: table){
+                cerr << p.first << " ";
+            }
+            cerr << endl;
+            */
+        }
 
         void visit(ast::node *node_);
         void visit(ast::program *program);
@@ -70,6 +79,7 @@ namespace visitor {
         void visit(ast::idA_ref *idA_ref);
         void visit(ast::literal *literal);
         void visit(ast::read *read);
+        void visit(ast::labelled *labelled);
     };
 }
 

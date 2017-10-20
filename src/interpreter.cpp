@@ -5,6 +5,7 @@ void visitor::interpreter::visit(ast::node *node){
 }
 
 void visitor::interpreter::visit(ast::program *program){
+    root = program;
     program->decl->accept(this);
     program->block->accept(this);
 }
@@ -43,7 +44,7 @@ void visitor::interpreter::visit(ast::id_ *id_){
 
     id_->subscript->accept(this);
     dataType sc = evalStack.top(); evalStack.pop();
-    int sub = sc.T.i - 1;
+    int sub = sc.T.i;
     dataType d = env[id_->name];
     dt.T.i = env[id_->name].T.A[sub];
     /*
@@ -75,18 +76,18 @@ void visitor::interpreter::visit(ast::idA_ref *idA_ref){
 
     idA_ref->subscript->accept(this);
     dataType sc = evalStack.top(); evalStack.pop();
-    int sub = sc.T.i - 1;
+    int sub = sc.T.i;
     dt.T.p = &(env[idA_ref->name].T.A[sub]);
     evalStack.push(dt);
 }
 
 void visitor::interpreter::visit(ast::expr *expr){
-    cerr << "Code" << endl;
+    //cerr << "Code" << endl;
 }
 
 void visitor::interpreter::visit(ast::statement *statement){
-    cerr << "Evaluating Statement" << endl; 
-    cerr << "Statement, Done" << endl;
+    //cerr << "Evaluating Statement" << endl; 
+    //cerr << "Statement, Done" << endl;
 }
 
 void visitor::interpreter::visit(ast::assign *assign){
@@ -195,8 +196,23 @@ void visitor::interpreter::visit(ast::no_op *no_op){
     // cerr << "No-Op" << endl;
 }
 
-void visitor::interpreter::visit(ast::goto_ *no_op){
+void visitor::interpreter::visit(ast::goto_ *goto_){
     // cerr << "goto_" << endl;
+    if(goto_->cond == NULL){
+        ast::code *code = table[goto_->label];
+        code->accept(this);
+        exit(0);
+    }
+    else{
+        dataType dt;
+        goto_->cond->accept(this);
+        dt = evalStack.top(); evalStack.pop();
+        if (dt.T.i){
+            ast::code *code = table[goto_->label];
+            code->accept(this);
+            exit(0);
+        }
+    }
 }
 
 void visitor::interpreter::visit(ast::integer *integer){
@@ -286,5 +302,10 @@ void visitor::interpreter::visit(ast::read *read){
     cin >> value;
     *(ref.T.p) = value;
     //cerr << read->var->name << " = " << value << " ; "<< endl;
+}
+
+void visitor::interpreter::visit(ast::labelled *labelled){
+    //cerr << "Found label: " << labelled->label << endl;
+    labelled->block->accept(this);
 }
 

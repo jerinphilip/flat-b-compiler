@@ -168,6 +168,7 @@ namespace ast {
     struct id_;
     struct expr;
     struct code;
+    struct labelled;
     struct statement;
     struct assign;
     struct cblock;
@@ -301,20 +302,29 @@ namespace ast {
     };
 
 
+    struct statement: public node {
+    
+        void accept(visitor::pprinter *p);
+        void accept(visitor::interpreter *p);
+    };
 
     /* statements */
-    struct code : public node {
+    struct code : public statement {
         vector<statement*> *statements;
         code(vector<statement*> *s):statements(s) {}
         void accept(visitor::pprinter *p);
         void accept(visitor::interpreter *p);
     };
 
-    struct statement: public node {
-    
+    struct labelled : public statement {
+        string label;
+        code *block;
+        labelled(string label, code *s):
+            label(label), block(s) {}
         void accept(visitor::pprinter *p);
         void accept(visitor::interpreter *p);
     };
+
 
     struct assign: public statement {
         id_ref *ref;
@@ -368,9 +378,10 @@ namespace ast {
         void accept(visitor::interpreter *p);
     };
 
-    struct goto_: public id, statement {
+    struct goto_: public statement {
         expr *cond;
-        goto_ (string label, expr* e=NULL): id(label), cond(e) {}
+        string label;
+        goto_ (string label, expr* e=NULL): label(label), cond(e) {}
         void accept(visitor::pprinter *p);
         void accept(visitor::interpreter *p);
     };
