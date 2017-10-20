@@ -12,6 +12,11 @@ All the variables have to be declared in the declblock{....} before being used
 in the codeblock{...}. Multiple variables can be declared in the statement 
 and each declaration statement ends with a semi-colon. 
 
+For now, only the above is supported, but there is a sum-type (tagged union)
+used for data transport within the evaluation of the AST. In short, so long and
+the sum type is completed and supported with auxilliary code - the same
+codebase can be used to implement the rest of the features.
+
 ## Expressions
 
 
