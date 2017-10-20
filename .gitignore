@@ -1,0 +1,7 @@
+.*.sw*
+src/lex.yy.cc
+src/lex.yy.c
+src/parser.output
+src/parser.tab.h
+src/parser.tab.c
+
