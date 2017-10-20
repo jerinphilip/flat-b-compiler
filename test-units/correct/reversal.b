@@ -1,29 +1,34 @@
 declblock {
     int A[100];
     int n, mid;
-    int t, i;
-    int x;
+    int t, i, j;
 }
 
 codeblock {
     read n;
     for i=1,n {
-        read A[i];
+        A[i] = i;
     }
 
     for i=1,n {
         print A[i], "";
     }
 
+    println "";
+
     mid = n/2;
 
     for i=1,mid {
+        j = (n-i)+1;
+        println "Swapping", i, j;
         t = A[i];
-        A[i] = A[n-i-1];
-        A[n-i-1] = t;
+        A[i] = A[j];
+        A[j] = t;
     }
 
     for i=1,n {
-
+        print A[i], "";
     }
+
+    println "";
 }

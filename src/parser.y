@@ -113,14 +113,12 @@ code_block         :  k_statement block                                         
                    ;
 block              : '{' statement_list '}'                                     { $$ =  new ast::code($2); }
                    ;
-
 declaration_list   : declaration_list declaration                               { $1->push_back($2); $$ = $1; }
                    | %empty                                                     { $$ = new vector<ast::typed_ids*>(); }
                    ;
 statement_list     : statement_list statement                                   { $1->push_back($2); $$ = $1; }
                    | %empty                                                     { $$ = new vector<ast::statement*>(); } 
                    ;
-
 statement          : lval '=' arithExpr EOS                                     { $$ = new ast::assign($1, $3); }  
                    | lval '=' boolExpr EOS                                     { $$ = new ast::assign($1, $3); }  
                    | while                                                      { $$ = $1; }   
@@ -139,11 +137,8 @@ declaration        : dtype id_list EOS                                          
 id_list            : var                                                        { $$ = new vector<ast::id_def*>(); $$->push_back($1); }
                    | var ',' id_list                                            { $3->push_back($1); $$ = $3; }
                    ;
-
 var                : IDENTIFIER                                                 { $$ = new ast::id_def(string($1)); }
                    | IDENTIFIER '[' NUMBER ']'                                  { string sId = string($1); $$ = new ast::idA_def(sId, $3); }
-                   ;
-
                    ;
 dtype              : k_integer                                                  { $$ = type::Int; }
                    ;
@@ -156,38 +151,29 @@ arithExpr          : arithExpr '+' arithExpr                                    
                    | IDENTIFIER                                                 { $$ = new ast::id($1); }
                    | IDENTIFIER '[' arithExpr ']'                               { string sId = string($1); $$ = new ast::id_(sId, $3); }
                    ;
-
-
 boolExpr           :  arithExpr boolOp arithExpr                                { $$ = new ast::binOp($2, $1, $3); }
                    | '(' boolExpr ')'                                           { $$ = $2; }
                    ;
-
 lval               : IDENTIFIER                                                 { $$ = new ast::id_ref($1); } 
                    | IDENTIFIER '[' arithExpr ']'                               { string sId = string($1); $$ = new ast::idA_ref(sId, $3); }
                    ;
-
 boolOp             : '<'                                                        { $$ = opr::lt; }
                    | '>'                                                        { $$ = opr::gt; }
                    | GE                                                         { $$ = opr::ge; }
                    | LE                                                         { $$ = opr::le; }
                    | EQ                                                         { $$ = opr::eq; }
                    ;
-
 while              : k_while boolExpr block                                     { $$ = new ast::while_($2, $3); }
                    ;
-
 if                 : k_if boolExpr block                                        { $$ = new ast::if_($2, $3); }
                    | k_if boolExpr block k_else block                           { $$ = new ast::if_($2, $3, $5); }
                    ;
-
 for                : k_for lval '=' arithExpr ',' arithExpr block               { $$ = new ast::for_(new ast::assign($2, $4), (new ast::integer(1)), $6, $7); }
                    | k_for lval '=' arithExpr ',' arithExpr ',' arithExpr block { $$ = new ast::for_(new ast::assign($2, $4), $6, $8, $9); }
                    ;
-
 goto               : k_cond_goto IDENTIFIER k_if boolExpr                       { string sId = string($2); $$ = new ast::goto_(sId, $4); }
                    | k_uncond_goto IDENTIFIER                                   { string sId = string($2); $$ = new ast::goto_(sId); }
                    ;                                                            
-                                                                                 
 print              : k_print printables                                         { $$ = new ast::print($2, false); } 
                    ;                                                            
 println            : k_println printables                                       { $$ = new ast::print($2, true); }
@@ -198,7 +184,6 @@ printables         : printable                                                  
 printable          : arithExpr                                                  { $$ = $1 ;}
                    | STRING                                                     { $$ = new ast::literal($1); }
                    ;                                                            
-
 read               : k_read lval                                                { $$ = new ast::read($2);}
                    ;                                            
      
