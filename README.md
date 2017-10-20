@@ -27,8 +27,9 @@ for i = 1, 100, 2 {
 }
 ```
 
-## if-else statement
+## `if-else` statement
 
+```fortran
 	if expression {
 	....
 	}
@@ -40,22 +41,30 @@ for i = 1, 100, 2 {
 	else {
 	....
 	}
+```
 
-## while statment
+## `while` statment
 
+```fortran
 	while expression {
 
 	}
 
-## conditional and unconditional goto
+```
 
+## conditional and unconditional `goto`
+
+```fortran
 	got label
 
 	goto label if expression
+```
 
 ## print/read
 
+```fortran
 	print "blah...blah", val
 	println "new line at the end"
 	read sum
 	read data[i]
+```
