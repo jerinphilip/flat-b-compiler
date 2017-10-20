@@ -195,10 +195,8 @@ println            : k_println printables                                       
 printables         : printable                                                  { $$ = new vector<ast::expr*>(); $$->push_back($1); }
                    | printable ',' printables                                   { $3->push_back($1);  $$ = $3;}
                    ;                                                            
-printable          : IDENTIFIER                                                 { $$ = new ast::id($1); }
-                   | IDENTIFIER '[' arithExpr ']'                               { string sId = string($1); $$ = new ast::id_(sId, $3); }
+printable          : arithExpr                                                  { $$ = $1 ;}
                    | STRING                                                     { $$ = new ast::literal($1); }
-                   | NUMBER                                                     { $$ = new ast::integer($1); }
                    ;                                                            
 
 read               : k_read lval                                                { }
