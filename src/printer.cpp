@@ -1,5 +1,6 @@
 #include "ast.h"
 #include "visitor.h"
+#include "dtype.h"
 
 
 void visitor::pprinter::visit(ast::node *node){

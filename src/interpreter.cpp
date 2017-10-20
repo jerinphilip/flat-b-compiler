@@ -1,4 +1,5 @@
 #include "visitor.h"
+#include "dtype.h"
 
 void visitor::interpreter::visit(ast::node *node){
 

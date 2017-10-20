@@ -3,6 +3,8 @@
 
 #include <bits/stdc++.h>
 #include "ast.h"
+#include "dtype.h"
+
 using namespace std;
 
 namespace visitor {
