@@ -42,10 +42,11 @@ void visitor::interpreter::visit(ast::id_ *id_){
     if(not declared)
 
     id_->subscript->accept(this);
+
     dataType sc = evalStack.top(); evalStack.pop();
-    int sub = sc.T.i;
-    dataType d = env[id_->name];
-    dt.T.i = env[id_->name].T.A[sub];
+    int sub     = sc.T.i;
+    dataType d  = env[id_->name];
+    dt.T.i      = env[id_->name].T.A[sub];
     /*
     */
     evalStack.push(dt);

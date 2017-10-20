@@ -41,9 +41,7 @@ namespace visitor {
         map<string, dataType> env;
         stack <dataType> evalStack;
         ast::program *root;
-
         type currentType;
-        int currentStatus;
         map <string, ast::code*> table;
 
         void label(map<string, ast::code*> m){
