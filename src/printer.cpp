@@ -52,6 +52,8 @@ void visitor::pprinter::visit(ast::while_ *while_){
 
 void visitor::pprinter::visit(ast::if_ *if_){
     //cout << "Code" << endl;
+
+
 }
 
 void visitor::pprinter::visit(ast::for_ *for_){
@@ -112,7 +114,6 @@ void visitor::pprinter::visit(ast::id_ref *id_ref){
 
 void visitor::pprinter::visit(ast::idA_ref *idA_ref){
 }
-void visitor::pprinter::visit(ast::literal *literal){
-
-}
+void visitor::pprinter::visit(ast::literal *literal){}
+void visitor::pprinter::visit(ast::read *read){}
 

@@ -311,3 +311,13 @@ void visitor::interpreter::visit(ast::literal *literal){
     evalStack.push(dt);
 }
 
+void visitor::interpreter::visit(ast::read *read){
+    read->var->accept(this);
+    dataType ref = evalStack.top(); evalStack.pop();
+    int value;
+    cin >> value;
+    *(ref.T.p) = value;
+    cerr << read->var->name << " = " << value << " ; "<< endl;
+
+}
+

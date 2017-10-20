@@ -30,6 +30,7 @@ namespace visitor {
         void visit(ast::id_ref *id_ref);
         void visit(ast::idA_ref *idA_ref);
         void visit(ast::literal *literal);
+        void visit(ast::read *read);
     };
 
 
@@ -68,6 +69,7 @@ namespace visitor {
         void visit(ast::id_ref *id_ref);
         void visit(ast::idA_ref *idA_ref);
         void visit(ast::literal *literal);
+        void visit(ast::read *read);
     };
 }
 

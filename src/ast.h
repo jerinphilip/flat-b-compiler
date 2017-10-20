@@ -402,7 +402,13 @@ namespace ast {
         void accept(visitor::interpreter *p);
     };
 
+    struct read:public statement  {
+        id_ref *var;
 
+        read(id_ref *var): var(var) {}
+        void accept(visitor::pprinter *p);
+        void accept(visitor::interpreter *p);
+    };
 }
 
 

@@ -42,6 +42,7 @@
     ast::goto_ *goto_;
     vector<ast::expr*> *exprs;
     ast::print *print;
+    ast::read *read;
 }
 
 %type <Int> NUMBER;
@@ -67,10 +68,10 @@
 %type <if_> if;
 %type <goto_> goto;
 %type <ref> lval;
-%type <no_op> read;
 %type <exprs> printables;
 %type <expr> printable;
 %type <print> print;
+%type <read> read;
 %type <print> println;
 
 /*%token declaration_list*/
@@ -199,7 +200,7 @@ printable          : arithExpr                                                  
                    | STRING                                                     { $$ = new ast::literal($1); }
                    ;                                                            
 
-read               : k_read lval                                                { }
+read               : k_read lval                                                { $$ = new ast::read($2);}
                    ;                                            
      
 %%
