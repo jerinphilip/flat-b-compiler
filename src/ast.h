@@ -43,6 +43,7 @@ struct dataType {
 
     dataType operator+(dataType x){
         dataType result;
+        result.dtype = dtype;
         switch(dtype){
             case type::Int: 
                 result.T.i = T.i  + x.T.i;
@@ -50,10 +51,12 @@ struct dataType {
             default:
                 break;
         }
+        return result;
     }
 
     dataType operator-(dataType x){
         dataType result;
+        result.dtype = dtype;
         switch(dtype){
             case type::Int: 
                 result.T.i = T.i  - x.T.i;
@@ -61,10 +64,12 @@ struct dataType {
             default:
                 break;
         }
+        return result;
     }
 
     dataType operator*(dataType x){
         dataType result;
+        result.dtype = dtype;
         switch(dtype){
             case type::Int: 
                 result.T.i = T.i  * x.T.i;
@@ -72,10 +77,12 @@ struct dataType {
             default:
                 break;
         }
+        return result;
     }
 
     dataType operator/(dataType x){
         dataType result;
+        result.dtype = dtype;
         switch(dtype){
             case type::Int:
                 result.T.i = T.i  / x.T.i;
@@ -83,6 +90,7 @@ struct dataType {
             default:
                 break;
         }
+        return result;
     }
 
 };
@@ -146,6 +154,34 @@ namespace ast {
         void accept(visitor::interpreter *p);
     };
 
+    struct id_ : public id {
+        expr* subscript;
+        id_(string s, expr *e): id(s), subscript(e){
+            //cerr << "Initializing: " << s << endl;
+            //cerr << "Other: "<< name << endl;
+        }
+        void accept(visitor::pprinter *p);
+        void accept(visitor::interpreter *p);
+    };
+    
+
+    struct id_ref : public node {
+        string name;
+        id_ref (string s): name(s) {
+            //cerr << "Initializing: " << name << endl;
+        }
+        void accept(visitor::pprinter *p);
+        void accept(visitor::interpreter *p);
+    };
+
+    struct idA_ref : public id_ref {
+        expr* subscript;
+        idA_ref(string s, expr *e): id_ref(s), subscript(e){}
+        void accept(visitor::pprinter *p);
+        void accept(visitor::interpreter *p);
+    };
+
+
     struct id_def : public node {
         string name;
         id_def (string s): name(s) {
@@ -157,16 +193,6 @@ namespace ast {
     struct idA_def : public id_def {
         int size;
         idA_def (string s, int sz): id_def(s), size(sz) {}
-        void accept(visitor::pprinter *p);
-        void accept(visitor::interpreter *p);
-    };
-    
-    struct id_ : public id {
-        expr* subscript;
-        id_(string s, expr *e): id(s), subscript(e){
-            //cerr << "Initializing: " << s << endl;
-            //cerr << "Other: "<< name << endl;
-        }
         void accept(visitor::pprinter *p);
         void accept(visitor::interpreter *p);
     };
@@ -216,10 +242,10 @@ namespace ast {
     };
 
     struct assign: public statement {
-        id *ref;
+        id_ref *ref;
         expr *tree;
 
-        assign(id *ref, expr *e): ref(ref), tree(e){}
+        assign(id_ref *ref, expr *e): ref(ref), tree(e){}
     
         void accept(visitor::pprinter *p);
         void accept(visitor::interpreter *p);
@@ -248,13 +274,13 @@ namespace ast {
     };
 
     struct for_: public statement {
-        id *var;
+        id_ref *var;
         expr *start;
         expr *step;
         expr *end;
         code* block;
 
-        for_(id *i, expr *init, expr *delta, expr *end, code *b): 
+        for_(id_ref *i, expr *init, expr *delta, expr *end, code *b): 
             var(i), start(init), step(delta), end(end), block(b){}
         void accept(visitor::pprinter *p);
         void accept(visitor::interpreter *p);

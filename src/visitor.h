@@ -27,6 +27,8 @@ namespace visitor {
         void visit(ast::id_def *id_def);
         void visit(ast::idA_def *idA_def);
         void visit(ast::binOp *binOp);
+        void visit(ast::id_ref *id_ref);
+        void visit(ast::idA_ref *idA_ref);
     };
 
 
@@ -62,6 +64,8 @@ namespace visitor {
         void visit(ast::id_def *id_def);
         void visit(ast::idA_def *idA_def);
         void visit(ast::binOp *binOp);
+        void visit(ast::id_ref *id_ref);
+        void visit(ast::idA_ref *idA_ref);
     };
 }
 

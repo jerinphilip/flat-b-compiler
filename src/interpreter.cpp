@@ -29,13 +29,11 @@ void visitor::interpreter::visit(ast::code *code){
 void visitor::interpreter::visit(ast::id *id){
     cout << "Evaluating id" << endl;
     dataType dt;
-    dt.dtype = type::Pointer;
     bool declared = env.find(id->name) != env.end();
     if(not declared)
         cerr << "Undefined variable" << endl;
 
-    dt.T.p = &(env[id->name].T.i);
-    evalStack.push(dt);
+    evalStack.push(env[id->name]);
     cout << "id, done" << endl;
     
 }
@@ -50,21 +48,40 @@ void visitor::interpreter::visit(ast::id_ *id_){
 
     id_->subscript->accept(this);
     dataType sc = evalStack.top(); evalStack.pop();
-    int sub;
-    switch(sc.dtype){
-        case type::Int:
-            sub = sc.T.i;
-            break;
-        case type::Pointer:
-            sub = *(sc.T.p);
-            break;
-        default:
-            break;
-    }
-
-    dt.T.p = &(env[id_->name].T.A[sub]);
+    int sub = sc.T.i;
+    dt.T.i = env[id_->name].T.A[sub];
     evalStack.push(dt);
     cout << "id_, done" << endl;
+}
+
+void visitor::interpreter::visit(ast::id_ref *id_ref){
+    cout << "Evaluating id_ref" << endl;
+    dataType dt;
+    dt.dtype = type::Pointer;
+    bool declared = env.find(id_ref->name) != env.end();
+    if(not declared)
+        cerr << "Undefined variable" << endl;
+
+    dt.T.p = &(env[id_ref->name].T.i);
+    evalStack.push(dt);
+    cout << "id_ref, done" << endl;
+    
+}
+
+void visitor::interpreter::visit(ast::idA_ref *idA_ref){
+    cout << "Evaluating idA_ref" << endl;
+    dataType dt;
+    dt.dtype = type::Pointer;
+    bool declared = env.find(idA_ref->name) != env.end();
+    if(not declared)
+        cerr << "Undefined variable" << endl;
+
+    idA_ref->subscript->accept(this);
+    dataType sc = evalStack.top(); evalStack.pop();
+    int sub = sc.T.i;
+    dt.T.p = &(env[idA_ref->name].T.A[sub]);
+    evalStack.push(dt);
+    cout << "idA_ref, done" << endl;
 }
 
 void visitor::interpreter::visit(ast::expr *expr){
@@ -78,8 +95,12 @@ void visitor::interpreter::visit(ast::statement *statement){
 
 void visitor::interpreter::visit(ast::assign *assign){
     cout << "[ assign -------- " << endl;
-
-
+    assign->ref->accept(this);
+    dataType ref = evalStack.top(); evalStack.pop();
+    assign->tree->accept(this);
+    dataType value = evalStack.top(); evalStack.pop();
+    *(ref.T.p) = value.T.i;
+    cout << assign->ref->name << " = " << value.T.i << " ; "<< endl;
     cout << " -------- assign ]" << endl;
 }
 
@@ -126,19 +147,24 @@ void visitor::interpreter::visit(ast::integer *integer){
     dt.dtype = type::Int;
     dt.T.i = integer->value;
     evalStack.push(dt);
+    cout << integer->value << endl;
     cout << " ----- integer ]" << endl;
 
 }
+
 
 void visitor::interpreter::visit(ast::binOp *binOp){
     cout << "[ binary op ----- " << endl;
 
     /* Evaluate and put on stack */
     binOp->left->accept(this);
-    binOp->right->accept(this);
-
-    dataType right = evalStack.top(); evalStack.pop();
     dataType left = evalStack.top(); evalStack.pop();
+    binOp->right->accept(this);
+    dataType right = evalStack.top(); evalStack.pop();
+
+
+    /* TODO Generalize for types */
+    cerr << "Left, right: " << left.dtype << ", " << right.dtype << endl; 
 
     if ( left.dtype != right.dtype ){
         cerr << "Type mismatch!" << endl;

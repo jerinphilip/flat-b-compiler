@@ -30,6 +30,7 @@
     vector<ast::id*> *ids;
     vector<ast::id_def*> *defs; 
     ast::id_def *def;
+    ast::id_ref *ref;
     ast::expr *expr;
     ast::code *code;
     type dtype;
@@ -54,7 +55,6 @@
 %type <dtype> dtype;
 %type <def> var;
 %type <id> id_loc;
-%type <id> lval;
 %type <tIds> declaration_list;
 %type <op> boolOp;
 %type <expr> boolExpr;
@@ -63,6 +63,7 @@
 %type <for_> for;
 %type <if_> if;
 %type <goto_> goto;
+%type <ref> lval;
 
 %type <no_op> print;
 %type <no_op> println;
@@ -138,7 +139,6 @@ var                : IDENTIFIER                                                 
                    | IDENTIFIER '[' NUMBER ']'                                  { string sId = string($1); $$ = new ast::idA_def(sId, $3); }
                    ;
 
-id_loc             : IDENTIFIER '[' arithExpr ']'                               { string sId = string($1); $$ = new ast::id_(sId, $3); }
                    ;
 dtype              : k_integer                                                  { $$ = type::Int; }
                    ;
@@ -149,7 +149,7 @@ arithExpr          : arithExpr '+' arithExpr                                    
                    | '(' arithExpr ')'                                          { $$ = $2; }
                    | NUMBER                                                     { $$ = new ast::integer($1); }
                    | IDENTIFIER                                                 { $$ = new ast::id($1); }
-                   | id_loc                                                     { $$ = $1; }
+                   | IDENTIFIER '[' arithExpr ']'                               { string sId = string($1); $$ = new ast::id_(sId, $3); }
                    ;
 
 
@@ -157,8 +157,8 @@ boolExpr           :  arithExpr boolOp arithExpr                                
                    | '(' boolExpr ')'                                           { $$ = $2; }
                    ;
 
-lval               : IDENTIFIER                                                 { $$ = new ast::id($1); } 
-                   | id_loc                                                     { $$ = $1; }
+lval               : IDENTIFIER                                                 { $$ = new ast::id_ref($1); } 
+                   | IDENTIFIER '[' arithExpr ']'                               { string sId = string($1); $$ = new ast::idA_ref(sId, $3); }
                    ;
 
 boolOp             : '<'                                                        { $$ = opr::lt; }

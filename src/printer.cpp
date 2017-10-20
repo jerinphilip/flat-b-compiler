@@ -106,3 +106,9 @@ void visitor::pprinter::visit(ast::idA_def *idA_def){
 
 void visitor::pprinter::visit(ast::binOp *binOp){
 }
+
+void visitor::pprinter::visit(ast::id_ref *id_ref){
+}
+
+void visitor::pprinter::visit(ast::idA_ref *idA_ref){
+}
