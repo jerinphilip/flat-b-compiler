@@ -115,6 +115,17 @@ void visitor::interpreter::visit(ast::while_ *while_){
 
 void visitor::interpreter::visit(ast::if_ *if_){
     cerr << "Evaluating If" << endl;
+    dataType cond;
+    if_->cond->accept(this);
+    cond = evalStack.top(); evalStack.pop();
+    if (cond.T.i){
+        if_->block->accept(this);
+    }
+    else{
+        if(if_->otherwise != NULL){
+            if_->otherwise->accept(this);
+        }
+    }
     cerr << "If, Done" << endl;
 }
 
