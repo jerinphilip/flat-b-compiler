@@ -11,7 +11,8 @@ enum type {
     Bool,
     Char,
     CharArray,
-    IntArray
+    IntArray,
+    Pointer,
 };
 
 enum opr {
@@ -37,7 +38,52 @@ struct dataType {
         int *A;
         int i;
         bool b;
+        int *p;
     } T;
+
+    dataType operator+(dataType x){
+        dataType result;
+        switch(dtype){
+            case type::Int: 
+                result.T.i = T.i  + x.T.i;
+                break;
+            default:
+                break;
+        }
+    }
+
+    dataType operator-(dataType x){
+        dataType result;
+        switch(dtype){
+            case type::Int: 
+                result.T.i = T.i  - x.T.i;
+                break;
+            default:
+                break;
+        }
+    }
+
+    dataType operator*(dataType x){
+        dataType result;
+        switch(dtype){
+            case type::Int: 
+                result.T.i = T.i  * x.T.i;
+                break;
+            default:
+                break;
+        }
+    }
+
+    dataType operator/(dataType x){
+        dataType result;
+        switch(dtype){
+            case type::Int:
+                result.T.i = T.i  / x.T.i;
+                break;
+            default:
+                break;
+        }
+    }
 
 };
 

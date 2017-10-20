@@ -26,6 +26,7 @@ namespace visitor {
         void visit(ast::integer *integer);
         void visit(ast::id_def *id_def);
         void visit(ast::idA_def *idA_def);
+        void visit(ast::binOp *binOp);
     };
 
 
@@ -35,6 +36,8 @@ namespace visitor {
             declare,
             eval
         };
+
+        stack <dataType> evalStack;
 
         type currentType;
         int currentStatus;
@@ -58,6 +61,7 @@ namespace visitor {
         void visit(ast::integer *integer);
         void visit(ast::id_def *id_def);
         void visit(ast::idA_def *idA_def);
+        void visit(ast::binOp *binOp);
     };
 }
 

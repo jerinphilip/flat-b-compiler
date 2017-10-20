@@ -20,18 +20,50 @@ void visitor::interpreter::visit(ast::declarations *declarations){
 
 void visitor::interpreter::visit(ast::code *code){
     cout << "Evaluating Code" << endl;
-
+    for(auto &p: *(code->statements)){
+        p->accept(this);
+    }
     cout << "Code, Done" << endl;
 }
 
 void visitor::interpreter::visit(ast::id *id){
     cout << "Evaluating id" << endl;
+    dataType dt;
+    dt.dtype = type::Pointer;
+    bool declared = env.find(id->name) != env.end();
+    if(not declared)
+        cerr << "Undefined variable" << endl;
+
+    dt.T.p = &(env[id->name].T.i);
+    evalStack.push(dt);
     cout << "id, done" << endl;
     
 }
 
 void visitor::interpreter::visit(ast::id_ *id_){
     cout << "Evaluating id_" << endl;
+    dataType dt;
+    dt.dtype = type::Pointer;
+    bool declared = env.find(id_->name) != env.end();
+    if(not declared)
+        cerr << "Undefined variable" << endl;
+
+    id_->subscript->accept(this);
+    dataType sc = evalStack.top(); evalStack.pop();
+    int sub;
+    switch(sc.dtype){
+        case type::Int:
+            sub = sc.T.i;
+            break;
+        case type::Pointer:
+            sub = *(sc.T.p);
+            break;
+        default:
+            break;
+    }
+
+    dt.T.p = &(env[id_->name].T.A[sub]);
+    evalStack.push(dt);
     cout << "id_, done" << endl;
 }
 
@@ -40,27 +72,35 @@ void visitor::interpreter::visit(ast::expr *expr){
 }
 
 void visitor::interpreter::visit(ast::statement *statement){
-    cout << "Code" << endl;
+    cout << "Evaluating Statement" << endl; 
+    cout << "Statement, Done" << endl;
 }
 
 void visitor::interpreter::visit(ast::assign *assign){
-    cout << "Code" << endl;
+    cout << "[ assign -------- " << endl;
+
+
+    cout << " -------- assign ]" << endl;
 }
 
 void visitor::interpreter::visit(ast::while_ *while_){
-    cout << "Code" << endl;
+    cout << "Evaluating While" << endl;
+    cout << "While, Done" << endl;
 }
 
 void visitor::interpreter::visit(ast::if_ *if_){
-    cout << "Code" << endl;
+    cout << "Evaluating If" << endl;
+    cout << "If, Done" << endl;
 }
 
 void visitor::interpreter::visit(ast::for_ *for_){
-    cout << "Code" << endl;
+    cout << "[ for ---" << endl;
+    cout << "---- for ]" << endl;
 }
 
 void visitor::interpreter::visit(ast::print *print){
-    cout << "Code" << endl;
+    cout << "[ print ---" << endl;
+    cout << "--- print ]" << endl;
 }
 
 void visitor::interpreter::visit(ast::typed_ids *twrap){
@@ -81,6 +121,41 @@ void visitor::interpreter::visit(ast::goto_ *no_op){
 }
 
 void visitor::interpreter::visit(ast::integer *integer){
+    cout << "[ integer ---- ]" << endl;
+    dataType dt;
+    dt.dtype = type::Int;
+    dt.T.i = integer->value;
+    evalStack.push(dt);
+    cout << " ----- integer ]" << endl;
+
+}
+
+void visitor::interpreter::visit(ast::binOp *binOp){
+    cout << "[ binary op ----- " << endl;
+
+    /* Evaluate and put on stack */
+    binOp->left->accept(this);
+    binOp->right->accept(this);
+
+    dataType right = evalStack.top(); evalStack.pop();
+    dataType left = evalStack.top(); evalStack.pop();
+
+    if ( left.dtype != right.dtype ){
+        cerr << "Type mismatch!" << endl;
+    }
+    else{
+        switch (binOp->op){
+            case opr::add:  evalStack.push(left + right); break;
+            case opr::sub:  evalStack.push(left - right); break;
+            case opr::mul:  evalStack.push(left * right); break;
+            case opr::quot: evalStack.push(left / right); break;
+            default:
+                break;
+        }
+    }
+
+
+    cout << " ----- binary op ]" <<endl;
 
 }
 
