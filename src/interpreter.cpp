@@ -26,7 +26,6 @@ void visitor::interpreter::visit(ast::id *id){
     dataType dt;
     bool declared = env.find(id->name) != env.end();
     if(not declared)
-        cerr << "Undefined variable" << endl;
 
     /* TODO, Ascertain dtype from pointer type */
     dt.dtype = type::Int;
@@ -40,7 +39,6 @@ void visitor::interpreter::visit(ast::id_ *id_){
     dt.dtype = type::Int;
     bool declared = env.find(id_->name) != env.end();
     if(not declared)
-        cerr << "Undefined variable" << endl;
 
     id_->subscript->accept(this);
     dataType sc = evalStack.top(); evalStack.pop();
@@ -48,9 +46,6 @@ void visitor::interpreter::visit(ast::id_ *id_){
     dataType d = env[id_->name];
     dt.T.i = env[id_->name].T.A[sub];
     /*
-    cerr << "Index evaluated as: " << sub << endl;
-    cerr << "Value computed as: " << env[id_->name].T.A[sub] << endl;
-    cerr << "Outputting: " << dt.T.i << endl;
     */
     evalStack.push(dt);
 }
@@ -60,7 +55,6 @@ void visitor::interpreter::visit(ast::id_ref *id_ref){
     dt.dtype = type::Pointer;
     bool declared = env.find(id_ref->name) != env.end();
     if(not declared)
-        cerr << "Undefined variable" << endl;
 
     dt.T.p = &(env[id_ref->name].T.i);
     evalStack.push(dt);
@@ -72,7 +66,6 @@ void visitor::interpreter::visit(ast::idA_ref *idA_ref){
     dt.dtype = type::Pointer;
     bool declared = env.find(idA_ref->name) != env.end();
     if(not declared)
-        cerr << "Undefined variable!" << endl;
 
     idA_ref->subscript->accept(this);
     dataType sc = evalStack.top(); evalStack.pop();
@@ -82,12 +75,9 @@ void visitor::interpreter::visit(ast::idA_ref *idA_ref){
 }
 
 void visitor::interpreter::visit(ast::expr *expr){
-    //cerr << "Code" << endl;
 }
 
 void visitor::interpreter::visit(ast::statement *statement){
-    //cerr << "Evaluating Statement" << endl; 
-    //cerr << "Statement, Done" << endl;
 }
 
 void visitor::interpreter::visit(ast::assign *assign){
@@ -96,7 +86,6 @@ void visitor::interpreter::visit(ast::assign *assign){
     assign->tree->accept(this);
     dataType value = evalStack.top(); evalStack.pop();
     *(ref.T.p) = value.T.i;
-    // cerr << assign->ref->name << " = " << value.T.i << " ; "<< endl;
 }
 
 void visitor::interpreter::visit(ast::while_ *while_){
@@ -193,11 +182,9 @@ void visitor::interpreter::visit(ast::typed_ids *twrap){
 }
 
 void visitor::interpreter::visit(ast::no_op *no_op){
-    // cerr << "No-Op" << endl;
 }
 
 void visitor::interpreter::visit(ast::goto_ *goto_){
-    // cerr << "goto_" << endl;
     if(goto_->cond == NULL){
         ast::code *code = table[goto_->label];
         code->accept(this);
@@ -220,7 +207,6 @@ void visitor::interpreter::visit(ast::integer *integer){
     dt.dtype = type::Int;
     dt.T.i = integer->value;
     evalStack.push(dt);
-    // cerr << integer->value << endl;
 }
 
 
@@ -236,7 +222,6 @@ void visitor::interpreter::visit(ast::binOp *binOp){
     /* TODO Generalize for types */
 
     if ( left.dtype != right.dtype ){
-        cerr << "Type mismatch!" << endl;
     }
     else{
         switch (binOp->op){
@@ -273,7 +258,6 @@ void visitor::interpreter::visit(ast::id_def *id_def){
 void visitor::interpreter::visit(ast::idA_def *idA_def){
     string name = idA_def->name;
     int size = idA_def->size;
-    //cerr << name << "["<< size << "]" << endl;
     dataType dt;
     dt.dtype = currentType;
     switch (dt.dtype){
@@ -301,11 +285,9 @@ void visitor::interpreter::visit(ast::read *read){
     int value;
     cin >> value;
     *(ref.T.p) = value;
-    //cerr << read->var->name << " = " << value << " ; "<< endl;
 }
 
 void visitor::interpreter::visit(ast::labelled *labelled){
-    //cerr << "Found label: " << labelled->label << endl;
     labelled->block->accept(this);
 }
 
