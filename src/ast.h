@@ -93,6 +93,69 @@ struct dataType {
         return result;
     }
 
+    dataType operator<(dataType x){
+        dataType result;
+        result.dtype = type::Bool;
+        switch(dtype){
+            case type::Int:
+                result.T.i = T.i  < x.T.i;
+                break;
+            default:
+                break;
+        }
+        return result;
+    }
+    dataType operator>(dataType x){
+        dataType result;
+        result.dtype = type::Bool;
+        switch(dtype){
+            case type::Int:
+                result.T.i = T.i  > x.T.i;
+                break;
+            default:
+                break;
+        }
+        return result;
+    }
+
+    dataType operator<=(dataType x){
+        dataType result;
+        result.dtype = type::Bool;
+        switch(dtype){
+            case type::Int:
+                result.T.i = T.i  <= x.T.i;
+                break;
+            default:
+                break;
+        }
+        return result;
+    }
+
+    dataType operator>=(dataType x){
+        dataType result;
+        result.dtype = type::Bool;
+        switch(dtype){
+            case type::Int:
+                result.T.i = T.i  >= x.T.i;
+                break;
+            default:
+                break;
+        }
+        return result;
+    }
+
+    dataType operator==(dataType x){
+        dataType result;
+        result.dtype = type::Bool;
+        switch(dtype){
+            case type::Int:
+                result.T.i = T.i  == x.T.i;
+                break;
+            default:
+                break;
+        }
+        return result;
+    }
 };
 
 namespace ast {
@@ -164,14 +227,20 @@ namespace ast {
         void accept(visitor::interpreter *p);
     };
     
+    struct id_base : public node {
+        virtual void vnode (void **) = 0;
+    };
 
-    struct id_ref : public node {
+    struct id_ref : public id_base {
         string name;
         id_ref (string s): name(s) {
             //cerr << "Initializing: " << name << endl;
         }
         void accept(visitor::pprinter *p);
         void accept(visitor::interpreter *p);
+        void vnode(void **p){
+            *p = new id(name);
+        }
     };
 
     struct idA_ref : public id_ref {
@@ -179,7 +248,11 @@ namespace ast {
         idA_ref(string s, expr *e): id_ref(s), subscript(e){}
         void accept(visitor::pprinter *p);
         void accept(visitor::interpreter *p);
+        void vnode(void **p){
+            *p = new id_(name, subscript);
+        }
     };
+
 
 
     struct id_def : public node {
@@ -212,6 +285,7 @@ namespace ast {
         void accept(visitor::pprinter *p);
         void accept(visitor::interpreter *p);
     };
+
 
 
     struct binOp: public expr {
@@ -274,14 +348,21 @@ namespace ast {
     };
 
     struct for_: public statement {
+        assign *init;
+        /*
         id_ref *var;
         expr *start;
+        */
         expr *step;
         expr *end;
         code* block;
 
-        for_(id_ref *i, expr *init, expr *delta, expr *end, code *b): 
-            var(i), start(init), step(delta), end(end), block(b){}
+        for_(assign *init, 
+                /*id_ref *i, expr *init,*/ 
+                expr *delta, expr *end, code *b): 
+            /*var(i), start(init), */
+            init(init), 
+            step(delta), end(end), block(b){}
         void accept(visitor::pprinter *p);
         void accept(visitor::interpreter *p);
     };

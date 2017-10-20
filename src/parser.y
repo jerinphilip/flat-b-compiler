@@ -118,6 +118,7 @@ statement_list     : statement_list statement                                   
                    ;
 
 statement          : lval '=' arithExpr EOS                                     { $$ = new ast::assign($1, $3); }  
+                   | lval '=' boolExpr EOS                                     { $$ = new ast::assign($1, $3); }  
                    | while                                                      { $$ = $1; }   
                    | IDENTIFIER ':'                                             { string sId = string($1); $$ = new ast::goto_(sId); } 
                    | if                                                         { $$ = $1; } 
@@ -175,8 +176,8 @@ if                 : k_if boolExpr block                                        
                    | k_if boolExpr block k_else block                           { $$ = new ast::if_($2, $3, $5); }
                    ;
 
-for                : k_for lval '=' arithExpr ',' arithExpr block               { $$ = new ast::for_($2, $4, (new ast::integer(1)), $6, $7); }
-                   | k_for lval '=' arithExpr ',' arithExpr ',' arithExpr block { $$ = new ast::for_($2, $4, $6, $8, $9); }
+for                : k_for lval '=' arithExpr ',' arithExpr block               { $$ = new ast::for_(new ast::assign($2, $4), (new ast::integer(1)), $6, $7); }
+                   | k_for lval '=' arithExpr ',' arithExpr ',' arithExpr block { $$ = new ast::for_(new ast::assign($2, $4), $6, $8, $9); }
                    ;
 
 goto               : k_cond_goto IDENTIFIER k_if boolExpr                       { string sId = string($2); $$ = new ast::goto_(sId, $4); }
@@ -190,9 +191,10 @@ println            : k_println printables                                       
 printables         : printable                                                  { }
                    | printable ',' printables                                   { }
                    ;                                                            
-printable          : lval                                                       { } 
-                   | STRING                                                     { }
-                   | NUMBER                                                     { }
+printable          : IDENTIFIER                                                 { $$ = new ast::id($1); }
+                   | IDENTIFIER '[' arithExpr ']'                               { string sId = string($1); $$ = new ast::id_(sId, $3); }
+                   | STRING                                                     { $$ = new ast::string($1); }
+                   | NUMBER                                                     { $$ = new ast::integer($1); }
                    ;                                                            
 
 read               : k_read lval                                                { }
