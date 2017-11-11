@@ -30,6 +30,7 @@ enum opr {
 namespace visitor {
     struct pprinter;
     struct interpreter;
+    struct compiler;
 }
 
 
@@ -58,6 +59,7 @@ namespace ast {
 
         virtual void accept(visitor::pprinter *) = 0;
         virtual void accept(visitor::interpreter *) = 0;
+        virtual void accept(visitor::compiler *) = 0;
     };
 
     struct program : public node {
@@ -66,6 +68,7 @@ namespace ast {
         program(declarations *d, code* c): decl(d), block(c){}
         void accept(visitor::pprinter *p);
         void accept(visitor::interpreter *p);
+        void accept(visitor::compiler *p);
     };
 
     /* declarations */
@@ -76,12 +79,14 @@ namespace ast {
 
         void accept(visitor::pprinter *p);
         void accept(visitor::interpreter *p);
+        void accept(visitor::compiler *p);
     };
 
     /* Auxiliary types for declations and onward */
     struct expr: public node{
         void accept(visitor::pprinter *p);
         void accept(visitor::interpreter *p);
+        void accept(visitor::compiler *p);
     };
 
     struct id : public expr {
@@ -91,6 +96,7 @@ namespace ast {
         }
         void accept(visitor::pprinter *p);
         void accept(visitor::interpreter *p);
+        void accept(visitor::compiler *p);
     };
 
     struct id_ : public id {
@@ -101,6 +107,7 @@ namespace ast {
         }
         void accept(visitor::pprinter *p);
         void accept(visitor::interpreter *p);
+        void accept(visitor::compiler *p);
     };
     
     struct id_base : public node {
@@ -114,6 +121,7 @@ namespace ast {
         }
         void accept(visitor::pprinter *p);
         void accept(visitor::interpreter *p);
+        void accept(visitor::compiler *p);
         void vnode(void **p){
             *p = new id(name);
         }
@@ -124,6 +132,7 @@ namespace ast {
         idA_ref(string s, expr *e): id_ref(s), subscript(e){}
         void accept(visitor::pprinter *p);
         void accept(visitor::interpreter *p);
+        void accept(visitor::compiler *p);
         void vnode(void **p){
             *p = new id_(name, subscript);
         }
@@ -137,6 +146,7 @@ namespace ast {
         }
         void accept(visitor::pprinter *p);
         void accept(visitor::interpreter *p);
+        void accept(visitor::compiler *p);
     };
     
     struct idA_def : public id_def {
@@ -144,6 +154,7 @@ namespace ast {
         idA_def (string s, int sz): id_def(s), size(sz) {}
         void accept(visitor::pprinter *p);
         void accept(visitor::interpreter *p);
+        void accept(visitor::compiler *p);
     };
     
     struct typed_ids : public node {
@@ -153,6 +164,7 @@ namespace ast {
             dtype(d), t_ids(v) {}
         void accept(visitor::pprinter *p);
         void accept(visitor::interpreter *p);
+        void accept(visitor::compiler *p);
     };
 
     struct integer: public expr {
@@ -160,6 +172,7 @@ namespace ast {
         integer(int v): value(v){}
         void accept(visitor::pprinter *p);
         void accept(visitor::interpreter *p);
+        void accept(visitor::compiler *p);
     };
 
 
@@ -173,6 +186,7 @@ namespace ast {
             op(op), left(l), right(r) {}
         void accept(visitor::pprinter *p);
         void accept(visitor::interpreter *p);
+        void accept(visitor::compiler *p);
     };
 
 
@@ -180,6 +194,7 @@ namespace ast {
     
         void accept(visitor::pprinter *p);
         void accept(visitor::interpreter *p);
+        void accept(visitor::compiler *p);
     };
 
     /* statements */
@@ -188,6 +203,7 @@ namespace ast {
         code(vector<statement*> *s):statements(s) {}
         void accept(visitor::pprinter *p);
         void accept(visitor::interpreter *p);
+        void accept(visitor::compiler *p);
     };
 
     struct labelled : public statement {
@@ -197,6 +213,7 @@ namespace ast {
             label(label), block(s) {}
         void accept(visitor::pprinter *p);
         void accept(visitor::interpreter *p);
+        void accept(visitor::compiler *p);
     };
 
 
@@ -208,6 +225,7 @@ namespace ast {
     
         void accept(visitor::pprinter *p);
         void accept(visitor::interpreter *p);
+        void accept(visitor::compiler *p);
     };
 
     struct cblock: public statement{
@@ -216,12 +234,14 @@ namespace ast {
         cblock(expr *c, code *b): cond(c), block(b){}
         void accept(visitor::pprinter *p);
         void accept(visitor::interpreter *p);
+        void accept(visitor::compiler *p);
     };
 
     struct while_: public cblock{
         while_(expr *c, code *b): cblock(c, b){}
         void accept(visitor::pprinter *p);
         void accept(visitor::interpreter *p);
+        void accept(visitor::compiler *p);
     };
 
     struct if_: public cblock {
@@ -230,6 +250,7 @@ namespace ast {
             cblock(c, b), otherwise(o) { }
         void accept(visitor::pprinter *p);
         void accept(visitor::interpreter *p);
+        void accept(visitor::compiler *p);
     };
 
     struct for_: public statement {
@@ -250,6 +271,7 @@ namespace ast {
             step(delta), end(end), block(b){}
         void accept(visitor::pprinter *p);
         void accept(visitor::interpreter *p);
+        void accept(visitor::compiler *p);
     };
 
     struct goto_: public statement {
@@ -258,6 +280,7 @@ namespace ast {
         goto_ (string label, expr* e=NULL): label(label), cond(e) {}
         void accept(visitor::pprinter *p);
         void accept(visitor::interpreter *p);
+        void accept(visitor::compiler *p);
     };
 
     struct print: public statement {
@@ -269,6 +292,7 @@ namespace ast {
     
         void accept(visitor::pprinter *p);
         void accept(visitor::interpreter *p);
+        void accept(visitor::compiler *p);
     };
 
 
@@ -276,6 +300,7 @@ namespace ast {
         no_op(){}
         void accept(visitor::pprinter *p);
         void accept(visitor::interpreter *p);
+        void accept(visitor::compiler *p);
     };
 
     struct literal: public expr {
@@ -285,6 +310,7 @@ namespace ast {
         }
         void accept(visitor::pprinter *p);
         void accept(visitor::interpreter *p);
+        void accept(visitor::compiler *p);
     };
 
     struct read:public statement  {
@@ -293,6 +319,7 @@ namespace ast {
         read(id_ref *var): var(var) {}
         void accept(visitor::pprinter *p);
         void accept(visitor::interpreter *p);
+        void accept(visitor::compiler *p);
     };
 }
 

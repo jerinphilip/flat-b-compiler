@@ -55,3 +55,30 @@ void ast::literal::accept(visitor::interpreter *p)      { p->visit(this); }
 void ast::read::accept(visitor::interpreter *p)         { p->visit(this); }
 void ast::labelled::accept(visitor::interpreter *p)     { p->visit(this); }
 
+/* COMPILER */
+void ast::program::accept(visitor::compiler *p)      { p->visit(this); }
+void ast::declarations::accept(visitor::compiler *p) { p->visit(this); }
+void ast::id::accept(visitor::compiler *p)           { p->visit(this); }
+void ast::id_::accept(visitor::compiler *p)          { p->visit(this); }
+void ast::expr::accept(visitor::compiler *p)         { p->visit(this); }
+void ast::code::accept(visitor::compiler *p)         { p->visit(this); }
+void ast::statement::accept(visitor::compiler *p)    { p->visit(this); }
+void ast::assign::accept(visitor::compiler *p)       { p->visit(this); }
+void ast::cblock::accept(visitor::compiler *p)       { p->visit(this); }
+void ast::while_::accept(visitor::compiler *p)       { p->visit(this); }
+void ast::if_::accept(visitor::compiler *p)          { p->visit(this); }
+void ast::for_::accept(visitor::compiler *p)         { p->visit(this); }
+void ast::print::accept(visitor::compiler *p)        { p->visit(this); }
+void ast::typed_ids::accept(visitor::compiler *p)    { p->visit(this); }
+void ast::integer::accept(visitor::compiler *p)      { p->visit(this); }
+void ast::binOp::accept(visitor::compiler *p)        { p->visit(this); }
+void ast::no_op::accept(visitor::compiler *p)        { p->visit(this); }
+void ast::goto_::accept(visitor::compiler *p)        { p->visit(this); }
+void ast::id_def::accept(visitor::compiler *p)       { p->visit(this); }
+void ast::id_ref::accept(visitor::compiler *p)       { p->visit(this); }
+void ast::idA_def::accept(visitor::compiler *p)      { p->visit(this); }
+void ast::idA_ref::accept(visitor::compiler *p)      { p->visit(this); }
+void ast::literal::accept(visitor::compiler *p)      { p->visit(this); }
+void ast::read::accept(visitor::compiler *p)         { p->visit(this); }
+void ast::labelled::accept(visitor::compiler *p)     { p->visit(this); }
+
