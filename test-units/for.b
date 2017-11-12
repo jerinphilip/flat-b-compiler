@@ -1,18 +1,17 @@
 declblock{
     int x;
     int y;
-    int y[100];
-    int s, t[100];
+    int s, t[10];
 }
 
 codeblock{
 L2: x = 0;
-    for x = 3, 10, 1 {
-        y = 2;
+    for x = 1, 100, 1 {
+        t[x] = x;
     }
 
-    for x = 3, 10 {
-        y = 4;
+    for x = 1, 100{
+        print t[x];
     }
 }
 

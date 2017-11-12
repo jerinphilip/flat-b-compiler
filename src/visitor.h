@@ -140,13 +140,13 @@ namespace visitor {
                         module);
             printf = Function::Create(
                         FunctionType::get(
-                            Type::getVoidTy(context), true),
+                            Type::getInt64Ty(context), true),
                         GlobalValue::ExternalLinkage,
                         "printf",
                         module);
             scanf = Function::Create(
                         FunctionType::get(
-                            Type::getVoidTy(context), true),
+                            Type::getInt64Ty(context), true),
                         GlobalValue::ExternalLinkage,
                         "scanf",
                         module);
