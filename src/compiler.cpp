@@ -42,8 +42,6 @@ void visitor::compiler::visit(ast::id *id){
 
     StoreInst *r = new StoreInst(ret_val, v_table[id->name], false, entry.top());
     eval.push((void*)r);
-
-    
 }
 
 void visitor::compiler::visit(ast::id_ *id_){
@@ -232,47 +230,81 @@ void visitor::compiler::visit(ast::goto_ *goto_){
 }
 
 void visitor::compiler::visit(ast::integer *integer){
-    /*
-    dataType dt;
-    dt.dtype = type::Int;
-    dt.T.i = integer->value;
-    evalStack.push(dt);
-    */
+    Constant *r = ConstantInt::get(Type::getInt64Ty(context), integer->value);
+    eval.push((void*)r);
 }
 
 
 void visitor::compiler::visit(ast::binOp *binOp){
 
-    /* Evaluate and put on stack */
-    /*
     binOp->left->accept(this);
-    dataType left = evalStack.top(); evalStack.pop();
+    Value* left = (Value*)eval.top(); eval.pop();
     binOp->right->accept(this);
-    dataType right = evalStack.top(); evalStack.pop();
-    */
+    Value* right = (Value*)eval.top(); eval.pop();
+
+    auto parent = entry.top();
+    auto binary_operator = [&left, &right, &parent](Instruction::BinaryOps Op){
+        return BinaryOperator::Create(Op, left, right, "vr", parent);
+    };
+
+    auto cmp_operator = [&left, &right, &parent, this](CmpInst::Predicate pred){
+        return new ZExtInst(
+                CmpInst::Create(
+                    Instruction::ICmp,
+                    pred,
+                    left, 
+                    right,
+                    "vr",
+                    parent),
+                Type::getInt64Ty(context),
+                "zext",
+                parent);
+    };
+
+    BinaryOperator *b;
+    ZExtInst *z;
 
 
-    /* TODO Generalize for types */
-
-    /*
-    if ( left.dtype != right.dtype ){
+    switch (binOp->op){
+        case opr::add:  
+            b = binary_operator(Instruction::Add);
+            eval.push((void*)b);
+            break;
+        case opr::sub:  
+            b = binary_operator(Instruction::Sub);
+            eval.push((void*)b);
+            break;
+        case opr::mul:  
+            b = binary_operator(Instruction::Mul);
+            eval.push((void*)b);
+            break;
+        case opr::quot: 
+            b = binary_operator(Instruction::SDiv);
+            eval.push((void*)b);
+            break;
+        case opr::lt: 
+            z = cmp_operator(ICmpInst::ICMP_SLT);
+            eval.push((void*)b);
+            break;
+        case opr::gt: 
+            z = cmp_operator(ICmpInst::ICMP_SGT);
+            eval.push((void*)z);
+            break;
+        case opr::le: 
+            z = cmp_operator(ICmpInst::ICMP_SLE);
+            eval.push((void*)z);
+            break;
+        case opr::ge: 
+            z = cmp_operator(ICmpInst::ICMP_SGE);
+            eval.push((void*)z);
+            break;
+        case opr::eq: 
+            z = cmp_operator(ICmpInst::ICMP_EQ);
+            eval.push((void*)z);
+            break;
+        default:
+            break;
     }
-    else{
-        switch (binOp->op){
-            case opr::add:  evalStack.push(left + right); break;
-            case opr::sub:  evalStack.push(left - right); break;
-            case opr::mul:  evalStack.push(left * right); break;
-            case opr::quot: evalStack.push(left / right); break;
-            case opr::lt: evalStack.push(left < right); break;
-            case opr::gt: evalStack.push(left > right); break;
-            case opr::le: evalStack.push(left <= right); break;
-            case opr::ge: evalStack.push(left >= right); break;
-            case opr::eq: evalStack.push(left == right); break;
-            default:
-                break;
-        }
-    }
-    */
 }
 
 void visitor::compiler::visit(ast::id_def *id_def){
