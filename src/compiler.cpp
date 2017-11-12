@@ -233,6 +233,9 @@ void visitor::compiler::visit(ast::for_ *for_){
     ast::binOp *check = new ast::binOp(opr::le, ivar, for_->end);
 
 
+
+
+    entry.push(body); 
     check->accept(this);
     ZExtInst *condition = (ZExtInst*)eval.top(); eval.pop();
     // Value *comparison = condition;
@@ -242,18 +245,16 @@ void visitor::compiler::visit(ast::for_ *for_){
             condition, 
             zero,
             "vr");
-
     BranchInst::Create(body, post, comparison, pre);
     BranchInst::Create(pre, parent);
-
-    entry.push(body); 
     for_->block->accept(this);
+    BranchInst::Create(body, post, comparison, pre);
+    BranchInst::Create(pre, parent);
     step->accept(this);
     body = entry.top(); entry.pop();
 
     if ( not body->getTerminator() ){
         BranchInst::Create(pre, body);
-        //BranchInst::Create(post, body);
     }
 
 
