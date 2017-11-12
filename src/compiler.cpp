@@ -210,35 +210,54 @@ void visitor::compiler::visit(ast::if_ *if_){
 }
 
 void visitor::compiler::visit(ast::for_ *for_){
-    /*
-       for_->init->accept(this);
+    BasicBlock *parent = entry.top();
+    BasicBlock *pre, *body, *post;
 
-       void *location;k
-       void **var = &location; 
-       for_->init->ref->vnode(var);
-       ast::id* ivar = (ast::id*)location;
+    pre = body = post = NULL;
 
-       ast::binOp *rhs = new ast::binOp(opr::add, ivar, for_->step);
-       ast::assign *step = new ast::assign(for_->init->ref, rhs);
-       ast::binOp *check = new ast::binOp(opr::le, ivar, for_->end);
 
-       dataType cond;
-       cond.dtype = type::Int;
-       cond.T.i = 1;
-       do {
-       check->accept(this);
-    //evalStack.push(cond);
-    cond = evalStack.top(); evalStack.pop();
-    if (cond.T.i){
-    for_->block->accept(this); 
-    */
+    pre = BasicBlock::Create(context, "for_pre", parent->getParent(), 0);
+    body = BasicBlock::Create(context, "for_body", parent->getParent(), 0);
+    post = BasicBlock::Create(context, "for_post", parent->getParent(), 0);
 
-    /* Evaluate body */
-    /*
-       step->accept(this);
-       }
-       }while (cond.T.i);
-       */
+
+    /* Initialize before entering loop, hopefully in parent */
+    for_->init->accept(this);
+    void *location;
+    void **var = &location; 
+    for_->init->ref->vnode(var);
+    ast::id* ivar = (ast::id*)location;
+
+    ast::binOp *rhs = new ast::binOp(opr::add, ivar, for_->step);
+    ast::assign *step = new ast::assign(for_->init->ref, rhs);
+    ast::binOp *check = new ast::binOp(opr::le, ivar, for_->end);
+
+
+    check->accept(this);
+    ZExtInst *condition = (ZExtInst*)eval.top(); eval.pop();
+    // Value *comparison = condition;
+    ConstantInt *zero = ConstantInt::get(Type::getInt64Ty(context), 0, true);
+    ICmpInst *comparison = new ICmpInst(*parent, 
+            ICmpInst::ICMP_NE, 
+            condition, 
+            zero,
+            "vr");
+
+    BranchInst::Create(body, post, comparison, pre);
+    BranchInst::Create(pre, parent);
+
+    entry.push(body); 
+    for_->block->accept(this);
+    step->accept(this);
+    body = entry.top(); entry.pop();
+
+    if ( not body->getTerminator() ){
+        BranchInst::Create(pre, body);
+        //BranchInst::Create(post, body);
+    }
+
+
+    entry.push(post);
 }
 
 void visitor::compiler::visit(ast::print *print){
