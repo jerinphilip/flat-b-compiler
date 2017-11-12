@@ -102,8 +102,32 @@ namespace visitor {
         map <string, ast::code*> table;
 
         struct {
+            struct {
+                string s;
+                Value *v;
+            }var;
+
             string str;
             vector<Value*> args;
+            bool flag;
+
+            void init(){
+                flag = true; str = ""; args.clear();
+            }
+
+            void finish(){
+                flag = false; str = ""; args.clear();
+            }
+
+
+            void place(string s_, Value *v_){
+                if(flag){ var.s = s_; var.v = v_; }
+            }
+
+            void update(){
+                str += var.s; args.push_back(var.v);
+            }
+
         }format;
 
 

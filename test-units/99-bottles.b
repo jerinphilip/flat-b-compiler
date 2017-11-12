@@ -10,6 +10,7 @@ codeblock{
         println "Take one down, pass it around!";
     }
 
+    i = i - 1;
     println i, "bottles of beer on the wall!";
     println "Take one down, pass it around!";
     println "No more bottles of beer on the wall!";

@@ -40,6 +40,7 @@ void visitor::compiler::visit(ast::id *id){
     Value *location = v_table[id->name];
     auto *r = new LoadInst(location, "vr", entry.top());
     eval.push((void*)r);
+    format.place("%d", r);
 }
 
 void visitor::compiler::visit(ast::id_ *id_){
@@ -60,6 +61,7 @@ void visitor::compiler::visit(ast::id_ *id_){
             entry.top());
     auto *r = new LoadInst(location, "vr", entry.top());
     eval.push((void*)r);
+    format.place("%d", r);
 }
 
 void visitor::compiler::visit(ast::id_ref *id_ref){
@@ -93,18 +95,6 @@ void visitor::compiler::visit(ast::idA_ref *idA_ref){
 
     Value *instruction = new StoreInst(ret_val, location, false, entry.top());
     eval.push((void*)instruction);
-    /*
-       dataType dt;
-       dt.dtype = type::Pointer;
-       bool declared = env.find(idA_ref->name) != env.end();
-       if(not declared)
-
-       idA_ref->subscript->accept(this);
-       dataType sc = evalStack.top(); evalStack.pop();
-       int sub = sc.T.i;
-       dt.T.p = &(env[idA_ref->name].T.A[sub]);
-       evalStack.push(dt);
-       */
 }
 
 void visitor::compiler::visit(ast::expr *expr){
@@ -232,9 +222,6 @@ void visitor::compiler::visit(ast::for_ *for_){
     ast::assign *step = new ast::assign(for_->init->ref, rhs);
     ast::binOp *check = new ast::binOp(opr::le, ivar, for_->end);
 
-
-
-
     entry.push(body); 
     check->accept(this);
     ZExtInst *condition = (ZExtInst*)eval.top(); eval.pop();
@@ -263,8 +250,7 @@ void visitor::compiler::visit(ast::for_ *for_){
 
 void visitor::compiler::visit(ast::print *print){
     /* Reset */
-    format.str = "";
-    format.args.clear();
+    format.init();
 
     bool first = true;
     auto ts = *print->args;
@@ -275,19 +261,21 @@ void visitor::compiler::visit(ast::print *print){
         }
         first = false;
         p->accept(this);
+        Value *r = (Value*)eval.top(); eval.pop();
+        format.update();
     }
 
     if (print->newline){
         format.str += "\n";
     }
 
-    vector<Value*> args;
-    vector<Value*> fargs = format.args;
+    vector<Value*> new_args;
     Value *fvar = string_to_Value(format.str);
-    args.push_back(fvar);
-    args.insert(args.end(), fargs.begin(), fargs.end());
-    CallInst::Create(printf, makeArrayRef(args), string("printf"), entry.top());
+    new_args.push_back(fvar);
+    new_args.insert(new_args.end(), format.args.begin(), format.args.end());
+    CallInst::Create(printf, makeArrayRef(new_args), string("printf"), entry.top());
 
+    format.finish();
 }
 
 void visitor::compiler::visit(ast::typed_ids *twrap){
@@ -324,6 +312,7 @@ void visitor::compiler::visit(ast::goto_ *goto_){
 void visitor::compiler::visit(ast::integer *integer){
     Constant *r = ConstantInt::get(Type::getInt64Ty(context), integer->value);
     eval.push((void*)r);
+    format.place("%d", r);
 }
 
 
@@ -408,7 +397,7 @@ void visitor::compiler::visit(ast::id_def *id_def){
                     APInt(64, StringRef("0"), 10)));
 
         v_table[id_def->name] = var;
-        cerr << "Declaration of variable " << id_def->name << endl;
+        //cerr << "Declaration of variable " << id_def->name << endl;
     }
 
 }
@@ -431,30 +420,17 @@ void visitor::compiler::visit(ast::idA_def *idA_def){
                         Type::getInt64Ty(context), idA_def->size)));
 
         v_table[idA_def->name] = var;
-        cerr << "Declaration of variable " << idA_def->name << endl;
+        //cerr << "Declaration of variable " << idA_def->name << endl;
     }
 }
 
 void visitor::compiler::visit(ast::literal *literal){
-    /*
-       dataType dt;
-       dt.dtype = type::CharArray;
-       dt.T.s = (char*)literal->value.c_str();
-       evalStack.push(dt);
-       */
-    format.str += "%s";
     auto var =  string_to_Value(literal->value);
-    format.args.push_back(var);
+    eval.push(var);
+    format.place("%s", var);
 }
 
 void visitor::compiler::visit(ast::read *read){
-    /*
-       read->var->accept(this);
-       dataType ref = evalStack.top(); evalStack.pop();
-       int value;
-       cin >> value;
-     *(ref.T.p) = value;
-     */
 }
 
 void visitor::compiler::visit(ast::labelled *labelled){
