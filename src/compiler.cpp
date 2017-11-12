@@ -37,11 +37,9 @@ void visitor::compiler::visit(ast::id *id){
 		cerr << "Undefined variable " << id->name << endl;
 		//exit(-1);
 	}
-
-	Value *ret_val = (Value*) eval.top(); eval.pop();
-
-	StoreInst *r = new StoreInst(ret_val, v_table[id->name], false, entry.top());
-	eval.push((void*)r);
+    Value *location = v_table[id->name];
+    auto *r = new LoadInst(location, "vr", entry.top());
+    eval.push((void*)r);
 }
 
 void visitor::compiler::visit(ast::id_ *id_){
@@ -50,35 +48,51 @@ void visitor::compiler::visit(ast::id_ *id_){
 		//exit(-1);
 	}
 
-	Value *ret_val = (Value*)eval.top(); eval.pop();
-
 	id_->subscript->accept(this);
 	auto start = ConstantInt::get(context, APInt(64, StringRef("0"), 10));
 	auto offset = (Value*) eval.top(); eval.pop();
+
 	vector<Value*> index_params = {start, offset};
 	Value *location =  GetElementPtrInst::CreateInBounds(
 			v_table[id_->name], 
 			index_params,
 			"vr",
 			entry.top());
-
-	Value *instruction = new StoreInst(ret_val, location, false, entry.top());
-	eval.push((void*)instruction);
+    auto *r = new LoadInst(location, "vr", entry.top());
+    eval.push((void*)r);
 }
 
 void visitor::compiler::visit(ast::id_ref *id_ref){
-	/*
-	   dataType dt;
-	   dt.dtype = type::Pointer;
-	   bool declared = env.find(id_ref->name) != env.end();
-	   if(not declared)
+	if ( not declared_before(id_ref->name)){
+		cerr << "Undefined variable " << id_ref->name << endl;
+		//exit(-1);
+	}
 
-	   dt.T.p = &(env[id_ref->name].T.i);
-	   evalStack.push(dt);
-	   */
+	Value *ret_val = (Value*) eval.top(); eval.pop();
+	StoreInst *r = new StoreInst(ret_val, v_table[id_ref->name], false, entry.top());
+	eval.push((void*)r);
 }
 
 void visitor::compiler::visit(ast::idA_ref *idA_ref){
+	if ( not declared_before(idA_ref->name)){
+		cerr << "Undefined variable " << idA_ref->name << endl;
+		//exit(-1);
+	}
+
+	Value *ret_val = (Value*)eval.top(); eval.pop();
+
+	idA_ref->subscript->accept(this);
+	auto start = ConstantInt::get(context, APInt(64, StringRef("0"), 10));
+	auto offset = (Value*) eval.top(); eval.pop();
+	vector<Value*> index_params = {start, offset};
+	Value *location =  GetElementPtrInst::CreateInBounds(
+			v_table[idA_ref->name], 
+			index_params,
+			"vr",
+			entry.top());
+
+	Value *instruction = new StoreInst(ret_val, location, false, entry.top());
+	eval.push((void*)instruction);
 	/*
 	   dataType dt;
 	   dt.dtype = type::Pointer;
@@ -105,20 +119,39 @@ void visitor::compiler::visit(ast::assign *assign){
 }
 
 void visitor::compiler::visit(ast::while_ *while_){
-	/*
-	   dataType cond;
-	   while_->cond->accept(this);
-	   cond = evalStack.top(); evalStack.pop();
-	   while (cond.T.i){
-	   while_->block->accept(this);
-	   */
+    BasicBlock *parent, *pre, *body, *post;
+    parent = entry.top();
 
-	/* Step */
-	/*
-	   while_->cond->accept(this);
-	   cond = evalStack.top(); evalStack.pop();
-	   }
-	   */
+    pre = body = post = NULL;
+
+    pre = BasicBlock::Create(context, "pre", parent->getParent(), 0);
+    body = BasicBlock::Create(context, "body", parent->getParent(), 0);
+    post = BasicBlock::Create(context, "post", parent->getParent(), 0);
+
+    entry.push(pre);
+	while_->cond->accept(this);
+	ZExtInst *condition = (ZExtInst*)eval.top(); eval.pop();
+    // Value *comparison = condition;
+    ConstantInt *zero = ConstantInt::get(Type::getInt64Ty(context), 0, true);
+    ICmpInst *comparison = new ICmpInst(*pre, 
+            ICmpInst::ICMP_NE, 
+            condition, 
+            zero,
+            "vr");
+    entry.pop();
+
+    BranchInst::Create(body, post, comparison, pre);
+    BranchInst::Create(pre, parent);
+
+    entry.push(body);
+    while_->block->accept(this);
+    body = entry.top(); entry.pop();
+
+    if ( not body->getTerminator()){
+        BranchInst::Create(pre, body); 
+    }
+
+    entry.push(post);
 }
 
 void visitor::compiler::visit(ast::if_ *if_){
