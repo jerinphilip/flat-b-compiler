@@ -217,7 +217,9 @@ int main(int argc, char *argv[])
 	yyin = fopen(argv[1], "r");
 
     //visitor::pprinter V;
-    visitor::interpreter V;
+    //visitor::interpreter V;
+    visitor::compiler V;
+    
 	if(yyparse() == 0){
         V.label(labels);
         V.visit(pgm);

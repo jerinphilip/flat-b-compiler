@@ -15,6 +15,7 @@
 #include <llvm/IR/Type.h>
 #include <llvm/IR/Verifier.h>
 #include <llvm/IR/Value.h>
+#include "llvm/IR/Instructions.h"
 using namespace llvm;
 using namespace std;
 
@@ -100,24 +101,76 @@ namespace visitor {
         type currentType;
         map <string, ast::code*> table;
 
+        struct {
+            string str;
+            vector<Value*> args;
+        }format;
+
+
         LLVMContext context;
         Module* module;
-        BasicBlock main_block;
+        BasicBlock *main_block;
+
+        Function *main_fn;
+        Function *printf, *scanf;
 
 
         /* To circumvent void return type, stupid Visitor Pattern */
         stack <BasicBlock*> entry;
         stack <BasicBlock*> exit;
 
+        stack <void*> eval;
+
+        /* Variable and Label Tables */
+        map<string, Value*> v_table;
+        map<string, Value*> l_table;
+
         void label(map<string, ast::code*> m){
             table = m;
         }
 
         compiler(){
-            /* Initializing, for LLVM stuff */
             module = new Module("main", context);
             module->setTargetTriple("x86_64-pc-linux-gnu");
+            main_fn = Function::Create(
+                        FunctionType::get(
+                            Type::getVoidTy(context), false), 
+                        GlobalValue::ExternalLinkage, 
+                        "main", 
+                        module);
+            printf = Function::Create(
+                        FunctionType::get(
+                            Type::getVoidTy(context), true),
+                        GlobalValue::ExternalLinkage,
+                        "printf",
+                        module);
+            scanf = Function::Create(
+                        FunctionType::get(
+                            Type::getVoidTy(context), true),
+                        GlobalValue::ExternalLinkage,
+                        "scanf",
+                        module);
+        }
 
+        Value* string_to_Value(string s){
+            GlobalVariable *var = new GlobalVariable(
+                        *module,
+                        ArrayType::get(
+                            IntegerType::get(context, 8), 
+                            (s.size() + 1)),
+                        true,
+                        GlobalVariable::InternalLinkage, 
+                        NULL,
+                        "literal");
+
+            var->setInitializer(
+                    ConstantDataArray::getString(
+                        context, s, true));
+            return var;
+        }
+
+        bool declared_before(const string &s){
+            return v_table.find(s) != v_table.end();
         }
 
         void visit(ast::node *node_);

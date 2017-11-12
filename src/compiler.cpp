@@ -7,18 +7,17 @@ void visitor::compiler::visit(ast::node *node){
 }
 
 void visitor::compiler::visit(ast::program *program){
-    main_fn = Function::Create(
-            FunctionType::get(Type(getVoidTy(context)), false), 
-            GlobalValue::ExternalLinkage, 
-            "main", 
-            module)
-    main_block = BasicBlock::Create(context, "main_fn", main_fn)
+    main_block = BasicBlock::Create(context, "main_fn", main_fn);
     entry.push(main_block);
 
     program->decl->accept(this);
     program->block->accept(this);
 
     // TODO: New
+    ReturnInst::Create(context, entry.top());
+    entry.pop();
+    module->print(errs(), nullptr);
+
 }
 
 void visitor::compiler::visit(ast::declarations *declarations){
@@ -34,35 +33,43 @@ void visitor::compiler::visit(ast::code *code){
 }
 
 void visitor::compiler::visit(ast::id *id){
-    dataType dt;
-    bool declared = env.find(id->name) != env.end();
-    if(not declared)
+    if ( not declared_before(id->name)){
+        cerr << "Undefined variable " << id->name << endl;
+        //exit(-1);
+    }
 
-    /* TODO, Ascertain dtype from pointer type */
-    dt.dtype = type::Int;
-    dt.T.i = env[id->name].T.i;
-    evalStack.push(dt);
+    Value *ret_val = (Value*) eval.top(); eval.pop();
+
+    StoreInst *r = new StoreInst(ret_val, v_table[id->name], false, entry.top());
+    eval.push((void*)r);
+
     
 }
 
 void visitor::compiler::visit(ast::id_ *id_){
-    dataType dt;
-    dt.dtype = type::Int;
-    bool declared = env.find(id_->name) != env.end();
-    if(not declared)
+    if ( not declared_before(id_->name)){
+        cerr << "Undefined variable " << id_->name << endl;
+        //exit(-1);
+    }
+
+    Value *ret_val = (Value*)eval.top(); eval.pop();
 
     id_->subscript->accept(this);
+    auto start = ConstantInt::get(context, APInt(64, StringRef("0"), 10));
+    auto offset = (Value*) eval.top(); eval.pop();
+    vector<Value*> index_params = {start, offset};
+    Value *location =  GetElementPtrInst::CreateInBounds(
+            v_table[id_->name], 
+            index_params,
+            "vr",
+            entry.top());
 
-    dataType sc = evalStack.top(); evalStack.pop();
-    int sub     = sc.T.i;
-    dataType d  = env[id_->name];
-    dt.T.i      = env[id_->name].T.A[sub];
-    /*
-    */
-    evalStack.push(dt);
+    Value *instruction = new StoreInst(ret_val, location, false, entry.top());
+    eval.push((void*)instruction);
 }
 
 void visitor::compiler::visit(ast::id_ref *id_ref){
+    /*
     dataType dt;
     dt.dtype = type::Pointer;
     bool declared = env.find(id_ref->name) != env.end();
@@ -70,10 +77,11 @@ void visitor::compiler::visit(ast::id_ref *id_ref){
 
     dt.T.p = &(env[id_ref->name].T.i);
     evalStack.push(dt);
-    
+    */
 }
 
 void visitor::compiler::visit(ast::idA_ref *idA_ref){
+    /*
     dataType dt;
     dt.dtype = type::Pointer;
     bool declared = env.find(idA_ref->name) != env.end();
@@ -84,6 +92,7 @@ void visitor::compiler::visit(ast::idA_ref *idA_ref){
     int sub = sc.T.i;
     dt.T.p = &(env[idA_ref->name].T.A[sub]);
     evalStack.push(dt);
+    */
 }
 
 void visitor::compiler::visit(ast::expr *expr){
@@ -93,27 +102,29 @@ void visitor::compiler::visit(ast::statement *statement){
 }
 
 void visitor::compiler::visit(ast::assign *assign){
-    assign->ref->accept(this);
-    dataType ref = evalStack.top(); evalStack.pop();
     assign->tree->accept(this);
-    dataType value = evalStack.top(); evalStack.pop();
-    *(ref.T.p) = value.T.i;
+    assign->ref->accept(this);
 }
 
 void visitor::compiler::visit(ast::while_ *while_){
+    /*
     dataType cond;
     while_->cond->accept(this);
     cond = evalStack.top(); evalStack.pop();
     while (cond.T.i){
         while_->block->accept(this);
+    */
 
         /* Step */
+    /*
         while_->cond->accept(this);
         cond = evalStack.top(); evalStack.pop();
     }
+    */
 }
 
 void visitor::compiler::visit(ast::if_ *if_){
+    /*
     dataType cond;
     if_->cond->accept(this);
     cond = evalStack.top(); evalStack.pop();
@@ -125,9 +136,11 @@ void visitor::compiler::visit(ast::if_ *if_){
             if_->otherwise->accept(this);
         }
     }
+    */
 }
 
 void visitor::compiler::visit(ast::for_ *for_){
+    /*
     for_->init->accept(this);
 
     void *location;
@@ -147,41 +160,43 @@ void visitor::compiler::visit(ast::for_ *for_){
         //evalStack.push(cond);
         cond = evalStack.top(); evalStack.pop();
         if (cond.T.i){
-            for_->block->accept(this); /* Evaluate body */
+            for_->block->accept(this); 
+    */
+    
+    /* Evaluate body */
+    /*
             step->accept(this);
         }
     }while (cond.T.i);
+    */
 }
 
 void visitor::compiler::visit(ast::print *print){
+    /* Reset */
+    format.str = "";
+    format.args.clear();
+
     bool first = true;
     auto ts = *print->args;
     reverse(ts.begin(), ts.end());
     for (auto &p: ts){
         if (not first){
-            cout << " ";
+            format.str += " ";
         }
         first = false;
         p->accept(this);
-        dataType dt = evalStack.top(); evalStack.pop();
-        switch(dt.dtype){
-            case type::Int: 
-                cout << dt.T.i;
-                break;
-            case type::CharArray:
-                cout << dt.T.s ;
-                break;
-            case type::Bool:
-                cout << dt.T.b ;
-                break;
-            default:
-                break;
-        }
     }
 
     if (print->newline){
-        cout << "\n";
+        format.str += "\n";
     }
+
+    vector<Value*> args;
+    vector<Value*> fargs = format.args;
+    Value *fvar = string_to_Value(format.str);
+    args.push_back(fvar);
+    args.insert(args.end(), fargs.begin(), fargs.end());
+    CallInst::Create(printf, makeArrayRef(args), string("printf"), entry.top());
 
 }
 
@@ -197,6 +212,7 @@ void visitor::compiler::visit(ast::no_op *no_op){
 }
 
 void visitor::compiler::visit(ast::goto_ *goto_){
+    /*
     if(goto_->cond == NULL){
         ast::code *code = table[goto_->label];
         code->accept(this);
@@ -212,27 +228,33 @@ void visitor::compiler::visit(ast::goto_ *goto_){
             exit(0);
         }
     }
+    */
 }
 
 void visitor::compiler::visit(ast::integer *integer){
+    /*
     dataType dt;
     dt.dtype = type::Int;
     dt.T.i = integer->value;
     evalStack.push(dt);
+    */
 }
 
 
 void visitor::compiler::visit(ast::binOp *binOp){
 
     /* Evaluate and put on stack */
+    /*
     binOp->left->accept(this);
     dataType left = evalStack.top(); evalStack.pop();
     binOp->right->accept(this);
     dataType right = evalStack.top(); evalStack.pop();
+    */
 
 
     /* TODO Generalize for types */
 
+    /*
     if ( left.dtype != right.dtype ){
     }
     else{
@@ -250,9 +272,11 @@ void visitor::compiler::visit(ast::binOp *binOp){
                 break;
         }
     }
+    */
 }
 
 void visitor::compiler::visit(ast::id_def *id_def){
+    /*
     dataType dt;
     dt.dtype = currentType;
     switch (dt.dtype){
@@ -265,9 +289,31 @@ void visitor::compiler::visit(ast::id_def *id_def){
 
     string name = id_def->name;
     env[name] = dt;
+    */
+
+    if (declared_before(id_def->name)){
+        cerr << "Redeclaration of variable " << id_def->name << endl;
+        //exit(-1);
+    }
+    else{
+
+        GlobalVariable *var = new GlobalVariable(*module, 
+                Type::getInt64Ty(context),
+                false,
+                GlobalValue::CommonLinkage,
+                NULL,
+                id_def->name);
+        var->setInitializer(ConstantInt::get(context, 
+                    APInt(64, StringRef("0"), 10)));
+
+        v_table[id_def->name] = var;
+        cerr << "Declaration of variable " << id_def->name << endl;
+    }
+    
 }
 
 void visitor::compiler::visit(ast::idA_def *idA_def){
+    /*
     string name = idA_def->name;
     int size = idA_def->size;
     dataType dt;
@@ -282,21 +328,48 @@ void visitor::compiler::visit(ast::idA_def *idA_def){
     }
 
     env[name] = dt;
+    */
+    if (declared_before(idA_def->name)){
+        cerr << "Redeclaration of variable " << idA_def->name << endl;
+        //exit(-1);
+    }
+    else{
+        GlobalVariable *var = new GlobalVariable(*module,
+                ArrayType::get(Type::getInt64Ty(context), idA_def->size),
+                false,
+                GlobalValue::CommonLinkage,
+                NULL,
+                idA_def->name);
+        var->setInitializer(
+                ConstantAggregateZero::get(
+                    ArrayType::get(
+                        Type::getInt64Ty(context), idA_def->size)));
+
+        v_table[idA_def->name] = var;
+        cerr << "Declaration of variable " << idA_def->name << endl;
+    }
 }
 
 void visitor::compiler::visit(ast::literal *literal){
+    /*
     dataType dt;
     dt.dtype = type::CharArray;
     dt.T.s = (char*)literal->value.c_str();
     evalStack.push(dt);
+    */
+    format.str += "%s";
+    auto var =  string_to_Value(literal->value);
+    format.args.push_back(var);
 }
 
 void visitor::compiler::visit(ast::read *read){
+    /*
     read->var->accept(this);
     dataType ref = evalStack.top(); evalStack.pop();
     int value;
     cin >> value;
     *(ref.T.p) = value;
+    */
 }
 
 void visitor::compiler::visit(ast::labelled *labelled){
