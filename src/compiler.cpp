@@ -290,6 +290,30 @@ void visitor::compiler::visit(ast::no_op *no_op){
 }
 
 void visitor::compiler::visit(ast::goto_ *goto_){
+    if ( l_table.find(goto_->label) != l_table.end()){
+        BasicBlock *parent, *follow, *non_follow;
+        parent = entry.top();
+        follow = l_table[goto_->label];
+        if(goto_->cond){
+            goto_->cond->accept(this);
+            ZExtInst *condition = (ZExtInst*)eval.top(); eval.pop();
+            // Value *comparison = condition;
+            ConstantInt *zero = ConstantInt::get(Type::getInt64Ty(context), 0, true);
+            ICmpInst *comparison = new ICmpInst(*parent, 
+                    ICmpInst::ICMP_NE, 
+                    condition, 
+                zero,
+                "vr");
+
+            non_follow = BasicBlock::Create(context, "post-target", parent->getParent(), 0);
+            BranchInst::Create(follow, non_follow, comparison, parent);
+            entry.push(non_follow);
+        
+        }
+        else{
+            BranchInst::Create(follow, parent);
+        }
+    }
     /*
        if(goto_->cond == NULL){
        ast::code *code = table[goto_->label];
@@ -307,6 +331,7 @@ void visitor::compiler::visit(ast::goto_ *goto_){
        }
        }
        */
+
 }
 
 void visitor::compiler::visit(ast::integer *integer){
@@ -431,9 +456,35 @@ void visitor::compiler::visit(ast::literal *literal){
 }
 
 void visitor::compiler::visit(ast::read *read){
+    format.init();
+    /* Create a temporary variable */
+    Value *tmpvar;
+    auto start = ConstantInt::get(context, APInt(64, StringRef("0"), 10));
+    vector<Value*> index_params = {start, int_to_Value(0)};
+    Value *location = GetElementPtrInst::Create(
+        Type::getInt64Ty(context),
+        tmpvar, 
+        index_params,
+        "invar",
+        entry.top());
+
+
+    vector<Value*> new_args = {string_to_Value("%d"), location};
+    CallInst::Create(scanf, makeArrayRef(new_args), string("scanf"), entry.top());
+    auto *r = new LoadInst(location, "invar", entry.top());
+    eval.push(r);
+    read->var->accept(this);
+    format.finish();
 }
 
 void visitor::compiler::visit(ast::labelled *labelled){
+    BasicBlock *parent, *follow;
+    parent = entry.top();
+    follow = BasicBlock::Create(context, "target", parent->getParent(), 0);
+    BranchInst::Create(follow, parent);
+
+    l_table[labelled->label] = follow;
+    entry.push(follow);
     labelled->block->accept(this);
 }
 

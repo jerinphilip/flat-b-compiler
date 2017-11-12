@@ -147,7 +147,7 @@ namespace visitor {
 
         /* Variable and Label Tables */
         map<string, Value*> v_table;
-        map<string, Value*> l_table;
+        map<string, BasicBlock*> l_table;
 
         void label(map<string, ast::code*> m){
             table = m;
@@ -191,6 +191,19 @@ namespace visitor {
                     ConstantDataArray::getString(
                         context, s, true));
             return var;
+        }
+        
+        Value* int_to_Value(int x){
+            GlobalVariable *var = new GlobalVariable(*module, 
+                    Type::getInt64Ty(context),
+                    false,
+                    GlobalValue::CommonLinkage,
+                    NULL,
+                    "integer");
+            var->setInitializer(ConstantInt::get(context, 
+                        APInt(64, x, true)));
+            return var;
+        
         }
 
         bool declared_before(const string &s){
