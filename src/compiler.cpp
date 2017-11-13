@@ -222,28 +222,31 @@ void visitor::compiler::visit(ast::for_ *for_){
     ast::assign *step = new ast::assign(for_->init->ref, rhs);
     ast::binOp *check = new ast::binOp(opr::le, ivar, for_->end);
 
-    entry.push(body); 
-    check->accept(this);
-    ZExtInst *condition = (ZExtInst*)eval.top(); eval.pop();
-    // Value *comparison = condition;
-    ConstantInt *zero = ConstantInt::get(Type::getInt64Ty(context), 0, true);
-    ICmpInst *comparison = new ICmpInst(*parent, 
-            ICmpInst::ICMP_NE, 
-            condition, 
-            zero,
-            "vr");
-    BranchInst::Create(body, post, comparison, pre);
-    BranchInst::Create(pre, parent);
-    for_->block->accept(this);
-    BranchInst::Create(body, post, comparison, pre);
-    BranchInst::Create(pre, parent);
-    step->accept(this);
+    entry.push(pre);
+        check->accept(this);
+        ZExtInst *condition = (ZExtInst*)eval.top(); eval.pop();
+        // Value *comparison = condition;
+        ConstantInt *zero = ConstantInt::get(Type::getInt64Ty(context), 0, true);
+        ICmpInst *comparison = new ICmpInst(*pre, 
+                ICmpInst::ICMP_NE, 
+                condition, 
+                zero,
+                "vr");
+        BranchInst::Create(body, post, comparison, pre);
+        BranchInst::Create(pre, parent);
+    entry.pop();
+
+
+    entry.push(body);
+
+        for_->block->accept(this);
+        step->accept(this);
+
     body = entry.top(); entry.pop();
 
     if ( not body->getTerminator() ){
         BranchInst::Create(pre, body);
     }
-
 
     entry.push(post);
 }
@@ -457,15 +460,12 @@ void visitor::compiler::visit(ast::literal *literal){
 
 void visitor::compiler::visit(ast::read *read){
     format.init();
-    /* Create a temporary variable */
-    Value *tmpvar;
-    auto start = ConstantInt::get(context, APInt(64, StringRef("0"), 10));
-    vector<Value*> index_params = {start, int_to_Value(0)};
+    /*
     Value *location = GetElementPtrInst::Create(
-        Type::getInt64Ty(context),
-        tmpvar, 
+        PointerType::getInt64Ty(context), 
+        var, 
         index_params,
-        "invar",
+        "invar_ref",
         entry.top());
 
 
@@ -474,6 +474,7 @@ void visitor::compiler::visit(ast::read *read){
     auto *r = new LoadInst(location, "invar", entry.top());
     eval.push(r);
     read->var->accept(this);
+    */
     format.finish();
 }
 
