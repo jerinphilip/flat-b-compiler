@@ -4,17 +4,17 @@ declblock{
 }
 
 codeblock{
-	for i = 0, 100 {
+	for i = 0, 99 {
 		data[i] = i;
 	}
 	
 
 	sum = 0;
-	for i = 0, 100 {
+	for i = 0, 99 {
 		sum = sum + data[i];
  	}
 
-	print "Sum value: ", sum;
+	println "Sum value (for): ", sum;
 
 }
 
