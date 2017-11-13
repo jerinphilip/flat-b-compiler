@@ -27,6 +27,8 @@ void visitor::interpreter::visit(ast::id *id){
     dataType dt;
     bool declared = env.find(id->name) != env.end();
     if(not declared)
+       cerr << "Undefined variable" << endl;
+
 
     /* TODO, Ascertain dtype from pointer type */
     dt.dtype = type::Int;
@@ -40,6 +42,7 @@ void visitor::interpreter::visit(ast::id_ *id_){
     dt.dtype = type::Int;
     bool declared = env.find(id_->name) != env.end();
     if(not declared)
+       cerr << "Undefined variable" << endl;
 
     id_->subscript->accept(this);
 
@@ -57,6 +60,7 @@ void visitor::interpreter::visit(ast::id_ref *id_ref){
     dt.dtype = type::Pointer;
     bool declared = env.find(id_ref->name) != env.end();
     if(not declared)
+       cerr << "Undefined variable" << endl;
 
     dt.T.p = &(env[id_ref->name].T.i);
     evalStack.push(dt);
@@ -68,6 +72,7 @@ void visitor::interpreter::visit(ast::idA_ref *idA_ref){
     dt.dtype = type::Pointer;
     bool declared = env.find(idA_ref->name) != env.end();
     if(not declared)
+       cerr << "Undefined variable" << endl;
 
     idA_ref->subscript->accept(this);
     dataType sc = evalStack.top(); evalStack.pop();
