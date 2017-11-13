@@ -94,6 +94,20 @@ The following UML Inheritance diagram describes AST:
 
 It should be understandable which class maps to which statement/construct of the programming language.
 
+Details which are not straightforward:
+
+* There are 3 types of id objects, 1 each for an array type and integer type.
+    * `ast::id_def`, `ast::idA_def`: Used in declarations, `visit` creates the variables.
+    * `ast::id`, `ast::id_`: Used in access, `visit` returns value or returns load memory instruction, depending on interpreter or compiler.
+    * `ast::id_ref`, `ast::idA_ref`: Used in access, `visit` returns value or returns load memory instruction, depending on interpreter or compiler.
+* For is implemented C-style internally.
+    * `for(init; check; step) { block };`
+    * `init` is an assignment statement, created using the parsed entities - initializes the looping variable.
+    * `check` is a boolean operation created using the end of range and variable.
+    * `step` is the update of the loop.
+    * `block` is the loop body.
+* Interpreter does an inorder tree walk and `goto` shows undefined behaviour in certain badly-formed cases.
+
 
 # Visitor pattern
 
@@ -123,6 +137,8 @@ Compiler emits LLVM 5 IR equivalent to the logic of the program, loading it from
 
 The following table indicates the `real` time taken on running programs in `test-units/non-trivial` on my system. On the smaller programs, there is not much indication, but matrix multiplication of higher dimensions show that my own interpreter is the worst, `lli` performs better but worst than compiled bytecode.
 
+## Time Elapsed
+
 | program      | interpreter | lli    | llc    |
 | --         | ---       | ---      | ---      |
 | 99-bottles | 0m0.019s  | 0m0.020s | 0m0.002s |
@@ -133,3 +149,13 @@ The following table indicates the `real` time taken on running programs in `test
 | matmul_125 | 0m27.972s | 0m0.037s | 0m0.014s |
 | matmul_250 | 3m43.217s | 0m0.101s | 0m0.081s |
 
+## Instructions 
+| program      | interpreter       | lli          | llc          |
+| --           | ---               | ---          | ---          |
+| 99-bottles.b | 4,20,31,101       | 4,91,23,189  | 44,16,209    |
+| fibonnacci.b | 4,11,16,141       | 4,83,83,573  | 42,94,451    |
+| reversal.b   | 4,80,11,228       | 5,54,04,987  | 45,04,330    |
+| bubblesort.b | 33,84,15,192      | 7,06,64,031  | 1,87,77,417  |
+| matmul_125.b | 1,13,80,51,77,753 | 15,02,50,333 | 8,00,21,360  |
+| matmul_5.b   | 5,96,79,582       | 7,34,06,000  | 43,87,608    |
+| matmul_250.b | 9,00,64,72,80,584 | 52,91,62,979 | 45,53,01,005 |

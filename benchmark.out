@@ -1,91 +1,301 @@
 99-bottles
 
-real	0m0.023s
-user	0m0.019s
-sys	0m0.004s
+ Performance counter stats for './src/bci test-units/non-trivial/99-bottles.b':
 
-real	0m0.024s
-user	0m0.020s
-sys	0m0.003s
+         18.592346      task-clock:u (msec)       #    0.980 CPUs utilized          
+                 0      context-switches:u        #    0.000 K/sec                  
+                 0      cpu-migrations:u          #    0.000 K/sec                  
+             1,450      page-faults:u             #    0.078 M/sec                  
+       2,70,76,144      cycles:u                  #    1.456 GHz                    
+       4,20,31,101      instructions:u            #    1.55  insn per cycle         
+         66,22,247      branches:u                #  356.181 M/sec                  
+          1,13,314      branch-misses:u           #    1.71% of all branches        
 
-real	0m0.002s
-user	0m0.002s
-sys	0m0.000s
+       0.018977406 seconds time elapsed
+
+
+ Performance counter stats for 'lli ll-src/99-bottles.ll':
+
+         22.092681      task-clock:u (msec)       #    0.988 CPUs utilized          
+                 0      context-switches:u        #    0.000 K/sec                  
+                 0      cpu-migrations:u          #    0.000 K/sec                  
+             1,845      page-faults:u             #    0.084 M/sec                  
+       3,60,06,899      cycles:u                  #    1.630 GHz                    
+       4,91,23,189      instructions:u            #    1.36  insn per cycle         
+         83,47,699      branches:u                #  377.849 M/sec                  
+          2,44,219      branch-misses:u           #    2.93% of all branches        
+
+       0.022362480 seconds time elapsed
+
+
+ Performance counter stats for './ll-out/99-bottles':
+
+          1.812687      task-clock:u (msec)       #    0.894 CPUs utilized          
+                 0      context-switches:u        #    0.000 K/sec                  
+                 0      cpu-migrations:u          #    0.000 K/sec                  
+                96      page-faults:u             #    0.053 M/sec                  
+         26,34,060      cycles:u                  #    1.453 GHz                    
+         44,16,209      instructions:u            #    1.68  insn per cycle         
+          6,43,772      branches:u                #  355.148 M/sec                  
+            19,275      branch-misses:u           #    2.99% of all branches        
+
+       0.002026727 seconds time elapsed
+
 fibonnacci
 
-real	0m0.016s
-user	0m0.010s
-sys	0m0.006s
+ Performance counter stats for './src/bci test-units/non-trivial/fibonnacci.b':
 
-real	0m0.020s
-user	0m0.013s
-sys	0m0.006s
+         14.903285      task-clock:u (msec)       #    0.986 CPUs utilized          
+                 0      context-switches:u        #    0.000 K/sec                  
+                 0      cpu-migrations:u          #    0.000 K/sec                  
+             1,450      page-faults:u             #    0.097 M/sec                  
+       2,82,48,294      cycles:u                  #    1.895 GHz                    
+       4,11,16,141      instructions:u            #    1.46  insn per cycle         
+         64,65,831      branches:u                #  433.853 M/sec                  
+          1,12,694      branch-misses:u           #    1.74% of all branches        
 
-real	0m0.002s
-user	0m0.000s
-sys	0m0.002s
+       0.015111272 seconds time elapsed
+
+
+ Performance counter stats for 'lli ll-src/fibonnacci.ll':
+
+         18.403432      task-clock:u (msec)       #    0.988 CPUs utilized          
+                 0      context-switches:u        #    0.000 K/sec                  
+                 0      cpu-migrations:u          #    0.000 K/sec                  
+             1,836      page-faults:u             #    0.100 M/sec                  
+       3,60,82,551      cycles:u                  #    1.961 GHz                    
+       4,83,83,573      instructions:u            #    1.34  insn per cycle         
+         81,98,727      branches:u                #  445.500 M/sec                  
+          2,38,319      branch-misses:u           #    2.91% of all branches        
+
+       0.018633611 seconds time elapsed
+
+
+ Performance counter stats for './ll-out/fibonnacci':
+
+          1.507739      task-clock:u (msec)       #    0.881 CPUs utilized          
+                 0      context-switches:u        #    0.000 K/sec                  
+                 0      cpu-migrations:u          #    0.000 K/sec                  
+                98      page-faults:u             #    0.065 M/sec                  
+         28,08,843      cycles:u                  #    1.863 GHz                    
+         42,94,451      instructions:u            #    1.53  insn per cycle         
+          6,18,366      branches:u                #  410.128 M/sec                  
+            19,188      branch-misses:u           #    3.10% of all branches        
+
+       0.001711833 seconds time elapsed
+
 reversal
 
-real	0m0.016s
-user	0m0.016s
-sys	0m0.000s
+ Performance counter stats for './src/bci test-units/non-trivial/reversal.b':
 
-real	0m0.020s
-user	0m0.017s
-sys	0m0.004s
+         16.330006      task-clock:u (msec)       #    0.987 CPUs utilized          
+                 0      context-switches:u        #    0.000 K/sec                  
+                 0      cpu-migrations:u          #    0.000 K/sec                  
+             1,452      page-faults:u             #    0.089 M/sec                  
+       3,16,99,116      cycles:u                  #    1.941 GHz                    
+       4,80,11,228      instructions:u            #    1.51  insn per cycle         
+         77,32,202      branches:u                #  473.497 M/sec                  
+          1,15,069      branch-misses:u           #    1.49% of all branches        
 
-real	0m0.002s
-user	0m0.002s
-sys	0m0.000s
+       0.016542599 seconds time elapsed
+
+
+ Performance counter stats for 'lli ll-src/reversal.ll':
+
+         20.520151      task-clock:u (msec)       #    0.988 CPUs utilized          
+                 0      context-switches:u        #    0.000 K/sec                  
+                 0      cpu-migrations:u          #    0.000 K/sec                  
+             1,858      page-faults:u             #    0.091 M/sec                  
+       4,01,95,223      cycles:u                  #    1.959 GHz                    
+       5,54,04,987      instructions:u            #    1.38  insn per cycle         
+         96,64,712      branches:u                #  470.986 M/sec                  
+          3,04,344      branch-misses:u           #    3.15% of all branches        
+
+       0.020769262 seconds time elapsed
+
+
+ Performance counter stats for './ll-out/reversal':
+
+          1.636569      task-clock:u (msec)       #    0.888 CPUs utilized          
+                 0      context-switches:u        #    0.000 K/sec                  
+                 0      cpu-migrations:u          #    0.000 K/sec                  
+                96      page-faults:u             #    0.059 M/sec                  
+         27,78,529      cycles:u                  #    1.698 GHz                    
+         45,04,330      instructions:u            #    1.62  insn per cycle         
+          6,61,786      branches:u                #  404.374 M/sec                  
+            19,200      branch-misses:u           #    2.90% of all branches        
+
+       0.001843705 seconds time elapsed
+
 bubblesort
 
-real	0m0.084s
-user	0m0.081s
-sys	0m0.004s
+ Performance counter stats for './src/bci test-units/non-trivial/bubblesort.b':
 
-real	0m0.023s
-user	0m0.011s
-sys	0m0.012s
+         80.693579      task-clock:u (msec)       #    0.997 CPUs utilized          
+                 0      context-switches:u        #    0.000 K/sec                  
+                 0      cpu-migrations:u          #    0.000 K/sec                  
+             1,456      page-faults:u             #    0.018 M/sec                  
+      19,68,60,387      cycles:u                  #    2.440 GHz                    
+      33,84,15,192      instructions:u            #    1.72  insn per cycle         
+       6,18,88,189      branches:u                #  766.953 M/sec                  
+          2,58,684      branch-misses:u           #    0.42% of all branches        
 
-real	0m0.004s
-user	0m0.002s
-sys	0m0.002s
+       0.080927896 seconds time elapsed
+
+
+ Performance counter stats for 'lli ll-src/bubblesort.ll':
+
+         22.844744      task-clock:u (msec)       #    0.990 CPUs utilized          
+                 0      context-switches:u        #    0.000 K/sec                  
+                 0      cpu-migrations:u          #    0.000 K/sec                  
+             1,862      page-faults:u             #    0.082 M/sec                  
+       4,62,77,920      cycles:u                  #    2.026 GHz                    
+       7,06,64,031      instructions:u            #    1.53  insn per cycle         
+       1,28,67,342      branches:u                #  563.252 M/sec                  
+          3,13,016      branch-misses:u           #    2.43% of all branches        
+
+       0.023082598 seconds time elapsed
+
+
+ Performance counter stats for './ll-out/bubblesort':
+
+          3.531590      task-clock:u (msec)       #    0.938 CPUs utilized          
+                 0      context-switches:u        #    0.000 K/sec                  
+                 0      cpu-migrations:u          #    0.000 K/sec                  
+                98      page-faults:u             #    0.028 M/sec                  
+         74,60,103      cycles:u                  #    2.112 GHz                    
+       1,87,77,417      instructions:u            #    2.52  insn per cycle         
+         36,58,360      branches:u                # 1035.896 M/sec                  
+            25,097      branch-misses:u           #    0.69% of all branches        
+
+       0.003765141 seconds time elapsed
+
 matmul_125
 
-real	0m28.071s
-user	0m27.972s
-sys	0m0.034s
+ Performance counter stats for './src/bci test-units/non-trivial/matmul_125.b':
 
-real	0m0.040s
-user	0m0.037s
-sys	0m0.004s
+      28636.634953      task-clock:u (msec)       #    1.000 CPUs utilized          
+                 0      context-switches:u        #    0.000 K/sec                  
+                 0      cpu-migrations:u          #    0.000 K/sec                  
+             2,221      page-faults:u             #    0.078 K/sec                  
+   72,59,26,64,145      cycles:u                  #    2.535 GHz                    
+ 1,13,80,51,77,753      instructions:u            #    1.57  insn per cycle         
+   21,51,00,39,213      branches:u                #  751.137 M/sec                  
+      11,09,18,267      branch-misses:u           #    0.52% of all branches        
 
-real	0m0.014s
-user	0m0.014s
-sys	0m0.000s
+      28.638189993 seconds time elapsed
+
+
+ Performance counter stats for 'lli ll-src/matmul_125.ll':
+
+         37.363392      task-clock:u (msec)       #    0.993 CPUs utilized          
+                 0      context-switches:u        #    0.000 K/sec                  
+                 0      cpu-migrations:u          #    0.000 K/sec                  
+             2,021      page-faults:u             #    0.054 M/sec                  
+       8,47,78,176      cycles:u                  #    2.269 GHz                    
+      15,02,50,333      instructions:u            #    1.77  insn per cycle         
+       2,37,35,253      branches:u                #  635.254 M/sec                  
+          4,56,888      branch-misses:u           #    1.92% of all branches        
+
+       0.037614045 seconds time elapsed
+
+
+ Performance counter stats for './ll-out/matmul_125':
+
+         13.233500      task-clock:u (msec)       #    0.981 CPUs utilized          
+                 0      context-switches:u        #    0.000 K/sec                  
+                 0      cpu-migrations:u          #    0.000 K/sec                  
+               187      page-faults:u             #    0.014 M/sec                  
+       3,31,14,219      cycles:u                  #    2.502 GHz                    
+       8,00,21,360      instructions:u            #    2.42  insn per cycle         
+       1,07,33,621      branches:u                #  811.095 M/sec                  
+            36,504      branch-misses:u           #    0.34% of all branches        
+
+       0.013496274 seconds time elapsed
+
 matmul_5
 
-real	0m0.022s
-user	0m0.019s
-sys	0m0.003s
+ Performance counter stats for './src/bci test-units/non-trivial/matmul_5.b':
 
-real	0m0.028s
-user	0m0.028s
-sys	0m0.000s
+         18.741295      task-clock:u (msec)       #    0.986 CPUs utilized          
+                 0      context-switches:u        #    0.000 K/sec                  
+                 0      cpu-migrations:u          #    0.000 K/sec                  
+             1,459      page-faults:u             #    0.078 M/sec                  
+       3,89,11,850      cycles:u                  #    2.076 GHz                    
+       5,96,79,582      instructions:u            #    1.53  insn per cycle         
+         99,47,696      branches:u                #  530.790 M/sec                  
+          1,29,805      branch-misses:u           #    1.30% of all branches        
 
-real	0m0.002s
-user	0m0.002s
-sys	0m0.000s
+       0.019005763 seconds time elapsed
+
+
+ Performance counter stats for 'lli ll-src/matmul_5.ll':
+
+         31.765250      task-clock:u (msec)       #    0.975 CPUs utilized          
+                 0      context-switches:u        #    0.000 K/sec                  
+                 0      cpu-migrations:u          #    0.000 K/sec                  
+             1,942      page-faults:u             #    0.061 M/sec                  
+       6,41,52,545      cycles:u                  #    2.020 GHz                    
+       7,34,06,000      instructions:u            #    1.14  insn per cycle         
+       1,33,58,381      branches:u                #  420.534 M/sec                  
+          4,51,918      branch-misses:u           #    3.38% of all branches        
+
+       0.032568019 seconds time elapsed
+
+
+ Performance counter stats for './ll-out/matmul_5':
+
+          1.526907      task-clock:u (msec)       #    0.859 CPUs utilized          
+                 0      context-switches:u        #    0.000 K/sec                  
+                 0      cpu-migrations:u          #    0.000 K/sec                  
+               101      page-faults:u             #    0.066 M/sec                  
+         28,49,566      cycles:u                  #    1.866 GHz                    
+         43,87,608      instructions:u            #    1.54  insn per cycle         
+          6,37,266      branches:u                #  417.357 M/sec                  
+            19,266      branch-misses:u           #    3.02% of all branches        
+
+       0.001778015 seconds time elapsed
+
 matmul_250
 
-real	3m43.366s
-user	3m43.217s
-sys	0m0.053s
+ Performance counter stats for './src/bci test-units/non-trivial/matmul_250.b':
 
-real	0m0.105s
-user	0m0.101s
-sys	0m0.003s
+     216653.000262      task-clock:u (msec)       #    1.000 CPUs utilized          
+                 0      context-switches:u        #    0.000 K/sec                  
+                 0      cpu-migrations:u          #    0.000 K/sec                  
+             4,447      page-faults:u             #    0.021 K/sec                  
+ 5,62,00,80,21,276      cycles:u                  #    2.594 GHz                    
+ 9,00,64,72,80,584      instructions:u            #    1.60  insn per cycle         
+ 1,70,25,77,76,803      branches:u                #  785.855 M/sec                  
+      88,74,93,395      branch-misses:u           #    0.52% of all branches        
 
-real	0m0.082s
-user	0m0.081s
-sys	0m0.000s
+     216.686295620 seconds time elapsed
+
+
+ Performance counter stats for 'lli ll-src/matmul_250.ll':
+
+        102.818954      task-clock:u (msec)       #    0.997 CPUs utilized          
+                 0      context-switches:u        #    0.000 K/sec                  
+                 0      cpu-migrations:u          #    0.000 K/sec                  
+             2,294      page-faults:u             #    0.022 M/sec                  
+      25,74,58,607      cycles:u                  #    2.504 GHz                    
+      52,91,62,979      instructions:u            #    2.06  insn per cycle         
+       6,26,63,455      branches:u                #  609.454 M/sec                  
+          5,02,264      branch-misses:u           #    0.80% of all branches        
+
+       0.103091802 seconds time elapsed
+
+
+ Performance counter stats for './ll-out/matmul_250':
+
+         91.649547      task-clock:u (msec)       #    0.997 CPUs utilized          
+                 0      context-switches:u        #    0.000 K/sec                  
+                 0      cpu-migrations:u          #    0.000 K/sec                  
+               465      page-faults:u             #    0.005 M/sec                  
+      23,36,02,150      cycles:u                  #    2.549 GHz                    
+      45,53,01,005      instructions:u            #    1.95  insn per cycle         
+       4,88,22,235      branches:u                #  532.706 M/sec                  
+            85,886      branch-misses:u           #    0.18% of all branches        
+
+       0.091883604 seconds time elapsed
+

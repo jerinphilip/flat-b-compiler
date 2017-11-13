@@ -5,13 +5,13 @@ function run-all {
     echo $filename >&2
 
     echo ./src/bci $1 
-    time ./src/bci $1 > /dev/null
+    perf stat ./src/bci $1 > /dev/null
 
     # Runn lli
     echo ./src/bcc 1 > ll-src/${filename}.ll
     ./src/bcc $1 > ll-src/${filename}.ll
     echo lli ll-src/${filename}.ll
-    time lli ll-src/${filename}.ll > /dev/null
+    perf stat lli ll-src/${filename}.ll > /dev/null
 
     # echo llc -filetype=obj ll-src/${filename}.ll
     # llc -filetype=obj ll-src/${filename}.ll
@@ -22,7 +22,7 @@ function run-all {
     clang++ -fPIC ll-src/${filename}.s -o ll-out/${filename}
     chmod +x ll-out/${filename}
     echo ./ll-out/${filename}
-    time ./ll-out/${filename} > /dev/null
+    perf stat ./ll-out/${filename} > /dev/null
 
 }
 
