@@ -5,7 +5,7 @@ declblock {
 }
 
 codeblock {
-    read n;
+    n = 100;
     for i=0,(n-1) {
         A[i] = i;
     }

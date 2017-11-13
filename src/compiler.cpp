@@ -185,7 +185,7 @@ void visitor::compiler::visit(ast::if_ *if_){
         ret_block = entry.top(); entry.pop();
 
         if (not ret_block->getTerminator()){
-            cerr << "terminator Happening! " << endl;
+            //cerr << "terminator Happening! " << endl;
             BranchInst::Create(merge_block, ret_block);
         }
         //BranchInst::Create(if_block, else_block, condition, parent);

@@ -206,6 +206,7 @@ namespace visitor {
         
         }
 
+
         bool declared_before(const string &s){
             return v_table.find(s) != v_table.end();
         }
