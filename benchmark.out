@@ -1,0 +1,91 @@
+99-bottles
+
+real	0m0.023s
+user	0m0.019s
+sys	0m0.004s
+
+real	0m0.024s
+user	0m0.020s
+sys	0m0.003s
+
+real	0m0.002s
+user	0m0.002s
+sys	0m0.000s
+fibonnacci
+
+real	0m0.016s
+user	0m0.010s
+sys	0m0.006s
+
+real	0m0.020s
+user	0m0.013s
+sys	0m0.006s
+
+real	0m0.002s
+user	0m0.000s
+sys	0m0.002s
+reversal
+
+real	0m0.016s
+user	0m0.016s
+sys	0m0.000s
+
+real	0m0.020s
+user	0m0.017s
+sys	0m0.004s
+
+real	0m0.002s
+user	0m0.002s
+sys	0m0.000s
+bubblesort
+
+real	0m0.084s
+user	0m0.081s
+sys	0m0.004s
+
+real	0m0.023s
+user	0m0.011s
+sys	0m0.012s
+
+real	0m0.004s
+user	0m0.002s
+sys	0m0.002s
+matmul_125
+
+real	0m28.071s
+user	0m27.972s
+sys	0m0.034s
+
+real	0m0.040s
+user	0m0.037s
+sys	0m0.004s
+
+real	0m0.014s
+user	0m0.014s
+sys	0m0.000s
+matmul_5
+
+real	0m0.022s
+user	0m0.019s
+sys	0m0.003s
+
+real	0m0.028s
+user	0m0.028s
+sys	0m0.000s
+
+real	0m0.002s
+user	0m0.002s
+sys	0m0.000s
+matmul_250
+
+real	3m43.366s
+user	3m43.217s
+sys	0m0.053s
+
+real	0m0.105s
+user	0m0.101s
+sys	0m0.003s
+
+real	0m0.082s
+user	0m0.081s
+sys	0m0.000s

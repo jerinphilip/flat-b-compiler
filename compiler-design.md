@@ -121,4 +121,15 @@ Compiler emits LLVM 5 IR equivalent to the logic of the program, loading it from
 
 # Performance Comparison
 
+The following table indicates the `real` time taken on running programs in `test-units/non-trivial` on my system. On the smaller programs, there is not much indication, but matrix multiplication of higher dimensions show that my own interpreter is the worst, `lli` performs better but worst than compiled bytecode.
+
+| program      | interpreter | lli    | llc    |
+| --         | ---       | ---      | ---      |
+| 99-bottles | 0m0.019s  | 0m0.020s | 0m0.002s |
+| fibonnacci | 0m0.010s  | 0m0.013s | 0m0.000s |
+| reversal   | 0m0.016s  | 0m0.017s | 0m0.002s |
+| bubblesort | 0m0.081s  | 0m0.011s | 0m0.002s |
+| matmul_5   | 0m0.019s  | 0m0.028s | 0m0.002s |
+| matmul_125 | 0m27.972s | 0m0.037s | 0m0.014s |
+| matmul_250 | 3m43.217s | 0m0.101s | 0m0.081s |
 
