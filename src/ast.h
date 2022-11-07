@@ -25,24 +25,24 @@ struct compiler;
 
 namespace ast {
 
-struct node;
-struct program;
-struct declarations;
-struct id;
-struct id_;
-struct expr;
-struct code;
-struct labelled;
-struct statement;
-struct assign;
-struct cblock;
-struct while_;
-struct if_;
-struct for_;
-struct print;
-struct typed_ids;
+struct Node;
+struct Program;
+struct Declarations;
+struct Id;
+struct IdArrayAccess;
+struct Expr;
+struct Code;
+struct Labelled;
+struct Statement;
+struct Assign;
+struct Cblock;
+struct While;
+struct If;
+struct For;
+struct Print;
+struct TypedIds;
 
-struct node {
+struct Node {
   /* Base struct */
 
   virtual void accept(visitor::pprinter *) = 0;
@@ -50,10 +50,10 @@ struct node {
   virtual void accept(visitor::compiler *) = 0;
 };
 
-struct program : public node {
-  declarations *decl;
-  code *block;
-  program(declarations *d, code *c) : decl(d), block(c) {}
+struct Program : public Node {
+  Declarations *decl;
+  Code *block;
+  Program(Declarations *d, Code *c) : decl(d), block(c) {}
   void accept(visitor::pprinter *p);
   void accept(visitor::interpreter *p);
   void accept(visitor::compiler *p);
@@ -61,9 +61,9 @@ struct program : public node {
 
 /* declarations */
 
-struct declarations : public node {
-  vector<typed_ids *> *ds;
-  declarations(vector<typed_ids *> *v) : ds(v) {}
+struct Declarations : public Node {
+  vector<TypedIds *> *ds;
+  Declarations(vector<TypedIds *> *v) : ds(v) {}
 
   void accept(visitor::pprinter *p);
   void accept(visitor::interpreter *p);
@@ -71,15 +71,15 @@ struct declarations : public node {
 };
 
 /* Auxiliary types for declations and onward */
-struct expr : public node {
+struct Expr : public Node {
   void accept(visitor::pprinter *p);
   void accept(visitor::interpreter *p);
   void accept(visitor::compiler *p);
 };
 
-struct id : public expr {
+struct Id : public Expr {
   string name;
-  id(string s) : name(s) {
+  Id(string s) : name(s) {
     // cerr << "Initializing: " << name << endl;
   }
   void accept(visitor::pprinter *p);
@@ -87,9 +87,9 @@ struct id : public expr {
   void accept(visitor::compiler *p);
 };
 
-struct id_ : public id {
-  expr *subscript;
-  id_(string s, expr *e) : id(s), subscript(e) {
+struct IdArrayAccess : public Id {
+  Expr *subscript;
+  IdArrayAccess(string s, Expr *e) : Id(s), subscript(e) {
     // cerr << "Initializing: " << s << endl;
     // cerr << "Other: "<< name << endl;
   }
@@ -98,147 +98,147 @@ struct id_ : public id {
   void accept(visitor::compiler *p);
 };
 
-struct id_base : public node {
+struct IdBase : public Node {
   virtual void vnode(void **) = 0;
 };
 
-struct id_ref : public id_base {
+struct IdRef : public IdBase {
   string name;
-  id_ref(string s) : name(s) {
+  IdRef(string s) : name(s) {
     // cerr << "Initializing: " << name << endl;
   }
   void accept(visitor::pprinter *p);
   void accept(visitor::interpreter *p);
   void accept(visitor::compiler *p);
-  void vnode(void **p) { *p = new id(name); }
+  void vnode(void **p) { *p = new Id(name); }
 };
 
-struct idA_ref : public id_ref {
-  expr *subscript;
-  idA_ref(string s, expr *e) : id_ref(s), subscript(e) {}
+struct IdArrayRef : public IdRef {
+  Expr *subscript;
+  IdArrayRef(string s, Expr *e) : IdRef(s), subscript(e) {}
   void accept(visitor::pprinter *p);
   void accept(visitor::interpreter *p);
   void accept(visitor::compiler *p);
-  void vnode(void **p) { *p = new id_(name, subscript); }
+  void vnode(void **p) { *p = new IdArrayAccess(name, subscript); }
 };
 
-struct id_def : public node {
+struct IdDef : public Node {
   string name;
-  id_def(string s) : name(s) {}
+  IdDef(string s) : name(s) {}
   void accept(visitor::pprinter *p);
   void accept(visitor::interpreter *p);
   void accept(visitor::compiler *p);
 };
 
-struct idA_def : public id_def {
+struct IdArrayDef : public IdDef {
   int size;
-  idA_def(string s, int sz) : id_def(s), size(sz) {}
+  IdArrayDef(string s, int sz) : IdDef(s), size(sz) {}
   void accept(visitor::pprinter *p);
   void accept(visitor::interpreter *p);
   void accept(visitor::compiler *p);
 };
 
-struct typed_ids : public node {
+struct TypedIds : public Node {
   type dtype;
-  vector<id_def *> *t_ids;
-  typed_ids(type d, vector<id_def *> *v) : dtype(d), t_ids(v) {}
+  vector<IdDef *> *t_ids;
+  TypedIds(type d, vector<IdDef *> *v) : dtype(d), t_ids(v) {}
   void accept(visitor::pprinter *p);
   void accept(visitor::interpreter *p);
   void accept(visitor::compiler *p);
 };
 
-struct integer : public expr {
+struct Integer : public Expr {
   int value;
-  integer(int v) : value(v) {}
+  Integer(int v) : value(v) {}
   void accept(visitor::pprinter *p);
   void accept(visitor::interpreter *p);
   void accept(visitor::compiler *p);
 };
 
-struct binOp : public expr {
+struct BinOp : public Expr {
   Op op;
-  expr *left;
-  expr *right;
+  Expr *left;
+  Expr *right;
 
-  binOp(Op op, expr *l, expr *r) : op(op), left(l), right(r) {}
+  BinOp(Op op, Expr *l, Expr *r) : op(op), left(l), right(r) {}
   void accept(visitor::pprinter *p);
   void accept(visitor::interpreter *p);
   void accept(visitor::compiler *p);
 };
 
-struct statement : public node {
+struct Statement : public Node {
 
   void accept(visitor::pprinter *p);
   void accept(visitor::interpreter *p);
   void accept(visitor::compiler *p);
 };
 
-/* statements */
-struct code : public statement {
-  vector<statement *> *statements;
-  code(vector<statement *> *s) : statements(s) {}
+/* Statements */
+struct Code : public Statement {
+  vector<Statement *> *statements;
+  Code(vector<Statement *> *s) : statements(s) {}
   void accept(visitor::pprinter *p);
   void accept(visitor::interpreter *p);
   void accept(visitor::compiler *p);
 };
 
-struct labelled : public statement {
+struct Labelled : public Statement {
   string label;
-  code *block;
-  labelled(string label, code *s) : label(label), block(s) {}
+  Code *block;
+  Labelled(string label, Code *s) : label(label), block(s) {}
   void accept(visitor::pprinter *p);
   void accept(visitor::interpreter *p);
   void accept(visitor::compiler *p);
 };
 
-struct assign : public statement {
-  id_ref *ref;
-  expr *tree;
+struct Assign : public Statement {
+  IdRef *ref;
+  Expr *tree;
 
-  assign(id_ref *ref, expr *e) : ref(ref), tree(e) {}
+  Assign(IdRef *ref, Expr *e) : ref(ref), tree(e) {}
 
   void accept(visitor::pprinter *p);
   void accept(visitor::interpreter *p);
   void accept(visitor::compiler *p);
 };
 
-struct cblock : public statement {
-  expr *cond;
-  code *block;
-  cblock(expr *c, code *b) : cond(c), block(b) {}
+struct CodeBlock : public Statement {
+  Expr *cond;
+  Code *block;
+  CodeBlock(Expr *c, Code *b) : cond(c), block(b) {}
   void accept(visitor::pprinter *p);
   void accept(visitor::interpreter *p);
   void accept(visitor::compiler *p);
 };
 
-struct while_ : public cblock {
-  while_(expr *c, code *b) : cblock(c, b) {}
+struct While : public CodeBlock {
+  While(Expr *c, Code *b) : CodeBlock(c, b) {}
   void accept(visitor::pprinter *p);
   void accept(visitor::interpreter *p);
   void accept(visitor::compiler *p);
 };
 
-struct if_ : public cblock {
-  code *otherwise;
-  if_(expr *c, code *b, code *o = NULL) : cblock(c, b), otherwise(o) {}
+struct If : public CodeBlock {
+  Code *otherwise;
+  If(Expr *c, Code *b, Code *o = NULL) : CodeBlock(c, b), otherwise(o) {}
   void accept(visitor::pprinter *p);
   void accept(visitor::interpreter *p);
   void accept(visitor::compiler *p);
 };
 
-struct for_ : public statement {
-  assign *init;
+struct For : public Statement {
+  Assign *init;
   /*
   id_ref *var;
-  expr *start;
+  Expr *start;
   */
-  expr *step;
-  expr *end;
-  code *block;
+  Expr *step;
+  Expr *end;
+  Code *block;
 
-  for_(assign *init,
-       /*id_ref *i, expr *init,*/
-       expr *delta, expr *end, code *b)
+  For(Assign *init,
+      /*id_ref *i, Expr *init,*/
+      Expr *delta, Expr *end, Code *b)
       : /*var(i), start(init), */
         init(init), step(delta), end(end), block(b) {}
   void accept(visitor::pprinter *p);
@@ -246,20 +246,20 @@ struct for_ : public statement {
   void accept(visitor::compiler *p);
 };
 
-struct goto_ : public statement {
-  expr *cond;
+struct Goto : public Statement {
+  Expr *cond;
   string label;
-  goto_(string label, expr *e = NULL) : label(label), cond(e) {}
+  Goto(string label, Expr *e = NULL) : label(label), cond(e) {}
   void accept(visitor::pprinter *p);
   void accept(visitor::interpreter *p);
   void accept(visitor::compiler *p);
 };
 
-struct print : public statement {
-  vector<ast::expr *> *args;
+struct Print : public Statement {
+  vector<ast::Expr *> *args;
   bool newline;
 
-  print(vector<ast::expr *> *args, bool newline)
+  Print(vector<ast::Expr *> *args, bool newline)
       : args(args), newline(newline) {}
 
   void accept(visitor::pprinter *p);
@@ -267,25 +267,25 @@ struct print : public statement {
   void accept(visitor::compiler *p);
 };
 
-struct no_op : public statement {
-  no_op() {}
+struct NoOp : public Statement {
+  NoOp() {}
   void accept(visitor::pprinter *p);
   void accept(visitor::interpreter *p);
   void accept(visitor::compiler *p);
 };
 
-struct literal : public expr {
+struct Literal : public Expr {
   string value;
-  literal(string s) { value = s.substr(1, s.size() - 2); }
+  Literal(string s) { value = s.substr(1, s.size() - 2); }
   void accept(visitor::pprinter *p);
   void accept(visitor::interpreter *p);
   void accept(visitor::compiler *p);
 };
 
-struct read : public statement {
-  id_ref *var;
+struct Read : public Statement {
+  IdRef *var;
 
-  read(id_ref *var) : var(var) {}
+  Read(IdRef *var) : var(var) {}
   void accept(visitor::pprinter *p);
   void accept(visitor::interpreter *p);
   void accept(visitor::compiler *p);

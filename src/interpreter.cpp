@@ -1,27 +1,26 @@
 #include "dtype.h"
 #include "visitor.h"
+void visitor::interpreter::visit(ast::Node *node) {}
 
-void visitor::interpreter::visit(ast::node *node) {}
-
-void visitor::interpreter::visit(ast::program *program) {
+void visitor::interpreter::visit(ast::Program *program) {
   root = program;
   program->decl->accept(this);
   program->block->accept(this);
 }
 
-void visitor::interpreter::visit(ast::declarations *declarations) {
+void visitor::interpreter::visit(ast::Declarations *declarations) {
   for (auto &p : *(declarations->ds)) {
     p->accept(this);
   }
 }
 
-void visitor::interpreter::visit(ast::code *code) {
+void visitor::interpreter::visit(ast::Code *code) {
   for (auto &p : *(code->statements)) {
     p->accept(this);
   }
 }
 
-void visitor::interpreter::visit(ast::id *id) {
+void visitor::interpreter::visit(ast::Id *id) {
   dataType dt;
   bool declared = env.find(id->name) != env.end();
   if (not declared)
@@ -33,7 +32,7 @@ void visitor::interpreter::visit(ast::id *id) {
   evalStack.push(dt);
 }
 
-void visitor::interpreter::visit(ast::id_ *id_) {
+void visitor::interpreter::visit(ast::IdArrayAccess *id_) {
   dataType dt;
   dt.dtype = type::Int;
   bool declared = env.find(id_->name) != env.end();
@@ -52,7 +51,7 @@ void visitor::interpreter::visit(ast::id_ *id_) {
   evalStack.push(dt);
 }
 
-void visitor::interpreter::visit(ast::id_ref *id_ref) {
+void visitor::interpreter::visit(ast::IdRef *id_ref) {
   dataType dt;
   dt.dtype = type::Pointer;
   bool declared = env.find(id_ref->name) != env.end();
@@ -63,7 +62,7 @@ void visitor::interpreter::visit(ast::id_ref *id_ref) {
   evalStack.push(dt);
 }
 
-void visitor::interpreter::visit(ast::idA_ref *idA_ref) {
+void visitor::interpreter::visit(ast::IdArrayRef *idA_ref) {
   dataType dt;
   dt.dtype = type::Pointer;
   bool declared = env.find(idA_ref->name) != env.end();
@@ -78,11 +77,11 @@ void visitor::interpreter::visit(ast::idA_ref *idA_ref) {
   evalStack.push(dt);
 }
 
-void visitor::interpreter::visit(ast::expr *expr) {}
+void visitor::interpreter::visit(ast::Expr *expr) {}
 
-void visitor::interpreter::visit(ast::statement *statement) {}
+void visitor::interpreter::visit(ast::Statement *statement) {}
 
-void visitor::interpreter::visit(ast::assign *assign) {
+void visitor::interpreter::visit(ast::Assign *assign) {
   assign->ref->accept(this);
   dataType ref = evalStack.top();
   evalStack.pop();
@@ -92,7 +91,7 @@ void visitor::interpreter::visit(ast::assign *assign) {
   *(ref.T.p) = value.T.i;
 }
 
-void visitor::interpreter::visit(ast::while_ *while_) {
+void visitor::interpreter::visit(ast::While *while_) {
   dataType cond;
   while_->cond->accept(this);
   cond = evalStack.top();
@@ -107,7 +106,7 @@ void visitor::interpreter::visit(ast::while_ *while_) {
   }
 }
 
-void visitor::interpreter::visit(ast::if_ *if_) {
+void visitor::interpreter::visit(ast::If *if_) {
   dataType cond;
   if_->cond->accept(this);
   cond = evalStack.top();
@@ -121,17 +120,17 @@ void visitor::interpreter::visit(ast::if_ *if_) {
   }
 }
 
-void visitor::interpreter::visit(ast::for_ *for_) {
+void visitor::interpreter::visit(ast::For *for_) {
   for_->init->accept(this);
 
   void *location;
   void **var = &location;
   for_->init->ref->vnode(var);
-  ast::id *ivar = (ast::id *)location;
+  ast::Id *ivar = (ast::Id *)location;
 
-  ast::binOp *rhs = new ast::binOp(Op::add, ivar, for_->step);
-  ast::assign *step = new ast::assign(for_->init->ref, rhs);
-  ast::binOp *check = new ast::binOp(Op::le, ivar, for_->end);
+  ast::BinOp *rhs = new ast::BinOp(Op::add, ivar, for_->step);
+  ast::Assign *step = new ast::Assign(for_->init->ref, rhs);
+  ast::BinOp *check = new ast::BinOp(Op::le, ivar, for_->end);
 
   dataType cond;
   cond.dtype = type::Int;
@@ -148,7 +147,7 @@ void visitor::interpreter::visit(ast::for_ *for_) {
   } while (cond.T.i);
 }
 
-void visitor::interpreter::visit(ast::print *print) {
+void visitor::interpreter::visit(ast::Print *print) {
   bool first = true;
   auto ts = *print->args;
   reverse(ts.begin(), ts.end());
@@ -180,7 +179,7 @@ void visitor::interpreter::visit(ast::print *print) {
   }
 }
 
-void visitor::interpreter::visit(ast::typed_ids *twrap) {
+void visitor::interpreter::visit(ast::TypedIds *twrap) {
   currentType = twrap->dtype;
   auto *ps = twrap->t_ids;
   for (auto &p : *ps) {
@@ -188,11 +187,11 @@ void visitor::interpreter::visit(ast::typed_ids *twrap) {
   }
 }
 
-void visitor::interpreter::visit(ast::no_op *no_op) {}
+void visitor::interpreter::visit(ast::NoOp *no_op) {}
 
-void visitor::interpreter::visit(ast::goto_ *goto_) {
+void visitor::interpreter::visit(ast::Goto *goto_) {
   if (goto_->cond == NULL) {
-    ast::code *code = table[goto_->label];
+    ast::Code *code = table[goto_->label];
     code->accept(this);
     exit(0);
   } else {
@@ -201,21 +200,21 @@ void visitor::interpreter::visit(ast::goto_ *goto_) {
     dt = evalStack.top();
     evalStack.pop();
     if (dt.T.i) {
-      ast::code *code = table[goto_->label];
+      ast::Code *code = table[goto_->label];
       code->accept(this);
       exit(0);
     }
   }
 }
 
-void visitor::interpreter::visit(ast::integer *integer) {
+void visitor::interpreter::visit(ast::Integer *integer) {
   dataType dt;
   dt.dtype = type::Int;
   dt.T.i = integer->value;
   evalStack.push(dt);
 }
 
-void visitor::interpreter::visit(ast::binOp *binOp) {
+void visitor::interpreter::visit(ast::BinOp *binOp) {
 
   /* Evaluate and put on stack */
   binOp->left->accept(this);
@@ -263,7 +262,7 @@ void visitor::interpreter::visit(ast::binOp *binOp) {
   }
 }
 
-void visitor::interpreter::visit(ast::id_def *id_def) {
+void visitor::interpreter::visit(ast::IdDef *id_def) {
   dataType dt;
   dt.dtype = currentType;
   switch (dt.dtype) {
@@ -278,7 +277,7 @@ void visitor::interpreter::visit(ast::id_def *id_def) {
   env[name] = dt;
 }
 
-void visitor::interpreter::visit(ast::idA_def *idA_def) {
+void visitor::interpreter::visit(ast::IdArrayDef *idA_def) {
   string name = idA_def->name;
   int size = idA_def->size;
   dataType dt;
@@ -295,14 +294,14 @@ void visitor::interpreter::visit(ast::idA_def *idA_def) {
   env[name] = dt;
 }
 
-void visitor::interpreter::visit(ast::literal *literal) {
+void visitor::interpreter::visit(ast::Literal *literal) {
   dataType dt;
   dt.dtype = type::CharArray;
   dt.T.s = (char *)literal->value.c_str();
   evalStack.push(dt);
 }
 
-void visitor::interpreter::visit(ast::read *read) {
+void visitor::interpreter::visit(ast::Read *read) {
   read->var->accept(this);
   dataType ref = evalStack.top();
   evalStack.pop();
@@ -311,6 +310,6 @@ void visitor::interpreter::visit(ast::read *read) {
   *(ref.T.p) = value;
 }
 
-void visitor::interpreter::visit(ast::labelled *labelled) {
+void visitor::interpreter::visit(ast::Labelled *labelled) {
   labelled->block->accept(this);
 }

@@ -2,14 +2,14 @@
 #include "dtype.h"
 #include "visitor.h"
 
-void visitor::pprinter::visit(ast::node *node) {}
+void visitor::pprinter::visit(ast::Node *node) {}
 
-void visitor::pprinter::visit(ast::program *program) {
+void visitor::pprinter::visit(ast::Program *program) {
   program->decl->accept(this);
   program->block->accept(this);
 }
 
-void visitor::pprinter::visit(ast::declarations *declarations) {
+void visitor::pprinter::visit(ast::Declarations *declarations) {
   cout << "decl {" << endl;
   for (auto &p : *(declarations->ds)) {
     p->accept(this);
@@ -17,51 +17,51 @@ void visitor::pprinter::visit(ast::declarations *declarations) {
   cout << "}\n";
 }
 
-void visitor::pprinter::visit(ast::code *code) {
+void visitor::pprinter::visit(ast::Code *code) {
   // cout << "Code" << endl;
 }
 
-void visitor::pprinter::visit(ast::id *id) {
+void visitor::pprinter::visit(ast::Id *id) {
   // cout << "Code" << endl;
   cout << id->name;
 }
 
-void visitor::pprinter::visit(ast::id_ *id_) {
+void visitor::pprinter::visit(ast::IdArrayAccess *id_) {
   // cout << "Code" << endl;
   cout << id_->name << "[";
   id_->subscript->accept(this);
   cout << "]";
 }
 
-void visitor::pprinter::visit(ast::expr *expr) {
+void visitor::pprinter::visit(ast::Expr *expr) {
   // cout << "Code" << endl;
 }
 
-void visitor::pprinter::visit(ast::statement *statement) {
+void visitor::pprinter::visit(ast::Statement *statement) {
   // cout << "Code" << endl;
 }
 
-void visitor::pprinter::visit(ast::assign *assign) {
+void visitor::pprinter::visit(ast::Assign *assign) {
   // cout << "Code" << endl;
 }
 
-void visitor::pprinter::visit(ast::while_ *while_) {
+void visitor::pprinter::visit(ast::While *while_) {
   // cout << "Code" << endl;
 }
 
-void visitor::pprinter::visit(ast::if_ *if_) {
+void visitor::pprinter::visit(ast::If *if_) {
   // cout << "Code" << endl;
 }
 
-void visitor::pprinter::visit(ast::for_ *for_) {
+void visitor::pprinter::visit(ast::For *for_) {
   // cout << "Code" << endl;
 }
 
-void visitor::pprinter::visit(ast::print *print) {
+void visitor::pprinter::visit(ast::Print *print) {
   // cout << "Code" << endl;
 }
 
-void visitor::pprinter::visit(ast::typed_ids *tIdWrapper) {
+void visitor::pprinter::visit(ast::TypedIds *tIdWrapper) {
   // cout << "Typed ids" << endl;
   string dtype;
   switch (tIdWrapper->dtype) {
@@ -90,21 +90,21 @@ void visitor::pprinter::visit(ast::typed_ids *tIdWrapper) {
   cout << ";\n";
 }
 
-void visitor::pprinter::visit(ast::no_op *no_op) { cout << "No-Op" << endl; }
+void visitor::pprinter::visit(ast::NoOp *no_op) { cout << "No-Op" << endl; }
 
-void visitor::pprinter::visit(ast::goto_ *goto_) { cout << "Go-To" << endl; }
+void visitor::pprinter::visit(ast::Goto *goto_) { cout << "Go-To" << endl; }
 
-void visitor::pprinter::visit(ast::integer *integer) { cout << integer->value; }
+void visitor::pprinter::visit(ast::Integer *integer) { cout << integer->value; }
 
-void visitor::pprinter::visit(ast::id_def *id_def) {}
+void visitor::pprinter::visit(ast::IdDef *id_def) {}
 
-void visitor::pprinter::visit(ast::idA_def *idA_def) {}
+void visitor::pprinter::visit(ast::IdArrayDef *idA_def) {}
 
-void visitor::pprinter::visit(ast::binOp *binOp) {}
+void visitor::pprinter::visit(ast::BinOp *binOp) {}
 
-void visitor::pprinter::visit(ast::id_ref *id_ref) {}
+void visitor::pprinter::visit(ast::IdRef *id_ref) {}
 
-void visitor::pprinter::visit(ast::idA_ref *idA_ref) {}
-void visitor::pprinter::visit(ast::literal *literal) {}
-void visitor::pprinter::visit(ast::read *read) {}
-void visitor::pprinter::visit(ast::labelled *labelled) {}
+void visitor::pprinter::visit(ast::IdArrayRef *idA_ref) {}
+void visitor::pprinter::visit(ast::Literal *literal) {}
+void visitor::pprinter::visit(ast::Read *read) {}
+void visitor::pprinter::visit(ast::Labelled *labelled) {}
