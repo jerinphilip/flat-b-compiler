@@ -34,7 +34,8 @@ void visitor::compiler::visit(ast::Id *id) {
     // exit(-1);
   }
   Value *location = v_table[id->name];
-  auto *r = new LoadInst(location, "vr", entry.top());
+  // Value *r = new LoadInst(location, "vr", entry.top());
+  Value *r = nullptr;
   eval.push((void *)r);
   format.place("%d", r);
 }
@@ -51,9 +52,11 @@ void visitor::compiler::visit(ast::IdArrayAccess *id_) {
   eval.pop();
 
   vector<Value *> index_params = {start, offset};
-  Value *location = GetElementPtrInst::CreateInBounds(
-      v_table[id_->name], index_params, "vr", entry.top());
-  auto *r = new LoadInst(location, "vr", entry.top());
+  // Value *location = GetElementPtrInst::CreateInBounds(
+  //     v_table[id_->name], index_params, "vr", entry.top());
+  // Value *r = new LoadInst(location, "vr", entry.top());
+  Value *location = nullptr;
+  Value *r = nullptr;
   eval.push((void *)r);
   format.place("%d", r);
 }
@@ -85,8 +88,9 @@ void visitor::compiler::visit(ast::IdArrayRef *idA_ref) {
   auto offset = (Value *)eval.top();
   eval.pop();
   vector<Value *> index_params = {start, offset};
-  Value *location = GetElementPtrInst::CreateInBounds(
-      v_table[idA_ref->name], index_params, "vr", entry.top());
+  // Value *location = GetElementPtrInst::CreateInBounds(
+  //     v_table[idA_ref->name], index_params, "vr", entry.top());
+  Value *location = nullptr;
 
   Value *instruction = new StoreInst(ret_val, location, false, entry.top());
   eval.push((void *)instruction);

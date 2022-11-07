@@ -20,7 +20,10 @@ using namespace llvm;
 using namespace std;
 
 namespace visitor {
-struct pprinter {
+
+struct Visitor {};
+
+struct pprinter : public Visitor {
   void visit(ast::Node *node_);
   void visit(ast::Program *program);
   void visit(ast::Declarations *declarations);
@@ -48,7 +51,7 @@ struct pprinter {
   void visit(ast::Labelled *labelled);
 };
 
-struct interpreter {
+struct interpreter : public Visitor {
   map<string, dataType> env;
   stack<dataType> evalStack;
   ast::Program *root;
@@ -93,7 +96,7 @@ struct interpreter {
   void visit(ast::Labelled *labelled);
 };
 
-struct compiler {
+struct compiler : public Visitor {
   map<string, dataType> env;
   stack<dataType> evalStack;
   ast::Program *root;
@@ -215,6 +218,19 @@ struct compiler {
   void visit(ast::Read *read);
   void visit(ast::Labelled *labelled);
 };
+
+inline std::unique_ptr<Visitor> make_visitor(std::string type) {
+  if (type == "interpreter") {
+    return std::make_unique<visitor::interpreter>();
+  }
+  if (type == "compiler") {
+    return std::make_unique<visitor::compiler>();
+  }
+  std::abort();
+  return nullptr;
+}
+
 } // namespace visitor
+  //
 
 #endif
