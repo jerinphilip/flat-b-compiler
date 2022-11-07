@@ -203,9 +203,9 @@ void visitor::compiler::visit(ast::for_ *for_) {
   for_->init->ref->vnode(var);
   ast::id *ivar = (ast::id *)location;
 
-  ast::binOp *rhs = new ast::binOp(opr::add, ivar, for_->step);
+  ast::binOp *rhs = new ast::binOp(Op::add, ivar, for_->step);
   ast::assign *step = new ast::assign(for_->init->ref, rhs);
-  ast::binOp *check = new ast::binOp(opr::le, ivar, for_->end);
+  ast::binOp *check = new ast::binOp(Op::le, ivar, for_->end);
 
   entry.push(pre);
   check->accept(this);
@@ -348,31 +348,31 @@ void visitor::compiler::visit(ast::binOp *binOp) {
   };
 
   switch (binOp->op) {
-  case opr::add:
+  case Op::add:
     binary_operator(Instruction::Add);
     break;
-  case opr::sub:
+  case Op::sub:
     binary_operator(Instruction::Sub);
     break;
-  case opr::mul:
+  case Op::mul:
     binary_operator(Instruction::Mul);
     break;
-  case opr::quot:
+  case Op::quot:
     binary_operator(Instruction::SDiv);
     break;
-  case opr::lt:
+  case Op::lt:
     cmp_operator(ICmpInst::ICMP_SLT);
     break;
-  case opr::gt:
+  case Op::gt:
     cmp_operator(ICmpInst::ICMP_SGT);
     break;
-  case opr::le:
+  case Op::le:
     cmp_operator(ICmpInst::ICMP_SLE);
     break;
-  case opr::ge:
+  case Op::ge:
     cmp_operator(ICmpInst::ICMP_SGE);
     break;
-  case opr::eq:
+  case Op::eq:
     cmp_operator(ICmpInst::ICMP_EQ);
     break;
   default:

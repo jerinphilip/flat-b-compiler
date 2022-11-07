@@ -15,7 +15,7 @@ enum type {
   Pointer,
 };
 
-enum opr { add, sub, mul, quot, lt, gt, le, ge, eq };
+enum class Op { add, sub, mul, quot, lt, gt, le, ge, eq };
 
 namespace visitor {
 struct pprinter;

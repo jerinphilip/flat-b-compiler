@@ -129,9 +129,9 @@ void visitor::interpreter::visit(ast::for_ *for_) {
   for_->init->ref->vnode(var);
   ast::id *ivar = (ast::id *)location;
 
-  ast::binOp *rhs = new ast::binOp(opr::add, ivar, for_->step);
+  ast::binOp *rhs = new ast::binOp(Op::add, ivar, for_->step);
   ast::assign *step = new ast::assign(for_->init->ref, rhs);
-  ast::binOp *check = new ast::binOp(opr::le, ivar, for_->end);
+  ast::binOp *check = new ast::binOp(Op::le, ivar, for_->end);
 
   dataType cond;
   cond.dtype = type::Int;
@@ -230,31 +230,31 @@ void visitor::interpreter::visit(ast::binOp *binOp) {
   if (left.dtype != right.dtype) {
   } else {
     switch (binOp->op) {
-    case opr::add:
+    case Op::add:
       evalStack.push(left + right);
       break;
-    case opr::sub:
+    case Op::sub:
       evalStack.push(left - right);
       break;
-    case opr::mul:
+    case Op::mul:
       evalStack.push(left * right);
       break;
-    case opr::quot:
+    case Op::quot:
       evalStack.push(left / right);
       break;
-    case opr::lt:
+    case Op::lt:
       evalStack.push(left < right);
       break;
-    case opr::gt:
+    case Op::gt:
       evalStack.push(left > right);
       break;
-    case opr::le:
+    case Op::le:
       evalStack.push(left <= right);
       break;
-    case opr::ge:
+    case Op::ge:
       evalStack.push(left >= right);
       break;
-    case opr::eq:
+    case Op::eq:
       evalStack.push(left == right);
       break;
     default:
