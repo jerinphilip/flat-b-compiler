@@ -6,7 +6,7 @@
 #include <vector>
 using namespace std;
 
-enum Type {
+enum FlatBType {
   Int,
   Bool,
   Char,
@@ -147,9 +147,9 @@ struct IdArrayDef : public IdDef {
 };
 
 struct TypedIds : public Node {
-  Type dtype;
+  FlatBType dtype;
   vector<IdDef *> *t_ids;
-  TypedIds(Type d, vector<IdDef *> *v) : dtype(d), t_ids(v) {}
+  TypedIds(FlatBType d, vector<IdDef *> *v) : dtype(d), t_ids(v) {}
   void accept(visitor::pprinter *p);
   void accept(visitor::interpreter *p);
   void accept(visitor::compiler *p);

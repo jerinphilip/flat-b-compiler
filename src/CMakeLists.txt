@@ -27,8 +27,8 @@ execute_process(COMMAND llvm-config --libs all
                 ERROR_STRIP_TRAILING_WHITESPACE)
 
 message(STATUS "Bison outputs: ${BISON_parser_OUTPUTS}")
-message(STATUS "Bison outputs: ${FLEX_lexer_OUTPUTS}")
-add_executable(fb ${BISON_parser_OUTPUTS} compiler.cpp interpreter.cpp printer.cpp)
+message(STATUS "Flex outputs: ${FLEX_lexer_OUTPUTS}")
+add_executable(fb ${BISON_parser_OUTPUTS} ${FLEX_lexer_OUTPUTS} compiler.cpp interpreter.cpp printer.cpp ast.cpp)
 message(STATUS "fb-link-libs: ${FLEX_LIBRARIES} ${llvm_libraries}")
 target_link_libraries(fb PRIVATE ${FLEX_LIBRARIES} ${llvm_libraries})
 target_include_directories(fb PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

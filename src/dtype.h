@@ -3,7 +3,7 @@
 #include "ast.h"
 
 struct DataType {
-  Type dtype;
+  FlatBType dtype;
   union {
     int *A;
     int i;
@@ -16,7 +16,7 @@ struct DataType {
     DataType result;
     result.dtype = dtype;
     switch (dtype) {
-    case Type::Int:
+    case FlatBType::Int:
       result.T.i = T.i + x.T.i;
       break;
     default:
@@ -29,7 +29,7 @@ struct DataType {
     DataType result;
     result.dtype = dtype;
     switch (dtype) {
-    case Type::Int:
+    case FlatBType::Int:
       result.T.i = T.i - x.T.i;
       break;
     default:
@@ -42,7 +42,7 @@ struct DataType {
     DataType result;
     result.dtype = dtype;
     switch (dtype) {
-    case Type::Int:
+    case FlatBType::Int:
       result.T.i = T.i * x.T.i;
       break;
     default:
@@ -55,7 +55,7 @@ struct DataType {
     DataType result;
     result.dtype = dtype;
     switch (dtype) {
-    case Type::Int:
+    case FlatBType::Int:
       result.T.i = T.i / x.T.i;
       break;
     default:
@@ -66,9 +66,9 @@ struct DataType {
 
   DataType operator<(DataType x) {
     DataType result;
-    result.dtype = Type::Bool;
+    result.dtype = FlatBType::Bool;
     switch (dtype) {
-    case Type::Int:
+    case FlatBType::Int:
       result.T.i = T.i < x.T.i;
       break;
     default:
@@ -78,9 +78,9 @@ struct DataType {
   }
   DataType operator>(DataType x) {
     DataType result;
-    result.dtype = Type::Bool;
+    result.dtype = FlatBType::Bool;
     switch (dtype) {
-    case Type::Int:
+    case FlatBType::Int:
       result.T.i = T.i > x.T.i;
       break;
     default:
@@ -91,9 +91,9 @@ struct DataType {
 
   DataType operator<=(DataType x) {
     DataType result;
-    result.dtype = Type::Bool;
+    result.dtype = FlatBType::Bool;
     switch (dtype) {
-    case Type::Int:
+    case FlatBType::Int:
       result.T.i = T.i <= x.T.i;
       break;
     default:
@@ -104,9 +104,9 @@ struct DataType {
 
   DataType operator>=(DataType x) {
     DataType result;
-    result.dtype = Type::Bool;
+    result.dtype = FlatBType::Bool;
     switch (dtype) {
-    case Type::Int:
+    case FlatBType::Int:
       result.T.i = T.i >= x.T.i;
       break;
     default:
@@ -117,9 +117,9 @@ struct DataType {
 
   DataType operator==(DataType x) {
     DataType result;
-    result.dtype = Type::Bool;
+    result.dtype = FlatBType::Bool;
     switch (dtype) {
-    case Type::Int:
+    case FlatBType::Int:
       result.T.i = T.i == x.T.i;
       break;
     default:

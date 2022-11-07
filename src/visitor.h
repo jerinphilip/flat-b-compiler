@@ -82,10 +82,10 @@ struct pprinter : public Visitor {
 };
 
 struct interpreter : public Visitor {
-  map<string, dataType> env;
-  stack<dataType> evalStack;
+  map<string, DataType> env;
+  stack<DataType> evalStack;
   ast::Program *root;
-  type currentType;
+  FlatBType currentType;
   map<string, ast::Code *> table;
 
   void label(map<string, ast::Code *> m) final {
@@ -127,10 +127,10 @@ struct interpreter : public Visitor {
 };
 
 struct compiler : public Visitor {
-  map<string, dataType> env;
-  stack<dataType> evalStack;
+  map<string, DataType> env;
+  stack<DataType> evalStack;
   ast::Program *root;
-  type currentType;
+  FlatBType currentType;
   map<string, ast::Code *> table;
 
   struct {

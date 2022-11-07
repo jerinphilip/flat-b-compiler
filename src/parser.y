@@ -9,7 +9,7 @@
   void yyerror (char const *s);
   #include "ast.h"
   #include "visitor.h"
-  #include "lex.yy.c"
+  #include "lexer.h"
   using namespace std;
 
   ast::Program *pgm = NULL;
@@ -36,7 +36,7 @@
     ast::IdRef *ref;
     ast::Expr *expr;
     ast::Code *code;
-    type dtype;
+    FlatBType dtype;
     Op op;
     ast::While *while_;
     ast::For *for_;
@@ -148,7 +148,7 @@ id_list            : var                                                        
 var                : IDENTIFIER                                                 { $$ = new ast::IdDef(string($1)); }
                    | IDENTIFIER '[' NUMBER ']'                                  { string sId = string($1); $$ = new ast::IdArrayDef(sId, $3); }
                    ;
-dtype              : k_integer                                                  { $$ = type::Int; }
+dtype              : k_integer                                                  { $$ = FlatBType::Int; }
                    ;
 arithExpr          : arithExpr '+' arithExpr                                    { $$ = new ast::BinOp(Op::add, $1, $3);  }
                    | arithExpr '*' arithExpr                                    { $$ = new ast::BinOp(Op::mul, $1, $3);  }  

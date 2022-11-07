@@ -65,13 +65,13 @@ void visitor::pprinter::visit(ast::TypedIds *tIdWrapper) {
   // cout << "Typed ids" << endl;
   string dtype;
   switch (tIdWrapper->dtype) {
-  case type::Int:
+  case FlatBType::Int:
     dtype = "int";
     break;
-  case type::Bool:
+  case FlatBType::Bool:
     dtype = "bool";
     break;
-  case type::Char:
+  case FlatBType::Char:
     dtype = "char";
     break;
   default:

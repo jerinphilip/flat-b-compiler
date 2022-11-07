@@ -27,14 +27,14 @@ void visitor::interpreter::visit(ast::Id *id) {
     cerr << "Undefined variable" << endl;
 
   /* TODO, Ascertain dtype from pointer type */
-  dt.dtype = Type::Int;
+  dt.dtype = FlatBType::Int;
   dt.T.i = env[id->name].T.i;
   evalStack.push(dt);
 }
 
 void visitor::interpreter::visit(ast::IdArrayAccess *id_) {
   DataType dt;
-  dt.dtype = Type::Int;
+  dt.dtype = FlatBType::Int;
   bool declared = env.find(id_->name) != env.end();
   if (not declared)
     cerr << "Undefined variable" << endl;
@@ -53,7 +53,7 @@ void visitor::interpreter::visit(ast::IdArrayAccess *id_) {
 
 void visitor::interpreter::visit(ast::IdRef *id_ref) {
   DataType dt;
-  dt.dtype = Type::Pointer;
+  dt.dtype = FlatBType::Pointer;
   bool declared = env.find(id_ref->name) != env.end();
   if (not declared)
     cerr << "Undefined variable" << endl;
@@ -64,7 +64,7 @@ void visitor::interpreter::visit(ast::IdRef *id_ref) {
 
 void visitor::interpreter::visit(ast::IdArrayRef *idA_ref) {
   DataType dt;
-  dt.dtype = Type::Pointer;
+  dt.dtype = FlatBType::Pointer;
   bool declared = env.find(idA_ref->name) != env.end();
   if (not declared)
     cerr << "Undefined variable" << endl;
@@ -133,7 +133,7 @@ void visitor::interpreter::visit(ast::For *for_) {
   ast::BinOp *check = new ast::BinOp(Op::le, ivar, for_->end);
 
   DataType cond;
-  cond.dtype = Type::Int;
+  cond.dtype = FlatBType::Int;
   cond.T.i = 1;
   do {
     check->accept(this);
@@ -160,13 +160,13 @@ void visitor::interpreter::visit(ast::Print *print) {
     DataType dt = evalStack.top();
     evalStack.pop();
     switch (dt.dtype) {
-    case Type::Int:
+    case FlatBType::Int:
       cout << dt.T.i;
       break;
-    case Type::CharArray:
+    case FlatBType::CharArray:
       cout << dt.T.s;
       break;
-    case Type::Bool:
+    case FlatBType::Bool:
       cout << dt.T.b;
       break;
     default:
@@ -209,7 +209,7 @@ void visitor::interpreter::visit(ast::Goto *goto_) {
 
 void visitor::interpreter::visit(ast::Integer *integer) {
   DataType dt;
-  dt.dtype = Type::Int;
+  dt.dtype = FlatBType::Int;
   dt.T.i = integer->value;
   evalStack.push(dt);
 }
@@ -266,7 +266,7 @@ void visitor::interpreter::visit(ast::IdDef *id_def) {
   DataType dt;
   dt.dtype = currentType;
   switch (dt.dtype) {
-  case Type::Int:
+  case FlatBType::Int:
     dt.T.i = 0;
     break;
   default:
@@ -283,7 +283,7 @@ void visitor::interpreter::visit(ast::IdArrayDef *idA_def) {
   DataType dt;
   dt.dtype = currentType;
   switch (dt.dtype) {
-  case Type::Int:
+  case FlatBType::Int:
     dt.T.A = new int[size];
     dt.dtype = IntArray;
     break;
@@ -296,7 +296,7 @@ void visitor::interpreter::visit(ast::IdArrayDef *idA_def) {
 
 void visitor::interpreter::visit(ast::Literal *literal) {
   DataType dt;
-  dt.dtype = Type::CharArray;
+  dt.dtype = FlatBType::CharArray;
   dt.T.s = (char *)literal->value.c_str();
   evalStack.push(dt);
 }
