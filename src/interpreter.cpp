@@ -21,30 +21,30 @@ void visitor::interpreter::visit(ast::Code *code) {
 }
 
 void visitor::interpreter::visit(ast::Id *id) {
-  dataType dt;
+  DataType dt;
   bool declared = env.find(id->name) != env.end();
   if (not declared)
     cerr << "Undefined variable" << endl;
 
   /* TODO, Ascertain dtype from pointer type */
-  dt.dtype = type::Int;
+  dt.dtype = Type::Int;
   dt.T.i = env[id->name].T.i;
   evalStack.push(dt);
 }
 
 void visitor::interpreter::visit(ast::IdArrayAccess *id_) {
-  dataType dt;
-  dt.dtype = type::Int;
+  DataType dt;
+  dt.dtype = Type::Int;
   bool declared = env.find(id_->name) != env.end();
   if (not declared)
     cerr << "Undefined variable" << endl;
 
   id_->subscript->accept(this);
 
-  dataType sc = evalStack.top();
+  DataType sc = evalStack.top();
   evalStack.pop();
   int sub = sc.T.i;
-  dataType d = env[id_->name];
+  DataType d = env[id_->name];
   dt.T.i = env[id_->name].T.A[sub];
   /*
    */
@@ -52,8 +52,8 @@ void visitor::interpreter::visit(ast::IdArrayAccess *id_) {
 }
 
 void visitor::interpreter::visit(ast::IdRef *id_ref) {
-  dataType dt;
-  dt.dtype = type::Pointer;
+  DataType dt;
+  dt.dtype = Type::Pointer;
   bool declared = env.find(id_ref->name) != env.end();
   if (not declared)
     cerr << "Undefined variable" << endl;
@@ -63,14 +63,14 @@ void visitor::interpreter::visit(ast::IdRef *id_ref) {
 }
 
 void visitor::interpreter::visit(ast::IdArrayRef *idA_ref) {
-  dataType dt;
-  dt.dtype = type::Pointer;
+  DataType dt;
+  dt.dtype = Type::Pointer;
   bool declared = env.find(idA_ref->name) != env.end();
   if (not declared)
     cerr << "Undefined variable" << endl;
 
   idA_ref->subscript->accept(this);
-  dataType sc = evalStack.top();
+  DataType sc = evalStack.top();
   evalStack.pop();
   int sub = sc.T.i;
   dt.T.p = &(env[idA_ref->name].T.A[sub]);
@@ -83,16 +83,16 @@ void visitor::interpreter::visit(ast::Statement *statement) {}
 
 void visitor::interpreter::visit(ast::Assign *assign) {
   assign->ref->accept(this);
-  dataType ref = evalStack.top();
+  DataType ref = evalStack.top();
   evalStack.pop();
   assign->tree->accept(this);
-  dataType value = evalStack.top();
+  DataType value = evalStack.top();
   evalStack.pop();
   *(ref.T.p) = value.T.i;
 }
 
 void visitor::interpreter::visit(ast::While *while_) {
-  dataType cond;
+  DataType cond;
   while_->cond->accept(this);
   cond = evalStack.top();
   evalStack.pop();
@@ -107,7 +107,7 @@ void visitor::interpreter::visit(ast::While *while_) {
 }
 
 void visitor::interpreter::visit(ast::If *if_) {
-  dataType cond;
+  DataType cond;
   if_->cond->accept(this);
   cond = evalStack.top();
   evalStack.pop();
@@ -132,8 +132,8 @@ void visitor::interpreter::visit(ast::For *for_) {
   ast::Assign *step = new ast::Assign(for_->init->ref, rhs);
   ast::BinOp *check = new ast::BinOp(Op::le, ivar, for_->end);
 
-  dataType cond;
-  cond.dtype = type::Int;
+  DataType cond;
+  cond.dtype = Type::Int;
   cond.T.i = 1;
   do {
     check->accept(this);
@@ -157,16 +157,16 @@ void visitor::interpreter::visit(ast::Print *print) {
     }
     first = false;
     p->accept(this);
-    dataType dt = evalStack.top();
+    DataType dt = evalStack.top();
     evalStack.pop();
     switch (dt.dtype) {
-    case type::Int:
+    case Type::Int:
       cout << dt.T.i;
       break;
-    case type::CharArray:
+    case Type::CharArray:
       cout << dt.T.s;
       break;
-    case type::Bool:
+    case Type::Bool:
       cout << dt.T.b;
       break;
     default:
@@ -195,7 +195,7 @@ void visitor::interpreter::visit(ast::Goto *goto_) {
     code->accept(this);
     exit(0);
   } else {
-    dataType dt;
+    DataType dt;
     goto_->cond->accept(this);
     dt = evalStack.top();
     evalStack.pop();
@@ -208,8 +208,8 @@ void visitor::interpreter::visit(ast::Goto *goto_) {
 }
 
 void visitor::interpreter::visit(ast::Integer *integer) {
-  dataType dt;
-  dt.dtype = type::Int;
+  DataType dt;
+  dt.dtype = Type::Int;
   dt.T.i = integer->value;
   evalStack.push(dt);
 }
@@ -218,10 +218,10 @@ void visitor::interpreter::visit(ast::BinOp *binOp) {
 
   /* Evaluate and put on stack */
   binOp->left->accept(this);
-  dataType left = evalStack.top();
+  DataType left = evalStack.top();
   evalStack.pop();
   binOp->right->accept(this);
-  dataType right = evalStack.top();
+  DataType right = evalStack.top();
   evalStack.pop();
 
   /* TODO Generalize for types */
@@ -263,10 +263,10 @@ void visitor::interpreter::visit(ast::BinOp *binOp) {
 }
 
 void visitor::interpreter::visit(ast::IdDef *id_def) {
-  dataType dt;
+  DataType dt;
   dt.dtype = currentType;
   switch (dt.dtype) {
-  case type::Int:
+  case Type::Int:
     dt.T.i = 0;
     break;
   default:
@@ -280,10 +280,10 @@ void visitor::interpreter::visit(ast::IdDef *id_def) {
 void visitor::interpreter::visit(ast::IdArrayDef *idA_def) {
   string name = idA_def->name;
   int size = idA_def->size;
-  dataType dt;
+  DataType dt;
   dt.dtype = currentType;
   switch (dt.dtype) {
-  case type::Int:
+  case Type::Int:
     dt.T.A = new int[size];
     dt.dtype = IntArray;
     break;
@@ -295,15 +295,15 @@ void visitor::interpreter::visit(ast::IdArrayDef *idA_def) {
 }
 
 void visitor::interpreter::visit(ast::Literal *literal) {
-  dataType dt;
-  dt.dtype = type::CharArray;
+  DataType dt;
+  dt.dtype = Type::CharArray;
   dt.T.s = (char *)literal->value.c_str();
   evalStack.push(dt);
 }
 
 void visitor::interpreter::visit(ast::Read *read) {
   read->var->accept(this);
-  dataType ref = evalStack.top();
+  DataType ref = evalStack.top();
   evalStack.pop();
   int value;
   cin >> value;

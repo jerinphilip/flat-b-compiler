@@ -22,5 +22,5 @@ lex.yy.c: scanner.l parser.tab.h iparser.tab.h
 
 .PHONY: clean all
 clean:
-	-@rm -rf parser.tab.c parser.tab.h lex.yy.c bcc 2>/dev/null || true
+	rm -rf parser.output iparser.output iparser.tab.c iparser.tab.h parser.tab.c parser.tab.h lex.yy.c bcc bci 2>/dev/null || true
 

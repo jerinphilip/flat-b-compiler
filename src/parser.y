@@ -202,6 +202,7 @@ void yyerror (char const *s)
        fprintf (stderr, "%s\n", s);
 }
 
+
 int main(int argc, char *argv[])
 {
 	if (argc == 1 ) {
@@ -214,14 +215,14 @@ int main(int argc, char *argv[])
 		fprintf(stderr, "Correct usage: %s filename\n", argv[0]);
 	}
 
-	yyin = fopen(argv[1], "r");
 
-    //visitor::pprinter V;
-    // visitor::interpreter V;
-    visitor::compiler V;
+  std::unique_ptr<visitor::Visitor> visitor = visitor::make_visitor(argv[1]);
     
+	yyin = fopen(argv[2], "r");
 	if(yyparse() == 0){
-        V.label(labels);
-        V.visit(pgm);
-    }
+        visitor->label(labels);
+        visitor->visit(pgm);
+  }
+
+  return 0;
 }

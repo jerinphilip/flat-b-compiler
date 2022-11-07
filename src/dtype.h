@@ -2,8 +2,8 @@
 #define DTYPE_H
 #include "ast.h"
 
-struct dataType {
-  type dtype;
+struct DataType {
+  Type dtype;
   union {
     int *A;
     int i;
@@ -12,11 +12,11 @@ struct dataType {
     char *s;
   } T;
 
-  dataType operator+(dataType x) {
-    dataType result;
+  DataType operator+(DataType x) {
+    DataType result;
     result.dtype = dtype;
     switch (dtype) {
-    case type::Int:
+    case Type::Int:
       result.T.i = T.i + x.T.i;
       break;
     default:
@@ -25,11 +25,11 @@ struct dataType {
     return result;
   }
 
-  dataType operator-(dataType x) {
-    dataType result;
+  DataType operator-(DataType x) {
+    DataType result;
     result.dtype = dtype;
     switch (dtype) {
-    case type::Int:
+    case Type::Int:
       result.T.i = T.i - x.T.i;
       break;
     default:
@@ -38,11 +38,11 @@ struct dataType {
     return result;
   }
 
-  dataType operator*(dataType x) {
-    dataType result;
+  DataType operator*(DataType x) {
+    DataType result;
     result.dtype = dtype;
     switch (dtype) {
-    case type::Int:
+    case Type::Int:
       result.T.i = T.i * x.T.i;
       break;
     default:
@@ -51,11 +51,11 @@ struct dataType {
     return result;
   }
 
-  dataType operator/(dataType x) {
-    dataType result;
+  DataType operator/(DataType x) {
+    DataType result;
     result.dtype = dtype;
     switch (dtype) {
-    case type::Int:
+    case Type::Int:
       result.T.i = T.i / x.T.i;
       break;
     default:
@@ -64,11 +64,11 @@ struct dataType {
     return result;
   }
 
-  dataType operator<(dataType x) {
-    dataType result;
-    result.dtype = type::Bool;
+  DataType operator<(DataType x) {
+    DataType result;
+    result.dtype = Type::Bool;
     switch (dtype) {
-    case type::Int:
+    case Type::Int:
       result.T.i = T.i < x.T.i;
       break;
     default:
@@ -76,11 +76,11 @@ struct dataType {
     }
     return result;
   }
-  dataType operator>(dataType x) {
-    dataType result;
-    result.dtype = type::Bool;
+  DataType operator>(DataType x) {
+    DataType result;
+    result.dtype = Type::Bool;
     switch (dtype) {
-    case type::Int:
+    case Type::Int:
       result.T.i = T.i > x.T.i;
       break;
     default:
@@ -89,11 +89,11 @@ struct dataType {
     return result;
   }
 
-  dataType operator<=(dataType x) {
-    dataType result;
-    result.dtype = type::Bool;
+  DataType operator<=(DataType x) {
+    DataType result;
+    result.dtype = Type::Bool;
     switch (dtype) {
-    case type::Int:
+    case Type::Int:
       result.T.i = T.i <= x.T.i;
       break;
     default:
@@ -102,11 +102,11 @@ struct dataType {
     return result;
   }
 
-  dataType operator>=(dataType x) {
-    dataType result;
-    result.dtype = type::Bool;
+  DataType operator>=(DataType x) {
+    DataType result;
+    result.dtype = Type::Bool;
     switch (dtype) {
-    case type::Int:
+    case Type::Int:
       result.T.i = T.i >= x.T.i;
       break;
     default:
@@ -115,11 +115,11 @@ struct dataType {
     return result;
   }
 
-  dataType operator==(dataType x) {
-    dataType result;
-    result.dtype = type::Bool;
+  DataType operator==(DataType x) {
+    DataType result;
+    result.dtype = Type::Bool;
     switch (dtype) {
-    case type::Int:
+    case Type::Int:
       result.T.i = T.i == x.T.i;
       break;
     default:

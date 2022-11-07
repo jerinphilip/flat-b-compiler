@@ -21,34 +21,64 @@ using namespace std;
 
 namespace visitor {
 
-struct Visitor {};
+struct Visitor {
+  virtual void visit(ast::Node *node_) = 0;
+  virtual void visit(ast::Program *program) = 0;
+  virtual void visit(ast::Declarations *declarations) = 0;
+  virtual void visit(ast::Id *id) = 0;
+  virtual void visit(ast::IdArrayAccess *id_) = 0;
+  virtual void visit(ast::Expr *expr) = 0;
+  virtual void visit(ast::Code *code) = 0;
+  virtual void visit(ast::Statement *statement) = 0;
+  virtual void visit(ast::Assign *a) = 0;
+  virtual void visit(ast::While *w) = 0;
+  virtual void visit(ast::If *ib) = 0;
+  virtual void visit(ast::For *fb) = 0;
+  virtual void visit(ast::Print *print) = 0;
+  virtual void visit(ast::TypedIds *t_ids) = 0;
+  virtual void visit(ast::NoOp *no_op) = 0;
+  virtual void visit(ast::Goto *goto_) = 0;
+  virtual void visit(ast::Integer *integer) = 0;
+  virtual void visit(ast::IdDef *id_def) = 0;
+  virtual void visit(ast::IdArrayDef *idA_def) = 0;
+  virtual void visit(ast::BinOp *binOp) = 0;
+  virtual void visit(ast::IdRef *id_ref) = 0;
+  virtual void visit(ast::IdArrayRef *idA_ref) = 0;
+  virtual void visit(ast::Literal *literal) = 0;
+  virtual void visit(ast::Read *read) = 0;
+  virtual void visit(ast::Labelled *labelled) = 0;
+
+  virtual void label(map<string, ast::Code *> m);
+
+  virtual ~Visitor() = default;
+};
 
 struct pprinter : public Visitor {
-  void visit(ast::Node *node_);
-  void visit(ast::Program *program);
-  void visit(ast::Declarations *declarations);
-  void visit(ast::Id *id);
-  void visit(ast::IdArrayAccess *id_);
-  void visit(ast::Expr *expr);
-  void visit(ast::Code *code);
-  void visit(ast::Statement *statement);
-  void visit(ast::Assign *a);
-  void visit(ast::While *w);
-  void visit(ast::If *ib);
-  void visit(ast::For *fb);
-  void visit(ast::Print *print);
-  void visit(ast::TypedIds *t_ids);
-  void visit(ast::NoOp *no_op);
-  void visit(ast::Goto *goto_);
-  void visit(ast::Integer *integer);
-  void visit(ast::IdDef *id_def);
-  void visit(ast::IdArrayDef *idA_def);
-  void visit(ast::BinOp *binOp);
-  void visit(ast::IdRef *id_ref);
-  void visit(ast::IdArrayRef *idA_ref);
-  void visit(ast::Literal *literal);
-  void visit(ast::Read *read);
-  void visit(ast::Labelled *labelled);
+  void visit(ast::Node *node_) final;
+  void visit(ast::Program *program) final;
+  void visit(ast::Declarations *declarations) final;
+  void visit(ast::Id *id) final;
+  void visit(ast::IdArrayAccess *id_) final;
+  void visit(ast::Expr *expr) final;
+  void visit(ast::Code *code) final;
+  void visit(ast::Statement *statement) final;
+  void visit(ast::Assign *a) final;
+  void visit(ast::While *w) final;
+  void visit(ast::If *ib) final;
+  void visit(ast::For *fb) final;
+  void visit(ast::Print *print) final;
+  void visit(ast::TypedIds *t_ids) final;
+  void visit(ast::NoOp *no_op) final;
+  void visit(ast::Goto *goto_) final;
+  void visit(ast::Integer *integer) final;
+  void visit(ast::IdDef *id_def) final;
+  void visit(ast::IdArrayDef *idA_def) final;
+  void visit(ast::BinOp *binOp) final;
+  void visit(ast::IdRef *id_ref) final;
+  void visit(ast::IdArrayRef *idA_ref) final;
+  void visit(ast::Literal *literal) final;
+  void visit(ast::Read *read) final;
+  void visit(ast::Labelled *labelled) final;
 };
 
 struct interpreter : public Visitor {
@@ -58,7 +88,7 @@ struct interpreter : public Visitor {
   type currentType;
   map<string, ast::Code *> table;
 
-  void label(map<string, ast::Code *> m) {
+  void label(map<string, ast::Code *> m) final {
     table = m;
     /*
     cerr << "labels: ";
@@ -69,31 +99,31 @@ struct interpreter : public Visitor {
     */
   }
 
-  void visit(ast::Node *node_);
-  void visit(ast::Program *program);
-  void visit(ast::Declarations *declarations);
-  void visit(ast::Id *id);
-  void visit(ast::IdArrayAccess *id_);
-  void visit(ast::Expr *e);
-  void visit(ast::Code *c);
-  void visit(ast::Statement *s);
-  void visit(ast::Assign *a);
-  void visit(ast::While *w);
-  void visit(ast::If *ib);
-  void visit(ast::For *fb);
-  void visit(ast::Print *print);
-  void visit(ast::TypedIds *t_ids);
-  void visit(ast::NoOp *no_op);
-  void visit(ast::Goto *goto_);
-  void visit(ast::Integer *integer);
-  void visit(ast::IdDef *id_def);
-  void visit(ast::IdArrayDef *idA_def);
-  void visit(ast::BinOp *binOp);
-  void visit(ast::IdRef *id_ref);
-  void visit(ast::IdArrayRef *idA_ref);
-  void visit(ast::Literal *literal);
-  void visit(ast::Read *read);
-  void visit(ast::Labelled *labelled);
+  void visit(ast::Node *node_) final;
+  void visit(ast::Program *program) final;
+  void visit(ast::Declarations *declarations) final;
+  void visit(ast::Id *id) final;
+  void visit(ast::IdArrayAccess *id_) final;
+  void visit(ast::Expr *e) final;
+  void visit(ast::Code *c) final;
+  void visit(ast::Statement *s) final;
+  void visit(ast::Assign *a) final;
+  void visit(ast::While *w) final;
+  void visit(ast::If *ib) final;
+  void visit(ast::For *fb) final;
+  void visit(ast::Print *print) final;
+  void visit(ast::TypedIds *t_ids) final;
+  void visit(ast::NoOp *no_op) final;
+  void visit(ast::Goto *goto_) final;
+  void visit(ast::Integer *integer) final;
+  void visit(ast::IdDef *id_def) final;
+  void visit(ast::IdArrayDef *idA_def) final;
+  void visit(ast::BinOp *binOp) final;
+  void visit(ast::IdRef *id_ref) final;
+  void visit(ast::IdArrayRef *idA_ref) final;
+  void visit(ast::Literal *literal) final;
+  void visit(ast::Read *read) final;
+  void visit(ast::Labelled *labelled) final;
 };
 
 struct compiler : public Visitor {
@@ -156,7 +186,7 @@ struct compiler : public Visitor {
   map<string, Value *> v_table;
   map<string, BasicBlock *> l_table;
 
-  void label(map<string, ast::Code *> m) { table = m; }
+  void label(map<string, ast::Code *> m) final { table = m; }
 
   compiler() {
     module = new Module("main", context);
@@ -192,31 +222,31 @@ struct compiler : public Visitor {
     return v_table.find(s) != v_table.end();
   }
 
-  void visit(ast::Node *node_);
-  void visit(ast::Program *program);
-  void visit(ast::Declarations *declarations);
-  void visit(ast::Id *id);
-  void visit(ast::IdArrayAccess *id_);
-  void visit(ast::Expr *e);
-  void visit(ast::Code *c);
-  void visit(ast::Statement *s);
-  void visit(ast::Assign *a);
-  void visit(ast::While *w);
-  void visit(ast::If *ib);
-  void visit(ast::For *fb);
-  void visit(ast::Print *print);
-  void visit(ast::TypedIds *t_ids);
-  void visit(ast::NoOp *no_op);
-  void visit(ast::Goto *goto_);
-  void visit(ast::Integer *integer);
-  void visit(ast::IdDef *id_def);
-  void visit(ast::IdArrayDef *idA_def);
-  void visit(ast::BinOp *binOp);
-  void visit(ast::IdRef *id_ref);
-  void visit(ast::IdArrayRef *idA_ref);
-  void visit(ast::Literal *literal);
-  void visit(ast::Read *read);
-  void visit(ast::Labelled *labelled);
+  void visit(ast::Node *node_) final;
+  void visit(ast::Program *program) final;
+  void visit(ast::Declarations *declarations) final;
+  void visit(ast::Id *id) final;
+  void visit(ast::IdArrayAccess *id_) final;
+  void visit(ast::Expr *e) final;
+  void visit(ast::Code *c) final;
+  void visit(ast::Statement *s) final;
+  void visit(ast::Assign *a) final;
+  void visit(ast::While *w) final;
+  void visit(ast::If *ib) final;
+  void visit(ast::For *fb) final;
+  void visit(ast::Print *print) final;
+  void visit(ast::TypedIds *t_ids) final;
+  void visit(ast::NoOp *no_op) final;
+  void visit(ast::Goto *goto_) final;
+  void visit(ast::Integer *integer) final;
+  void visit(ast::IdDef *id_def) final;
+  void visit(ast::IdArrayDef *idA_def) final;
+  void visit(ast::BinOp *binOp) final;
+  void visit(ast::IdRef *id_ref) final;
+  void visit(ast::IdArrayRef *idA_ref) final;
+  void visit(ast::Literal *literal) final;
+  void visit(ast::Read *read) final;
+  void visit(ast::Labelled *labelled) final;
 };
 
 inline std::unique_ptr<Visitor> make_visitor(std::string type) {
