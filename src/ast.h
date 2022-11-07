@@ -156,11 +156,11 @@ struct integer : public expr {
 };
 
 struct binOp : public expr {
-  opr op;
+  Op op;
   expr *left;
   expr *right;
 
-  binOp(opr op, expr *l, expr *r) : op(op), left(l), right(r) {}
+  binOp(Op op, expr *l, expr *r) : op(op), left(l), right(r) {}
   void accept(visitor::pprinter *p);
   void accept(visitor::interpreter *p);
   void accept(visitor::compiler *p);
