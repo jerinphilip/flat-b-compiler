@@ -11,6 +11,8 @@ FLEX_TARGET(lexer lexer.l ${CMAKE_CURRENT_BINARY_DIR}/lexer.cpp
 )
 
 
+ADD_FLEX_BISON_DEPENDENCY(lexer parser)
+
 
 # llvm_map_components_to_libnames is outdated, so try avoiding it. Adding this
 # code to your CMakeList file should fetch all the llvm libraries at configure
@@ -30,9 +32,11 @@ message(STATUS "Bison outputs: ${BISON_parser_OUTPUTS}")
 message(STATUS "Flex outputs: ${FLEX_lexer_OUTPUTS}")
 add_executable(fb ${BISON_parser_OUTPUTS} ${FLEX_lexer_OUTPUTS} compiler.cpp interpreter.cpp printer.cpp ast.cpp)
 message(STATUS "fb-link-libs: ${FLEX_LIBRARIES} ${llvm_libraries}")
-target_link_libraries(fb PRIVATE ${FLEX_LIBRARIES} ${llvm_libraries})
+target_link_libraries(fb PRIVATE ${FLEX_LIBRARIES})
+target_link_libraries(fb PRIVATE ${llvm_libraries})
 target_include_directories(fb PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_include_directories(fb PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
+target_compile_options(fb PRIVATE -fno-rtti)
 # target_include_directories(kaleidoscope PUBLIC ${LLVM_INCLUDE_DIRS})
 # target_compile_definitions(kaleidoscope PUBLIC ${LLVM_DEFINITIONS})
 
