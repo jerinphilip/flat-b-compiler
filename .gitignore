@@ -1,10 +1,2 @@
 .*.sw*
-src/lex.yy.cc
-src/lex.yy.c
-src/parser.output
-src/parser.tab.h
-src/parser.tab.c
-src/iparser.output
-src/iparser.tab.h
-src/iparser.tab.c
-
+build
