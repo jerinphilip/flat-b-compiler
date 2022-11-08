@@ -148,7 +148,7 @@ void Interpreter::visit(ast::For *for_block) {
     // evalStack.push(cond);
     cond = pop_stack();
     if (cond.underlying.Int) {
-      for_block->block->accept(this); /* Evaluate body */
+      for_block->body->accept(this); /* Evaluate body */
       step->accept(this);
     }
   } while (cond.underlying.Int);

@@ -31,7 +31,7 @@ Value *Compiler::int_to_Value(int x) {
 }
 
 bool Compiler::declared_before(const std::string &s) {
-  return v_table.find(s) != v_table.end();
+  return value_table.find(s) != value_table.end();
 }
 
 void Compiler::label(std::map<std::string, ast::Code *> m) { table = m; }
@@ -68,7 +68,7 @@ void Compiler::visit(ast::Id *id) {
     std::cerr << "Undefined variable " << id->name << std::endl;
     // exit(-1);
   }
-  Value *location = v_table[id->name];
+  Value *location = value_table[id->name];
   // Value *r = new LoadInst(location, "vr", entry.top());
   Value *r = nullptr;
   eval.push((void *)r);
@@ -88,7 +88,7 @@ void Compiler::visit(ast::IdArrayAccess *id_) {
 
   std::vector<Value *> index_params = {start, offset};
   // Value *location = GetElementPtrInst::CreateInBounds(
-  //     v_table[id_->name], index_params, "vr", entry.top());
+  //     value_table[id_->name], index_params, "vr", entry.top());
   // Value *r = new LoadInst(location, "vr", entry.top());
   Value *location = nullptr;
   Value *r = nullptr;
@@ -105,7 +105,7 @@ void Compiler::visit(ast::IdRef *id_ref) {
   Value *ret_val = (Value *)eval.top();
   eval.pop();
   StoreInst *r =
-      new StoreInst(ret_val, v_table[id_ref->name], false, entry.top());
+      new StoreInst(ret_val, value_table[id_ref->name], false, entry.top());
   eval.push((void *)r);
 }
 
@@ -124,7 +124,7 @@ void Compiler::visit(ast::IdArrayRef *idA_ref) {
   eval.pop();
   std::vector<Value *> index_params = {start, offset};
   // Value *location = GetElementPtrInst::CreateInBounds(
-  //     v_table[idA_ref->name], index_params, "vr", entry.top());
+  //     value_table[idA_ref->name], index_params, "vr", entry.top());
   Value *location = nullptr;
 
   Value *instruction = new StoreInst(ret_val, location, false, entry.top());
@@ -225,7 +225,7 @@ void Compiler::visit(ast::If *if_) {
   entry.push(merge_block);
 }
 
-void Compiler::visit(ast::For *for_) {
+void Compiler::visit(ast::For *for_block) {
   BasicBlock *parent = entry.top();
   BasicBlock *pre, *body, *post;
 
@@ -236,15 +236,15 @@ void Compiler::visit(ast::For *for_) {
   post = BasicBlock::Create(context, "for_post", parent->getParent(), 0);
 
   /* Initialize before entering loop, hopefully in parent */
-  for_->init->accept(this);
+  for_block->init->accept(this);
   void *location;
   void **var = &location;
-  for_->init->ref->vnode(var);
+  for_block->init->ref->vnode(var);
   ast::Id *ivar = (ast::Id *)location;
 
-  ast::BinOp *rhs = new ast::BinOp(Op::add, ivar, for_->step);
-  ast::Assign *step = new ast::Assign(for_->init->ref, rhs);
-  ast::BinOp *check = new ast::BinOp(Op::le, ivar, for_->end);
+  ast::BinOp *rhs = new ast::BinOp(Op::add, ivar, for_block->step);
+  ast::Assign *step = new ast::Assign(for_block->init->ref, rhs);
+  ast::BinOp *check = new ast::BinOp(Op::le, ivar, for_block->end);
 
   entry.push(pre);
   check->accept(this);
@@ -260,7 +260,7 @@ void Compiler::visit(ast::For *for_) {
 
   entry.push(body);
 
-  for_->block->accept(this);
+  for_block->body->accept(this);
   step->accept(this);
 
   body = entry.top();
@@ -278,9 +278,9 @@ void Compiler::visit(ast::Print *print) {
   format.init();
 
   bool first = true;
-  auto ts = *print->args;
-  reverse(ts.begin(), ts.end());
-  for (auto &p : ts) {
+  auto args = *print->args;
+  reverse(args.begin(), args.end());
+  for (auto &p : args) {
     if (not first) {
       format.str += " ";
     }
@@ -316,10 +316,10 @@ void Compiler::visit(ast::TypedIds *typed_ids) {
 void Compiler::visit(ast::NoOp *no_op) {}
 
 void Compiler::visit(ast::Goto *goto_) {
-  if (l_table.find(goto_->label) != l_table.end()) {
+  if (label_table.find(goto_->label) != label_table.end()) {
     BasicBlock *parent, *follow, *non_follow;
     parent = entry.top();
-    follow = l_table[goto_->label];
+    follow = label_table[goto_->label];
     if (goto_->cond) {
       goto_->cond->accept(this);
       ZExtInst *condition = (ZExtInst *)eval.top();
@@ -432,7 +432,7 @@ void Compiler::visit(ast::IdDef *id_def) {
     var->setInitializer(
         ConstantInt::get(context, APInt(64, StringRef("0"), 10)));
 
-    v_table[id_def->name] = var;
+    value_table[id_def->name] = var;
     // cerr << "Declaration of variable " << id_def->name << endl;
   }
 }
@@ -448,7 +448,7 @@ void Compiler::visit(ast::IdArrayDef *idA_def) {
     var->setInitializer(ConstantAggregateZero::get(
         ArrayType::get(Type::getInt64Ty(context), idA_def->size)));
 
-    v_table[idA_def->name] = var;
+    value_table[idA_def->name] = var;
     // cerr << "Declaration of variable " << idA_def->name << endl;
   }
 }
@@ -485,7 +485,7 @@ void Compiler::visit(ast::Labelled *labelled) {
   follow = BasicBlock::Create(context, "target", parent->getParent(), 0);
   BranchInst::Create(follow, parent);
 
-  l_table[labelled->label] = follow;
+  label_table[labelled->label] = follow;
   entry.push(follow);
   labelled->block->accept(this);
 }

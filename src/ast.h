@@ -7,6 +7,7 @@
 
 enum class Op { add, sub, mul, quot, lt, gt, le, ge, eq };
 
+// Forward declarations.
 namespace visitor {
 struct PrettyPrinter;
 struct Interpreter;
@@ -70,9 +71,7 @@ struct Expr : public Node {
 
 struct Id : public Expr {
   std::string name;
-  Id(std::string s) : name(s) {
-    // cerr << "Initializing: " << name << endl;
-  }
+  Id(std::string name) : name(name) {}
 
   virtual void accept(visitor::PrettyPrinter *p);
   virtual void accept(visitor::Interpreter *p);
@@ -83,10 +82,9 @@ struct Id : public Expr {
 
 struct IdArrayAccess : public Id {
   Expr *subscript;
-  IdArrayAccess(std::string s, Expr *e) : Id(s), subscript(e) {
-    // cerr << "Initializing: " << s << endl;
-    // cerr << "Other: "<< name << endl;
-  }
+
+  IdArrayAccess(std::string name, Expr *subscript)
+      : Id(name), subscript(subscript) {}
   void accept(visitor::PrettyPrinter *p);
   void accept(visitor::Interpreter *p);
   void accept(visitor::Compiler *p);
@@ -226,19 +224,12 @@ struct If : public CodeBlock {
 
 struct For : public Statement {
   Assign *init;
-  /*
-  id_ref *var;
-  Expr *start;
-  */
   Expr *step;
   Expr *end;
-  Code *block;
+  Code *body;
 
-  For(Assign *init,
-      /*id_ref *i, Expr *init,*/
-      Expr *delta, Expr *end, Code *b)
-      : /*var(i), start(init), */
-        init(init), step(delta), end(end), block(b) {}
+  For(Assign *init, Expr *delta, Expr *end, Code *b)
+      : init(init), step(delta), end(end), body(b) {}
   void accept(visitor::PrettyPrinter *p) final;
   void accept(visitor::Interpreter *p) final;
   void accept(visitor::Compiler *p) final;

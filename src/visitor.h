@@ -182,8 +182,8 @@ struct Compiler : public Visitor {
   std::stack<void *> eval;
 
   /* Variable and Label Tables */
-  std::map<std::string, Value *> v_table;
-  std::map<std::string, BasicBlock *> l_table;
+  std::map<std::string, Value *> value_table;
+  std::map<std::string, BasicBlock *> label_table;
 
   Compiler();
   Value *string_to_Value(std::string s);
@@ -198,9 +198,9 @@ struct Compiler : public Visitor {
   void visit(ast::IdArrayAccess *id_array_access) final;
   void visit(ast::Expr *expr) final;
   void visit(ast::Code *code) final;
-  void visit(ast::Statement *s) final;
-  void visit(ast::Assign *a) final;
-  void visit(ast::While *w) final;
+  void visit(ast::Statement *statement) final;
+  void visit(ast::Assign *assign) final;
+  void visit(ast::While *while_block) final;
   void visit(ast::If *if_block) final;
   void visit(ast::For *for_block) final;
   void visit(ast::Print *print) final;
