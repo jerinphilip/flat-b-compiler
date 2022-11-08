@@ -47,7 +47,7 @@ struct Visitor {
   virtual void visit(ast::Read *read) = 0;
   virtual void visit(ast::Labelled *labelled) = 0;
 
-  virtual void label(map<string, ast::Code *> m);
+  virtual void label(map<string, ast::Code *> m) = 0;
 
   virtual ~Visitor() = default;
 };
