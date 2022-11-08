@@ -25,13 +25,13 @@
     char* String;
     ast::Program *program;
     ast::Declarations *declarations;
-    vector<ast::TypedIds*> *tIds;
+    std::vector<ast::TypedIds*> *tIds;
     ast::TypedIds *tId;
     ast::Statement *statement;
-    vector<ast::Statement*> *statements;
+    std::vector<ast::Statement*> *statements;
     ast::Id *id;
-    vector<ast::Id*> *ids;
-    vector<ast::IdDef*> *defs; 
+    std::vector<ast::Id*> *ids;
+    std::vector<ast::IdDef*> *defs; 
     ast::IdDef *def;
     ast::IdRef *ref;
     ast::Expr *expr;
@@ -43,7 +43,7 @@
     ast::If *if_;
     ast::NoOp *no_op;
     ast::Goto *goto_;
-    vector<ast::Expr*> *exprs;
+    std::vector<ast::Expr*> *exprs;
     ast::Print *print;
     ast::Read *read;
     ast::Labelled *labelled;
@@ -119,13 +119,13 @@ code_block         :  k_statement block                                         
 block              : '{' statement_list '}'                                     { $$ =  new ast::Code($2); }
                    ;
 declaration_list   : declaration_list declaration                               { $1->push_back($2); $$ = $1; }
-                   | %empty                                                     { $$ = new vector<ast::TypedIds*>(); }
+                   | %empty                                                     { $$ = new std::vector<ast::TypedIds*>(); }
                    ;
 
 labelled_block     : IDENTIFIER ':' statement_list                              { code = new ast::Code($3); $$ = new ast::Labelled($1, code); labels[($1)] = code;}
 statement_list     : statement_list statement                                   { $1->push_back($2); $$ = $1; }
                    | statement_list labelled_block                              { $1->push_back($2); $$ = $1; }
-                   | %empty                                                     { $$ = new vector<ast::Statement*>(); } 
+                   | %empty                                                     { $$ = new std::vector<ast::Statement*>(); } 
                    ;
 statement          : lval '=' arithExpr EOS                                     { $$ = new ast::Assign($1, $3); }  
                    | lval '=' boolExpr EOS                                      { $$ = new ast::Assign($1, $3); }  
@@ -142,7 +142,7 @@ statement          : lval '=' arithExpr EOS                                     
 declaration        : dtype id_list EOS                                          { $$ = new ast::TypedIds($1, $2); }
                    /*| EOS {$$ */
                    ;
-id_list            : var                                                        { $$ = new vector<ast::IdDef*>(); $$->push_back($1); }
+id_list            : var                                                        { $$ = new std::vector<ast::IdDef*>(); $$->push_back($1); }
                    | var ',' id_list                                            { $3->push_back($1); $$ = $3; }
                    ;
 var                : IDENTIFIER                                                 { $$ = new ast::IdDef(string($1)); }
@@ -186,7 +186,7 @@ print              : k_print printables                                         
                    ;                                                            
 println            : k_println printables                                       { $$ = new ast::Print($2, true); }
                    ;                                                            
-printables         : printable                                                  { $$ = new vector<ast::Expr*>(); $$->push_back($1); }
+printables         : printable                                                  { $$ = new std::vector<ast::Expr*>(); $$->push_back($1); }
                    | printable ',' printables                                   { $3->push_back($1);  $$ = $3;}
                    ;                                                            
 printable          : arithExpr                                                  { $$ = $1 ;}

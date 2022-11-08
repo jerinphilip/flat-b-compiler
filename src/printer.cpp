@@ -3,7 +3,7 @@
 #include "visitor.h"
 
 namespace visitor {
-void PrettyPrinter::label(map<string, ast::Code *> m) {}
+void PrettyPrinter::label(std::map<std::string, ast::Code *> m) {}
 
 void PrettyPrinter::visit(ast::Node *node) {}
 
@@ -13,60 +13,60 @@ void PrettyPrinter::visit(ast::Program *program) {
 }
 
 void PrettyPrinter::visit(ast::Declarations *declarations) {
-  cout << "decl {" << endl;
+  std::cout << "decl {" << std::endl;
   for (auto &p : *(declarations->ds)) {
     p->accept(this);
   }
-  cout << "}\n";
+  std::cout << "}\n";
 }
 
 void PrettyPrinter::visit(ast::Code *code) {
-  // cout << "Code" << endl;
+  // std::cout << "Code" << std::endl;
 }
 
 void PrettyPrinter::visit(ast::Id *id) {
-  // cout << "Code" << endl;
-  cout << id->name;
+  // std::cout << "Code" << std::endl;
+  std::cout << id->name;
 }
 
 void PrettyPrinter::visit(ast::IdArrayAccess *id_) {
-  // cout << "Code" << endl;
-  cout << id_->name << "[";
+  // std::cout << "Code" << std::endl;
+  std::cout << id_->name << "[";
   id_->subscript->accept(this);
-  cout << "]";
+  std::cout << "]";
 }
 
 void PrettyPrinter::visit(ast::Expr *expr) {
-  // cout << "Code" << endl;
+  // std::cout << "Code" << std::endl;
 }
 
 void PrettyPrinter::visit(ast::Statement *statement) {
-  // cout << "Code" << endl;
+  // std::cout << "Code" << std::endl;
 }
 
 void PrettyPrinter::visit(ast::Assign *assign) {
-  // cout << "Code" << endl;
+  // std::cout << "Code" << std::endl;
 }
 
 void PrettyPrinter::visit(ast::While *while_) {
-  // cout << "Code" << endl;
+  // std::cout << "Code" << std::endl;
 }
 
 void PrettyPrinter::visit(ast::If *if_) {
-  // cout << "Code" << endl;
+  // std::cout << "Code" << std::endl;
 }
 
 void PrettyPrinter::visit(ast::For *for_) {
-  // cout << "Code" << endl;
+  // std::cout << "Code" << std::endl;
 }
 
 void PrettyPrinter::visit(ast::Print *print) {
-  // cout << "Code" << endl;
+  // std::cout << "Code" << std::endl;
 }
 
 void PrettyPrinter::visit(ast::TypedIds *tIdWrapper) {
-  // cout << "Typed ids" << endl;
-  string dtype;
+  // std::cout << "Typed ids" << std::endl;
+  std::string dtype;
   switch (tIdWrapper->dtype) {
   case FlatBType::Int:
     dtype = "int";
@@ -80,24 +80,30 @@ void PrettyPrinter::visit(ast::TypedIds *tIdWrapper) {
   default:
     break;
   }
-  cout << dtype << " ";
+  std::cout << dtype << " ";
   bool first = true;
   auto *ps = tIdWrapper->t_ids;
   reverse(ps->begin(), ps->end());
   for (auto &p : *ps) {
     if (not first)
-      cout << ", ";
+      std::cout << ", ";
     first = false;
     p->accept(this);
   }
-  cout << ";\n";
+  std::cout << ";\n";
 }
 
-void PrettyPrinter::visit(ast::NoOp *no_op) { cout << "No-Op" << endl; }
+void PrettyPrinter::visit(ast::NoOp *no_op) {
+  std::cout << "No-Op" << std::endl;
+}
 
-void PrettyPrinter::visit(ast::Goto *goto_) { cout << "Go-To" << endl; }
+void PrettyPrinter::visit(ast::Goto *goto_) {
+  std::cout << "Go-To" << std::endl;
+}
 
-void PrettyPrinter::visit(ast::Integer *integer) { cout << integer->value; }
+void PrettyPrinter::visit(ast::Integer *integer) {
+  std::cout << integer->value;
+}
 
 void PrettyPrinter::visit(ast::IdDef *id_def) {}
 

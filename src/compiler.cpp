@@ -14,7 +14,7 @@ Compiler::Compiler() {
                            GlobalValue::ExternalLinkage, "scanf", module);
 }
 
-Value *Compiler::string_to_Value(string s) {
+Value *Compiler::string_to_Value(std::string s) {
   GlobalVariable *var = new GlobalVariable(
       *module, ArrayType::get(IntegerType::get(context, 8), (s.size() + 1)),
       true, GlobalVariable::InternalLinkage, NULL, "literal");
@@ -31,11 +31,11 @@ Value *Compiler::int_to_Value(int x) {
   return var;
 }
 
-bool Compiler::declared_before(const string &s) {
+bool Compiler::declared_before(const std::string &s) {
   return v_table.find(s) != v_table.end();
 }
 
-void Compiler::label(map<string, ast::Code *> m) { table = m; }
+void Compiler::label(std::map<std::string, ast::Code *> m) { table = m; }
 
 void Compiler::visit(ast::Node *node) {}
 
@@ -66,7 +66,7 @@ void Compiler::visit(ast::Code *code) {
 
 void Compiler::visit(ast::Id *id) {
   if (not declared_before(id->name)) {
-    cerr << "Undefined variable " << id->name << endl;
+    std::cerr << "Undefined variable " << id->name << std::endl;
     // exit(-1);
   }
   Value *location = v_table[id->name];
@@ -78,7 +78,7 @@ void Compiler::visit(ast::Id *id) {
 
 void Compiler::visit(ast::IdArrayAccess *id_) {
   if (not declared_before(id_->name)) {
-    cerr << "Undefined variable " << id_->name << endl;
+    std::cerr << "Undefined variable " << id_->name << std::endl;
     // exit(-1);
   }
 
@@ -87,7 +87,7 @@ void Compiler::visit(ast::IdArrayAccess *id_) {
   auto offset = (Value *)eval.top();
   eval.pop();
 
-  vector<Value *> index_params = {start, offset};
+  std::vector<Value *> index_params = {start, offset};
   // Value *location = GetElementPtrInst::CreateInBounds(
   //     v_table[id_->name], index_params, "vr", entry.top());
   // Value *r = new LoadInst(location, "vr", entry.top());
@@ -99,7 +99,7 @@ void Compiler::visit(ast::IdArrayAccess *id_) {
 
 void Compiler::visit(ast::IdRef *id_ref) {
   if (not declared_before(id_ref->name)) {
-    cerr << "Undefined variable " << id_ref->name << endl;
+    std::cerr << "Undefined variable " << id_ref->name << std::endl;
     // exit(-1);
   }
 
@@ -112,7 +112,7 @@ void Compiler::visit(ast::IdRef *id_ref) {
 
 void Compiler::visit(ast::IdArrayRef *idA_ref) {
   if (not declared_before(idA_ref->name)) {
-    cerr << "Undefined variable " << idA_ref->name << endl;
+    std::cerr << "Undefined variable " << idA_ref->name << std::endl;
     // exit(-1);
   }
 
@@ -123,7 +123,7 @@ void Compiler::visit(ast::IdArrayRef *idA_ref) {
   auto start = ConstantInt::get(context, APInt(64, StringRef("0"), 10));
   auto offset = (Value *)eval.top();
   eval.pop();
-  vector<Value *> index_params = {start, offset};
+  std::vector<Value *> index_params = {start, offset};
   // Value *location = GetElementPtrInst::CreateInBounds(
   //     v_table[idA_ref->name], index_params, "vr", entry.top());
   Value *location = nullptr;
@@ -296,11 +296,11 @@ void Compiler::visit(ast::Print *print) {
     format.str += "\n";
   }
 
-  vector<Value *> new_args;
+  std::vector<Value *> new_args;
   Value *fvar = string_to_Value(format.str);
   new_args.push_back(fvar);
   new_args.insert(new_args.end(), format.args.begin(), format.args.end());
-  CallInst::Create(printf, makeArrayRef(new_args), string("printf"),
+  CallInst::Create(printf, makeArrayRef(new_args), std::string("printf"),
                    entry.top());
 
   format.finish();
@@ -423,7 +423,7 @@ void Compiler::visit(ast::BinOp *binOp) {
 void Compiler::visit(ast::IdDef *id_def) {
 
   if (declared_before(id_def->name)) {
-    cerr << "Redeclaration of variable " << id_def->name << endl;
+    std::cerr << "Redeclaration of variable " << id_def->name << std::endl;
     // exit(-1);
   } else {
 
@@ -440,7 +440,7 @@ void Compiler::visit(ast::IdDef *id_def) {
 
 void Compiler::visit(ast::IdArrayDef *idA_def) {
   if (declared_before(idA_def->name)) {
-    cerr << "Redeclaration of variable " << idA_def->name << endl;
+    std::cerr << "Redeclaration of variable " << idA_def->name << std::endl;
     // exit(-1);
   } else {
     GlobalVariable *var = new GlobalVariable(
@@ -471,7 +471,7 @@ void Compiler::visit(ast::Read *read) {
       entry.top());
 
 
-  vector<Value*> new_args = {string_to_Value("%d"), location};
+  std::vector<Value*> new_args = {string_to_Value("%d"), location};
   CallInst::Create(scanf, makeArrayRef(new_args), string("scanf"),
   entry.top()); auto *r = new LoadInst(location, "invar", entry.top());
   eval.push(r);

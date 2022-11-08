@@ -3,7 +3,6 @@
 #include <iostream>
 #include <string>
 #include <vector>
-using namespace std;
 
 enum FlatBType {
   Int,
@@ -62,8 +61,8 @@ struct Program : public Node {
 /* declarations */
 
 struct Declarations : public Node {
-  vector<TypedIds *> *ds;
-  Declarations(vector<TypedIds *> *v) : ds(v) {}
+  std::vector<TypedIds *> *ds;
+  Declarations(std::vector<TypedIds *> *v) : ds(v) {}
 
   void accept(visitor::PrettyPrinter *p);
   void accept(visitor::Interpreter *p);
@@ -79,8 +78,8 @@ struct Expr : public Node {
 };
 
 struct Id : public Expr {
-  string name;
-  Id(string s) : name(s) {
+  std::string name;
+  Id(std::string s) : name(s) {
     // cerr << "Initializing: " << name << endl;
   }
 
@@ -93,7 +92,7 @@ struct Id : public Expr {
 
 struct IdArrayAccess : public Id {
   Expr *subscript;
-  IdArrayAccess(string s, Expr *e) : Id(s), subscript(e) {
+  IdArrayAccess(std::string s, Expr *e) : Id(s), subscript(e) {
     // cerr << "Initializing: " << s << endl;
     // cerr << "Other: "<< name << endl;
   }
@@ -108,8 +107,8 @@ struct IdBase : public Node {
 };
 
 struct IdRef : public IdBase {
-  string name;
-  IdRef(string s) : name(s) {
+  std::string name;
+  IdRef(std::string s) : name(s) {
     // cerr << "Initializing: " << name << endl;
   }
   virtual void accept(visitor::PrettyPrinter *p);
@@ -121,7 +120,7 @@ struct IdRef : public IdBase {
 
 struct IdArrayRef : public IdRef {
   Expr *subscript;
-  IdArrayRef(string s, Expr *e) : IdRef(s), subscript(e) {}
+  IdArrayRef(std::string s, Expr *e) : IdRef(s), subscript(e) {}
   void accept(visitor::PrettyPrinter *p);
   void accept(visitor::Interpreter *p);
   void accept(visitor::Compiler *p);
@@ -129,8 +128,8 @@ struct IdArrayRef : public IdRef {
 };
 
 struct IdDef : public Node {
-  string name;
-  IdDef(string s) : name(s) {}
+  std::string name;
+  IdDef(std::string s) : name(s) {}
   virtual void accept(visitor::PrettyPrinter *p);
   virtual void accept(visitor::Interpreter *p);
   virtual void accept(visitor::Compiler *p);
@@ -139,7 +138,7 @@ struct IdDef : public Node {
 
 struct IdArrayDef : public IdDef {
   int size;
-  IdArrayDef(string s, int sz) : IdDef(s), size(sz) {}
+  IdArrayDef(std::string s, int sz) : IdDef(s), size(sz) {}
   void accept(visitor::PrettyPrinter *p);
   void accept(visitor::Interpreter *p);
   void accept(visitor::Compiler *p);
@@ -147,8 +146,8 @@ struct IdArrayDef : public IdDef {
 
 struct TypedIds : public Node {
   FlatBType dtype;
-  vector<IdDef *> *t_ids;
-  TypedIds(FlatBType d, vector<IdDef *> *v) : dtype(d), t_ids(v) {}
+  std::vector<IdDef *> *t_ids;
+  TypedIds(FlatBType d, std::vector<IdDef *> *v) : dtype(d), t_ids(v) {}
   void accept(visitor::PrettyPrinter *p);
   void accept(visitor::Interpreter *p);
   void accept(visitor::Compiler *p);
@@ -182,17 +181,17 @@ struct Statement : public Node {
 
 /* Statements */
 struct Code : public Statement {
-  vector<Statement *> *statements;
-  Code(vector<Statement *> *s) : statements(s) {}
+  std::vector<Statement *> *statements;
+  Code(std::vector<Statement *> *s) : statements(s) {}
   void accept(visitor::PrettyPrinter *p);
   void accept(visitor::Interpreter *p);
   void accept(visitor::Compiler *p);
 };
 
 struct Labelled : public Statement {
-  string label;
+  std::string label;
   Code *block;
-  Labelled(string label, Code *s) : label(label), block(s) {}
+  Labelled(std::string label, Code *s) : label(label), block(s) {}
   void accept(visitor::PrettyPrinter *p);
   void accept(visitor::Interpreter *p);
   void accept(visitor::Compiler *p);
@@ -256,18 +255,18 @@ struct For : public Statement {
 
 struct Goto : public Statement {
   Expr *cond;
-  string label;
-  Goto(string label, Expr *e = NULL) : label(label), cond(e) {}
+  std::string label;
+  Goto(std::string label, Expr *e = NULL) : label(label), cond(e) {}
   void accept(visitor::PrettyPrinter *p);
   void accept(visitor::Interpreter *p);
   void accept(visitor::Compiler *p);
 };
 
 struct Print : public Statement {
-  vector<ast::Expr *> *args;
+  std::vector<ast::Expr *> *args;
   bool newline;
 
-  Print(vector<ast::Expr *> *args, bool newline)
+  Print(std::vector<ast::Expr *> *args, bool newline)
       : args(args), newline(newline) {}
 
   void accept(visitor::PrettyPrinter *p);
@@ -283,8 +282,8 @@ struct NoOp : public Statement {
 };
 
 struct Literal : public Expr {
-  string value;
-  Literal(string s) { value = s.substr(1, s.size() - 2); }
+  std::string value;
+  Literal(std::string s) { value = s.substr(1, s.size() - 2); }
   void accept(visitor::PrettyPrinter *p);
   void accept(visitor::Interpreter *p);
   void accept(visitor::Compiler *p);

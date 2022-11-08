@@ -3,14 +3,14 @@
 
 namespace visitor {
 
-void Interpreter::label(map<string, ast::Code *> m) {
+void Interpreter::label(std::map<std::string, ast::Code *> m) {
   table = m;
   /*
-  cerr << "labels: ";
+  std::cerr << "labels: ";
   for(auto p: table){
-      cerr << p.first << " ";
+      std::cerr << p.first << " ";
   }
-  cerr << endl;
+  std::cerr << std::endl;
   */
 }
 
@@ -38,7 +38,7 @@ void Interpreter::visit(ast::Id *id) {
   DataType dt;
   bool declared = env.find(id->name) != env.end();
   if (not declared)
-    cerr << "Undefined variable" << endl;
+    std::cerr << "Undefined variable" << std::endl;
 
   /* TODO, Ascertain dtype from pointer type */
   dt.dtype = FlatBType::Int;
@@ -51,7 +51,7 @@ void Interpreter::visit(ast::IdArrayAccess *id_) {
   dt.dtype = FlatBType::Int;
   bool declared = env.find(id_->name) != env.end();
   if (not declared)
-    cerr << "Undefined variable" << endl;
+    std::cerr << "Undefined variable" << std::endl;
 
   id_->subscript->accept(this);
 
@@ -70,7 +70,7 @@ void Interpreter::visit(ast::IdRef *id_ref) {
   dt.dtype = FlatBType::Pointer;
   bool declared = env.find(id_ref->name) != env.end();
   if (not declared)
-    cerr << "Undefined variable" << endl;
+    std::cerr << "Undefined variable" << std::endl;
 
   dt.T.p = &(env[id_ref->name].T.i);
   evalStack.push(dt);
@@ -81,7 +81,7 @@ void Interpreter::visit(ast::IdArrayRef *idA_ref) {
   dt.dtype = FlatBType::Pointer;
   bool declared = env.find(idA_ref->name) != env.end();
   if (not declared)
-    cerr << "Undefined variable" << endl;
+    std::cerr << "Undefined variable" << std::endl;
 
   idA_ref->subscript->accept(this);
   DataType sc = evalStack.top();
@@ -167,7 +167,7 @@ void Interpreter::visit(ast::Print *print) {
   reverse(ts.begin(), ts.end());
   for (auto &p : ts) {
     if (not first) {
-      cout << " ";
+      std::cout << " ";
     }
     first = false;
     p->accept(this);
@@ -175,13 +175,13 @@ void Interpreter::visit(ast::Print *print) {
     evalStack.pop();
     switch (dt.dtype) {
     case FlatBType::Int:
-      cout << dt.T.i;
+      std::cout << dt.T.i;
       break;
     case FlatBType::CharArray:
-      cout << dt.T.s;
+      std::cout << dt.T.s;
       break;
     case FlatBType::Bool:
-      cout << dt.T.b;
+      std::cout << dt.T.b;
       break;
     default:
       break;
@@ -189,7 +189,7 @@ void Interpreter::visit(ast::Print *print) {
   }
 
   if (print->newline) {
-    cout << "\n";
+    std::cout << "\n";
   }
 }
 
@@ -287,12 +287,12 @@ void Interpreter::visit(ast::IdDef *id_def) {
     break;
   }
 
-  string name = id_def->name;
+  std::string name = id_def->name;
   env[name] = dt;
 }
 
 void Interpreter::visit(ast::IdArrayDef *idA_def) {
-  string name = idA_def->name;
+  std::string name = idA_def->name;
   int size = idA_def->size;
   DataType dt;
   dt.dtype = currentType;
@@ -320,7 +320,7 @@ void Interpreter::visit(ast::Read *read) {
   DataType ref = evalStack.top();
   evalStack.pop();
   int value;
-  cin >> value;
+  std::cin >> value;
   *(ref.T.p) = value;
 }
 
