@@ -2,6 +2,7 @@
     #include <vector>
     #include "ast.h"
     #include "parser.h"
+    extern "C" int yylex (void);
 %}
 
 %%
