@@ -202,27 +202,26 @@ void yyerror (char const *s)
        fprintf (stderr, "%s\n", s);
 }
 
+int main(int argc, char *argv[]) {
+  if (argc == 1) {
+    fprintf(stderr, "Correct usage: %s filename\n", argv[0]);
+    exit(1);
+  }
 
-int main(int argc, char *argv[])
-{
-	if (argc == 1 ) {
-		fprintf(stderr, "Correct usage: %s filename\n", argv[0]);
-		exit(1);
-	}
-
-	if (argc > 2) {
-		fprintf(stderr, "Passing more arguments than necessary.\n");
-		fprintf(stderr, "Correct usage: %s filename\n", argv[0]);
-	}
-
+  if (argc > 2) {
+    fprintf(stderr, "Passing more arguments than necessary.\n");
+    fprintf(stderr, "Correct usage: %s filename\n", argv[0]);
+  }
 
   std::unique_ptr<visitor::Visitor> visitor = visitor::make_visitor(argv[1]);
-    
-	yyin = fopen(argv[2], "r");
-	if(yyparse() == 0){
-        visitor->label(labels);
-        visitor->visit(pgm);
+
+  yyin = fopen(argv[2], "r");
+  if (yyparse() == 0) {
+    visitor->label(labels);
+    visitor->visit(pgm);
   }
 
   return 0;
 }
+
+

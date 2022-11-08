@@ -1,26 +1,40 @@
 #include "dtype.h"
 #include "visitor.h"
-void visitor::interpreter::visit(ast::Node *node) {}
 
-void visitor::interpreter::visit(ast::Program *program) {
+namespace visitor {
+
+void interpreter::label(map<string, ast::Code *> m) {
+  table = m;
+  /*
+  cerr << "labels: ";
+  for(auto p: table){
+      cerr << p.first << " ";
+  }
+  cerr << endl;
+  */
+}
+
+void interpreter::visit(ast::Node *node) {}
+
+void interpreter::visit(ast::Program *program) {
   root = program;
   program->decl->accept(this);
   program->block->accept(this);
 }
 
-void visitor::interpreter::visit(ast::Declarations *declarations) {
+void interpreter::visit(ast::Declarations *declarations) {
   for (auto &p : *(declarations->ds)) {
     p->accept(this);
   }
 }
 
-void visitor::interpreter::visit(ast::Code *code) {
+void interpreter::visit(ast::Code *code) {
   for (auto &p : *(code->statements)) {
     p->accept(this);
   }
 }
 
-void visitor::interpreter::visit(ast::Id *id) {
+void interpreter::visit(ast::Id *id) {
   DataType dt;
   bool declared = env.find(id->name) != env.end();
   if (not declared)
@@ -32,7 +46,7 @@ void visitor::interpreter::visit(ast::Id *id) {
   evalStack.push(dt);
 }
 
-void visitor::interpreter::visit(ast::IdArrayAccess *id_) {
+void interpreter::visit(ast::IdArrayAccess *id_) {
   DataType dt;
   dt.dtype = FlatBType::Int;
   bool declared = env.find(id_->name) != env.end();
@@ -51,7 +65,7 @@ void visitor::interpreter::visit(ast::IdArrayAccess *id_) {
   evalStack.push(dt);
 }
 
-void visitor::interpreter::visit(ast::IdRef *id_ref) {
+void interpreter::visit(ast::IdRef *id_ref) {
   DataType dt;
   dt.dtype = FlatBType::Pointer;
   bool declared = env.find(id_ref->name) != env.end();
@@ -62,7 +76,7 @@ void visitor::interpreter::visit(ast::IdRef *id_ref) {
   evalStack.push(dt);
 }
 
-void visitor::interpreter::visit(ast::IdArrayRef *idA_ref) {
+void interpreter::visit(ast::IdArrayRef *idA_ref) {
   DataType dt;
   dt.dtype = FlatBType::Pointer;
   bool declared = env.find(idA_ref->name) != env.end();
@@ -77,11 +91,11 @@ void visitor::interpreter::visit(ast::IdArrayRef *idA_ref) {
   evalStack.push(dt);
 }
 
-void visitor::interpreter::visit(ast::Expr *expr) {}
+void interpreter::visit(ast::Expr *expr) {}
 
-void visitor::interpreter::visit(ast::Statement *statement) {}
+void interpreter::visit(ast::Statement *statement) {}
 
-void visitor::interpreter::visit(ast::Assign *assign) {
+void interpreter::visit(ast::Assign *assign) {
   assign->ref->accept(this);
   DataType ref = evalStack.top();
   evalStack.pop();
@@ -91,7 +105,7 @@ void visitor::interpreter::visit(ast::Assign *assign) {
   *(ref.T.p) = value.T.i;
 }
 
-void visitor::interpreter::visit(ast::While *while_) {
+void interpreter::visit(ast::While *while_) {
   DataType cond;
   while_->cond->accept(this);
   cond = evalStack.top();
@@ -106,7 +120,7 @@ void visitor::interpreter::visit(ast::While *while_) {
   }
 }
 
-void visitor::interpreter::visit(ast::If *if_) {
+void interpreter::visit(ast::If *if_) {
   DataType cond;
   if_->cond->accept(this);
   cond = evalStack.top();
@@ -120,7 +134,7 @@ void visitor::interpreter::visit(ast::If *if_) {
   }
 }
 
-void visitor::interpreter::visit(ast::For *for_) {
+void interpreter::visit(ast::For *for_) {
   for_->init->accept(this);
 
   void *location;
@@ -147,7 +161,7 @@ void visitor::interpreter::visit(ast::For *for_) {
   } while (cond.T.i);
 }
 
-void visitor::interpreter::visit(ast::Print *print) {
+void interpreter::visit(ast::Print *print) {
   bool first = true;
   auto ts = *print->args;
   reverse(ts.begin(), ts.end());
@@ -179,7 +193,7 @@ void visitor::interpreter::visit(ast::Print *print) {
   }
 }
 
-void visitor::interpreter::visit(ast::TypedIds *twrap) {
+void interpreter::visit(ast::TypedIds *twrap) {
   currentType = twrap->dtype;
   auto *ps = twrap->t_ids;
   for (auto &p : *ps) {
@@ -187,9 +201,9 @@ void visitor::interpreter::visit(ast::TypedIds *twrap) {
   }
 }
 
-void visitor::interpreter::visit(ast::NoOp *no_op) {}
+void interpreter::visit(ast::NoOp *no_op) {}
 
-void visitor::interpreter::visit(ast::Goto *goto_) {
+void interpreter::visit(ast::Goto *goto_) {
   if (goto_->cond == NULL) {
     ast::Code *code = table[goto_->label];
     code->accept(this);
@@ -207,14 +221,14 @@ void visitor::interpreter::visit(ast::Goto *goto_) {
   }
 }
 
-void visitor::interpreter::visit(ast::Integer *integer) {
+void interpreter::visit(ast::Integer *integer) {
   DataType dt;
   dt.dtype = FlatBType::Int;
   dt.T.i = integer->value;
   evalStack.push(dt);
 }
 
-void visitor::interpreter::visit(ast::BinOp *binOp) {
+void interpreter::visit(ast::BinOp *binOp) {
 
   /* Evaluate and put on stack */
   binOp->left->accept(this);
@@ -262,7 +276,7 @@ void visitor::interpreter::visit(ast::BinOp *binOp) {
   }
 }
 
-void visitor::interpreter::visit(ast::IdDef *id_def) {
+void interpreter::visit(ast::IdDef *id_def) {
   DataType dt;
   dt.dtype = currentType;
   switch (dt.dtype) {
@@ -277,7 +291,7 @@ void visitor::interpreter::visit(ast::IdDef *id_def) {
   env[name] = dt;
 }
 
-void visitor::interpreter::visit(ast::IdArrayDef *idA_def) {
+void interpreter::visit(ast::IdArrayDef *idA_def) {
   string name = idA_def->name;
   int size = idA_def->size;
   DataType dt;
@@ -294,14 +308,14 @@ void visitor::interpreter::visit(ast::IdArrayDef *idA_def) {
   env[name] = dt;
 }
 
-void visitor::interpreter::visit(ast::Literal *literal) {
+void interpreter::visit(ast::Literal *literal) {
   DataType dt;
   dt.dtype = FlatBType::CharArray;
   dt.T.s = (char *)literal->value.c_str();
   evalStack.push(dt);
 }
 
-void visitor::interpreter::visit(ast::Read *read) {
+void interpreter::visit(ast::Read *read) {
   read->var->accept(this);
   DataType ref = evalStack.top();
   evalStack.pop();
@@ -310,6 +324,7 @@ void visitor::interpreter::visit(ast::Read *read) {
   *(ref.T.p) = value;
 }
 
-void visitor::interpreter::visit(ast::Labelled *labelled) {
+void interpreter::visit(ast::Labelled *labelled) {
   labelled->block->accept(this);
 }
+} // namespace visitor

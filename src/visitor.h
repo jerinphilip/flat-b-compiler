@@ -1,5 +1,4 @@
-#ifndef PRINTER_H
-#define PRINTER_H
+#pragma once
 
 #include "ast.h"
 #include "dtype.h"
@@ -88,16 +87,7 @@ struct interpreter : public Visitor {
   FlatBType currentType;
   map<string, ast::Code *> table;
 
-  void label(map<string, ast::Code *> m) final {
-    table = m;
-    /*
-    cerr << "labels: ";
-    for(auto p: table){
-        cerr << p.first << " ";
-    }
-    cerr << endl;
-    */
-  }
+  void label(map<string, ast::Code *> m) final;
 
   void visit(ast::Node *node_) final;
   void visit(ast::Program *program) final;
@@ -186,7 +176,7 @@ struct compiler : public Visitor {
   map<string, Value *> v_table;
   map<string, BasicBlock *> l_table;
 
-  void label(map<string, ast::Code *> m) final { table = m; }
+  void label(map<string, ast::Code *> m) final;
 
   compiler() {
     module = new Module("main", context);
@@ -262,5 +252,3 @@ inline std::unique_ptr<Visitor> make_visitor(std::string type) {
 
 } // namespace visitor
   //
-
-#endif

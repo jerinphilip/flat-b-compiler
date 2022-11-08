@@ -1,5 +1,4 @@
-#ifndef DTYPE_H
-#define DTYPE_H
+#pragma once
 #include "ast.h"
 
 struct DataType {
@@ -128,5 +127,3 @@ struct DataType {
     return result;
   }
 };
-
-#endif

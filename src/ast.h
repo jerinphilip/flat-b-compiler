@@ -1,5 +1,4 @@
-#ifndef AST_H
-#define AST_H
+#pragma once
 
 #include <iostream>
 #include <string>
@@ -300,5 +299,3 @@ struct Read : public Statement {
   void accept(visitor::compiler *p) final;
 };
 } // namespace ast
-
-#endif

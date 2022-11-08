@@ -1,9 +1,13 @@
 #include "dtype.h"
 #include "visitor.h"
 
-void visitor::compiler::visit(ast::Node *node) {}
+namespace visitor {
 
-void visitor::compiler::visit(ast::Program *program) {
+void compiler::label(map<string, ast::Code *> m) { table = m; }
+
+void compiler::visit(ast::Node *node) {}
+
+void compiler::visit(ast::Program *program) {
   main_block = BasicBlock::Create(context, "main_fn", main_fn);
   entry.push(main_block);
 
@@ -16,19 +20,19 @@ void visitor::compiler::visit(ast::Program *program) {
   module->print(outs(), nullptr);
 }
 
-void visitor::compiler::visit(ast::Declarations *declarations) {
+void compiler::visit(ast::Declarations *declarations) {
   for (auto &p : *(declarations->ds)) {
     p->accept(this);
   }
 }
 
-void visitor::compiler::visit(ast::Code *code) {
+void compiler::visit(ast::Code *code) {
   for (auto &p : *(code->statements)) {
     p->accept(this);
   }
 }
 
-void visitor::compiler::visit(ast::Id *id) {
+void compiler::visit(ast::Id *id) {
   if (not declared_before(id->name)) {
     cerr << "Undefined variable " << id->name << endl;
     // exit(-1);
@@ -40,7 +44,7 @@ void visitor::compiler::visit(ast::Id *id) {
   format.place("%d", r);
 }
 
-void visitor::compiler::visit(ast::IdArrayAccess *id_) {
+void compiler::visit(ast::IdArrayAccess *id_) {
   if (not declared_before(id_->name)) {
     cerr << "Undefined variable " << id_->name << endl;
     // exit(-1);
@@ -61,7 +65,7 @@ void visitor::compiler::visit(ast::IdArrayAccess *id_) {
   format.place("%d", r);
 }
 
-void visitor::compiler::visit(ast::IdRef *id_ref) {
+void compiler::visit(ast::IdRef *id_ref) {
   if (not declared_before(id_ref->name)) {
     cerr << "Undefined variable " << id_ref->name << endl;
     // exit(-1);
@@ -74,7 +78,7 @@ void visitor::compiler::visit(ast::IdRef *id_ref) {
   eval.push((void *)r);
 }
 
-void visitor::compiler::visit(ast::IdArrayRef *idA_ref) {
+void compiler::visit(ast::IdArrayRef *idA_ref) {
   if (not declared_before(idA_ref->name)) {
     cerr << "Undefined variable " << idA_ref->name << endl;
     // exit(-1);
@@ -96,16 +100,16 @@ void visitor::compiler::visit(ast::IdArrayRef *idA_ref) {
   eval.push((void *)instruction);
 }
 
-void visitor::compiler::visit(ast::Expr *expr) {}
+void compiler::visit(ast::Expr *expr) {}
 
-void visitor::compiler::visit(ast::Statement *statement) {}
+void compiler::visit(ast::Statement *statement) {}
 
-void visitor::compiler::visit(ast::Assign *assign) {
+void compiler::visit(ast::Assign *assign) {
   assign->tree->accept(this);
   assign->ref->accept(this);
 }
 
-void visitor::compiler::visit(ast::While *while_) {
+void compiler::visit(ast::While *while_) {
   BasicBlock *parent, *pre, *body, *post;
   parent = entry.top();
 
@@ -140,7 +144,7 @@ void visitor::compiler::visit(ast::While *while_) {
   entry.push(post);
 }
 
-void visitor::compiler::visit(ast::If *if_) {
+void compiler::visit(ast::If *if_) {
   BasicBlock *if_block, *merge_block, *else_block;
   if_block = merge_block = else_block = NULL;
 
@@ -190,7 +194,7 @@ void visitor::compiler::visit(ast::If *if_) {
   entry.push(merge_block);
 }
 
-void visitor::compiler::visit(ast::For *for_) {
+void compiler::visit(ast::For *for_) {
   BasicBlock *parent = entry.top();
   BasicBlock *pre, *body, *post;
 
@@ -238,7 +242,7 @@ void visitor::compiler::visit(ast::For *for_) {
   entry.push(post);
 }
 
-void visitor::compiler::visit(ast::Print *print) {
+void compiler::visit(ast::Print *print) {
   /* Reset */
   format.init();
 
@@ -270,7 +274,7 @@ void visitor::compiler::visit(ast::Print *print) {
   format.finish();
 }
 
-void visitor::compiler::visit(ast::TypedIds *twrap) {
+void compiler::visit(ast::TypedIds *twrap) {
   currentType = twrap->dtype;
   auto *ps = twrap->t_ids;
   for (auto &p : *ps) {
@@ -278,9 +282,9 @@ void visitor::compiler::visit(ast::TypedIds *twrap) {
   }
 }
 
-void visitor::compiler::visit(ast::NoOp *no_op) {}
+void compiler::visit(ast::NoOp *no_op) {}
 
-void visitor::compiler::visit(ast::Goto *goto_) {
+void compiler::visit(ast::Goto *goto_) {
   if (l_table.find(goto_->label) != l_table.end()) {
     BasicBlock *parent, *follow, *non_follow;
     parent = entry.top();
@@ -322,13 +326,13 @@ void visitor::compiler::visit(ast::Goto *goto_) {
      */
 }
 
-void visitor::compiler::visit(ast::Integer *integer) {
+void compiler::visit(ast::Integer *integer) {
   Constant *r = ConstantInt::get(Type::getInt64Ty(context), integer->value);
   eval.push((void *)r);
   format.place("%d", r);
 }
 
-void visitor::compiler::visit(ast::BinOp *binOp) {
+void compiler::visit(ast::BinOp *binOp) {
 
   binOp->left->accept(this);
   Value *left = (Value *)eval.top();
@@ -384,7 +388,7 @@ void visitor::compiler::visit(ast::BinOp *binOp) {
   }
 }
 
-void visitor::compiler::visit(ast::IdDef *id_def) {
+void compiler::visit(ast::IdDef *id_def) {
 
   if (declared_before(id_def->name)) {
     cerr << "Redeclaration of variable " << id_def->name << endl;
@@ -402,7 +406,7 @@ void visitor::compiler::visit(ast::IdDef *id_def) {
   }
 }
 
-void visitor::compiler::visit(ast::IdArrayDef *idA_def) {
+void compiler::visit(ast::IdArrayDef *idA_def) {
   if (declared_before(idA_def->name)) {
     cerr << "Redeclaration of variable " << idA_def->name << endl;
     // exit(-1);
@@ -418,13 +422,13 @@ void visitor::compiler::visit(ast::IdArrayDef *idA_def) {
   }
 }
 
-void visitor::compiler::visit(ast::Literal *literal) {
+void compiler::visit(ast::Literal *literal) {
   auto var = string_to_Value(literal->value);
   eval.push(var);
   format.place("%s", var);
 }
 
-void visitor::compiler::visit(ast::Read *read) {
+void compiler::visit(ast::Read *read) {
   format.init();
   /*
   Value *location = GetElementPtrInst::Create(
@@ -436,15 +440,15 @@ void visitor::compiler::visit(ast::Read *read) {
 
 
   vector<Value*> new_args = {string_to_Value("%d"), location};
-  CallInst::Create(scanf, makeArrayRef(new_args), string("scanf"), entry.top());
-  auto *r = new LoadInst(location, "invar", entry.top());
+  CallInst::Create(scanf, makeArrayRef(new_args), string("scanf"),
+  entry.top()); auto *r = new LoadInst(location, "invar", entry.top());
   eval.push(r);
   read->var->accept(this);
   */
   format.finish();
 }
 
-void visitor::compiler::visit(ast::Labelled *labelled) {
+void compiler::visit(ast::Labelled *labelled) {
   BasicBlock *parent, *follow;
   parent = entry.top();
   follow = BasicBlock::Create(context, "target", parent->getParent(), 0);
@@ -454,3 +458,4 @@ void visitor::compiler::visit(ast::Labelled *labelled) {
   entry.push(follow);
   labelled->block->accept(this);
 }
+} // namespace visitor
