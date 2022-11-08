@@ -1,13 +1,13 @@
-#include "dtype.h"
+#include "types.h"
 #include "visitor.h"
 
 namespace visitor {
 
 void Interpreter::label(std::map<std::string, ast::Code *> m) {
-  table = m;
+  table_ = m;
   /*
   std::cerr << "labels: ";
-  for(auto p: table){
+  for(auto p: table_){
       std::cerr << p.first << " ";
   }
   std::cerr << std::endl;
@@ -17,7 +17,7 @@ void Interpreter::label(std::map<std::string, ast::Code *> m) {
 void Interpreter::visit(ast::Node *node) {}
 
 void Interpreter::visit(ast::Program *program) {
-  root = program;
+  root_ = program;
   program->decl->accept(this);
   program->block->accept(this);
 }
@@ -35,58 +35,59 @@ void Interpreter::visit(ast::Code *code) {
 }
 
 void Interpreter::visit(ast::Id *id) {
-  DataType dt;
-  bool declared = env.find(id->name) != env.end();
+  FlatBValue value;
+  bool declared = env_.find(id->name) != env_.end();
   if (not declared)
     std::cerr << "Undefined variable" << std::endl;
 
-  /* TODO, Ascertain dtype from pointer type */
-  dt.dtype = FlatBType::Int;
-  dt.T.i = env[id->name].T.i;
-  stack_.push(dt);
+  /* TODO, Ascertain type from pointer type */
+  value.type = FlatBType::Int;
+  value.underlying.Int = env_[id->name].underlying.Int;
+  stack_.push(value);
 }
 
-void Interpreter::visit(ast::IdArrayAccess *id_) {
-  DataType dt;
-  dt.dtype = FlatBType::Int;
-  bool declared = env.find(id_->name) != env.end();
+void Interpreter::visit(ast::IdArrayAccess *id_array_access) {
+  FlatBValue value;
+  value.type = FlatBType::Int;
+  bool declared = env_.find(id_array_access->name) != env_.end();
   if (not declared)
     std::cerr << "Undefined variable" << std::endl;
 
-  id_->subscript->accept(this);
+  id_array_access->subscript->accept(this);
 
-  DataType sc = pop_stack();
-  int sub = sc.T.i;
-  DataType d = env[id_->name];
-  dt.T.i = env[id_->name].T.A[sub];
+  FlatBValue sc = pop_stack();
+  int sub = sc.underlying.Int;
+  FlatBValue d = env_[id_array_access->name];
+  value.underlying.Int = env_[id_array_access->name].underlying.IntArray[sub];
   /*
    */
-  stack_.push(dt);
+  stack_.push(value);
 }
 
 void Interpreter::visit(ast::IdRef *id_ref) {
-  DataType dt;
-  dt.dtype = FlatBType::Pointer;
-  bool declared = env.find(id_ref->name) != env.end();
+  FlatBValue value;
+  value.type = FlatBType::Pointer;
+  bool declared = env_.find(id_ref->name) != env_.end();
   if (not declared)
     std::cerr << "Undefined variable" << std::endl;
 
-  dt.T.p = &(env[id_ref->name].T.i);
-  stack_.push(dt);
+  value.underlying.Pointer = &(env_[id_ref->name].underlying.Int);
+  stack_.push(value);
 }
 
-void Interpreter::visit(ast::IdArrayRef *idA_ref) {
-  DataType dt;
-  dt.dtype = FlatBType::Pointer;
-  bool declared = env.find(idA_ref->name) != env.end();
+void Interpreter::visit(ast::IdArrayRef *id_array_ref) {
+  FlatBValue value;
+  value.type = FlatBType::Pointer;
+  bool declared = env_.find(id_array_ref->name) != env_.end();
   if (not declared)
     std::cerr << "Undefined variable" << std::endl;
 
-  idA_ref->subscript->accept(this);
-  DataType sc = pop_stack();
-  int sub = sc.T.i;
-  dt.T.p = &(env[idA_ref->name].T.A[sub]);
-  stack_.push(dt);
+  id_array_ref->subscript->accept(this);
+  FlatBValue sc = pop_stack();
+  int sub = sc.underlying.Int;
+  value.underlying.Pointer =
+      &(env_[id_array_ref->name].underlying.IntArray[sub]);
+  stack_.push(value);
 }
 
 void Interpreter::visit(ast::Expr *expr) {}
@@ -95,30 +96,30 @@ void Interpreter::visit(ast::Statement *statement) {}
 
 void Interpreter::visit(ast::Assign *assign) {
   assign->ref->accept(this);
-  DataType ref = pop_stack();
+  FlatBValue ref = pop_stack();
   assign->tree->accept(this);
-  DataType value = pop_stack();
-  *(ref.T.p) = value.T.i;
+  FlatBValue value = pop_stack();
+  *(ref.underlying.Pointer) = value.underlying.Int;
 }
 
-void Interpreter::visit(ast::While *while_) {
-  DataType cond;
-  while_->cond->accept(this);
+void Interpreter::visit(ast::While *while_block) {
+  FlatBValue cond;
+  while_block->cond->accept(this);
   cond = pop_stack();
-  while (cond.T.i) {
-    while_->block->accept(this);
+  while (cond.underlying.Int) {
+    while_block->block->accept(this);
 
     /* Step */
-    while_->cond->accept(this);
+    while_block->cond->accept(this);
     cond = pop_stack();
   }
 }
 
 void Interpreter::visit(ast::If *if_) {
-  DataType cond;
+  FlatBValue cond;
   if_->cond->accept(this);
   cond = pop_stack();
-  if (cond.T.i) {
+  if (cond.underlying.Int) {
     if_->block->accept(this);
   } else {
     if (if_->otherwise != NULL) {
@@ -127,30 +128,30 @@ void Interpreter::visit(ast::If *if_) {
   }
 }
 
-void Interpreter::visit(ast::For *for_) {
-  for_->init->accept(this);
+void Interpreter::visit(ast::For *for_block) {
+  for_block->init->accept(this);
 
   void *location;
   void **var = &location;
-  for_->init->ref->vnode(var);
+  for_block->init->ref->vnode(var);
   ast::Id *ivar = (ast::Id *)location;
 
-  ast::BinOp *rhs = new ast::BinOp(Op::add, ivar, for_->step);
-  ast::Assign *step = new ast::Assign(for_->init->ref, rhs);
-  ast::BinOp *check = new ast::BinOp(Op::le, ivar, for_->end);
+  ast::BinOp *rhs = new ast::BinOp(Op::add, ivar, for_block->step);
+  ast::Assign *step = new ast::Assign(for_block->init->ref, rhs);
+  ast::BinOp *check = new ast::BinOp(Op::le, ivar, for_block->end);
 
-  DataType cond;
-  cond.dtype = FlatBType::Int;
-  cond.T.i = 1;
+  FlatBValue cond;
+  cond.type = FlatBType::Int;
+  cond.underlying.Int = 1;
   do {
     check->accept(this);
     // evalStack.push(cond);
     cond = pop_stack();
-    if (cond.T.i) {
-      for_->block->accept(this); /* Evaluate body */
+    if (cond.underlying.Int) {
+      for_block->block->accept(this); /* Evaluate body */
       step->accept(this);
     }
-  } while (cond.T.i);
+  } while (cond.underlying.Int);
 }
 
 void Interpreter::visit(ast::Print *print) {
@@ -163,16 +164,16 @@ void Interpreter::visit(ast::Print *print) {
     }
     first = false;
     p->accept(this);
-    DataType dt = pop_stack();
-    switch (dt.dtype) {
+    FlatBValue value = pop_stack();
+    switch (value.type) {
     case FlatBType::Int:
-      std::cout << dt.T.i;
+      std::cout << value.underlying.Int;
       break;
     case FlatBType::CharArray:
-      std::cout << dt.T.s;
+      std::cout << value.underlying.CharArray;
       break;
     case FlatBType::Bool:
-      std::cout << dt.T.b;
+      std::cout << value.underlying.Bool;
       break;
     default:
       break;
@@ -184,11 +185,11 @@ void Interpreter::visit(ast::Print *print) {
   }
 }
 
-void Interpreter::visit(ast::TypedIds *twrap) {
-  currentType = twrap->dtype;
-  auto *ps = twrap->t_ids;
-  for (auto &p : *ps) {
-    p->accept(this);
+void Interpreter::visit(ast::TypedIds *typed_ids) {
+  current_type_ = typed_ids->type;
+  auto *id_defs = typed_ids->id_defs;
+  for (auto &id_def : *id_defs) {
+    id_def->accept(this);
   }
 }
 
@@ -196,15 +197,15 @@ void Interpreter::visit(ast::NoOp *no_op) {}
 
 void Interpreter::visit(ast::Goto *goto_) {
   if (goto_->cond == NULL) {
-    ast::Code *code = table[goto_->label];
+    ast::Code *code = table_[goto_->label];
     code->accept(this);
     exit(0);
   } else {
-    DataType dt;
+    FlatBValue value;
     goto_->cond->accept(this);
-    dt = pop_stack();
-    if (dt.T.i) {
-      ast::Code *code = table[goto_->label];
+    value = pop_stack();
+    if (value.underlying.Int) {
+      ast::Code *code = table_[goto_->label];
       code->accept(this);
       exit(0);
     }
@@ -212,25 +213,25 @@ void Interpreter::visit(ast::Goto *goto_) {
 }
 
 void Interpreter::visit(ast::Integer *integer) {
-  DataType dt;
-  dt.dtype = FlatBType::Int;
-  dt.T.i = integer->value;
-  stack_.push(dt);
+  FlatBValue value;
+  value.type = FlatBType::Int;
+  value.underlying.Int = integer->value;
+  stack_.push(value);
 }
 
-void Interpreter::visit(ast::BinOp *binOp) {
+void Interpreter::visit(ast::BinOp *bin_op) {
 
   /* Evaluate and put on stack */
-  binOp->left->accept(this);
-  DataType left = pop_stack();
-  binOp->right->accept(this);
-  DataType right = pop_stack();
+  bin_op->left->accept(this);
+  FlatBValue left = pop_stack();
+  bin_op->right->accept(this);
+  FlatBValue right = pop_stack();
 
   /* TODO Generalize for types */
 
-  if (left.dtype != right.dtype) {
+  if (left.type != right.type) {
   } else {
-    switch (binOp->op) {
+    switch (bin_op->op) {
     case Op::add:
       stack_.push(left + right);
       break;
@@ -265,50 +266,50 @@ void Interpreter::visit(ast::BinOp *binOp) {
 }
 
 void Interpreter::visit(ast::IdDef *id_def) {
-  DataType dt;
-  dt.dtype = currentType;
-  switch (dt.dtype) {
+  FlatBValue value;
+  value.type = current_type_;
+  switch (value.type) {
   case FlatBType::Int:
-    dt.T.i = 0;
+    value.underlying.Int = 0;
     break;
   default:
     break;
   }
 
   std::string name = id_def->name;
-  env[name] = dt;
+  env_[name] = value;
 }
 
-void Interpreter::visit(ast::IdArrayDef *idA_def) {
-  std::string name = idA_def->name;
-  int size = idA_def->size;
-  DataType dt;
-  dt.dtype = currentType;
-  switch (dt.dtype) {
+void Interpreter::visit(ast::IdArrayDef *id_array_def) {
+  std::string name = id_array_def->name;
+  int size = id_array_def->size;
+  FlatBValue value;
+  value.type = current_type_;
+  switch (value.type) {
   case FlatBType::Int:
-    dt.T.A = new int[size];
-    dt.dtype = IntArray;
+    value.underlying.IntArray = new int[size];
+    value.type = FlatBType::IntArray;
     break;
   default:
     break;
   }
 
-  env[name] = dt;
+  env_[name] = value;
 }
 
 void Interpreter::visit(ast::Literal *literal) {
-  DataType dt;
-  dt.dtype = FlatBType::CharArray;
-  dt.T.s = (char *)literal->value.c_str();
-  stack_.push(dt);
+  FlatBValue value;
+  value.type = FlatBType::CharArray;
+  value.underlying.CharArray = (char *)literal->value.c_str();
+  stack_.push(value);
 }
 
 void Interpreter::visit(ast::Read *read) {
   read->var->accept(this);
-  DataType ref = pop_stack();
+  FlatBValue ref = pop_stack();
   int value;
   std::cin >> value;
-  *(ref.T.p) = value;
+  *(ref.underlying.Pointer) = value;
 }
 
 void Interpreter::visit(ast::Labelled *labelled) {

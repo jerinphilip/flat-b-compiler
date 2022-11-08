@@ -1,4 +1,3 @@
-#include "dtype.h"
 #include "visitor.h"
 
 namespace visitor {
@@ -306,9 +305,9 @@ void Compiler::visit(ast::Print *print) {
   format.finish();
 }
 
-void Compiler::visit(ast::TypedIds *twrap) {
-  currentType = twrap->dtype;
-  auto *ps = twrap->t_ids;
+void Compiler::visit(ast::TypedIds *typed_ids) {
+  currentType = typed_ids->type;
+  auto *ps = typed_ids->id_defs;
   for (auto &p : *ps) {
     p->accept(this);
   }

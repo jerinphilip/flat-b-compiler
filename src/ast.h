@@ -1,17 +1,9 @@
 #pragma once
 
+#include "types.h"
 #include <iostream>
 #include <string>
 #include <vector>
-
-enum FlatBType {
-  Int,
-  Bool,
-  Char,
-  CharArray,
-  IntArray,
-  Pointer,
-};
 
 enum class Op { add, sub, mul, quot, lt, gt, le, ge, eq };
 
@@ -33,7 +25,6 @@ struct Code;
 struct Labelled;
 struct Statement;
 struct Assign;
-struct Cblock;
 struct While;
 struct If;
 struct For;
@@ -145,9 +136,9 @@ struct IdArrayDef : public IdDef {
 };
 
 struct TypedIds : public Node {
-  FlatBType dtype;
-  std::vector<IdDef *> *t_ids;
-  TypedIds(FlatBType d, std::vector<IdDef *> *v) : dtype(d), t_ids(v) {}
+  FlatBType type;
+  std::vector<IdDef *> *id_defs;
+  TypedIds(FlatBType d, std::vector<IdDef *> *v) : type(d), id_defs(v) {}
   void accept(visitor::PrettyPrinter *p);
   void accept(visitor::Interpreter *p);
   void accept(visitor::Compiler *p);

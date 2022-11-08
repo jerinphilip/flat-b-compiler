@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ast.h"
-#include "dtype.h"
+#include "types.h"
 #include "llvm/IR/Instructions.h"
 #include <llvm/ADT/APFloat.h>
 #include <llvm/ADT/STLExtras.h>
@@ -35,7 +35,7 @@ struct Visitor {
   virtual void visit(ast::If *if_block) = 0;
   virtual void visit(ast::For *for_block) = 0;
   virtual void visit(ast::Print *print) = 0;
-  virtual void visit(ast::TypedIds *type_ids) = 0;
+  virtual void visit(ast::TypedIds *typed_ids) = 0;
   virtual void visit(ast::NoOp *no_op) = 0;
   virtual void visit(ast::Goto *goto_) = 0;
   virtual void visit(ast::Integer *integer) = 0;
@@ -67,7 +67,7 @@ struct PrettyPrinter : public Visitor {
   void visit(ast::If *if_block) final;
   void visit(ast::For *for_block) final;
   void visit(ast::Print *print) final;
-  void visit(ast::TypedIds *type_ids) final;
+  void visit(ast::TypedIds *typed_ids) final;
   void visit(ast::NoOp *no_op) final;
   void visit(ast::Goto *goto_) final;
   void visit(ast::Integer *integer) final;
@@ -85,52 +85,49 @@ struct PrettyPrinter : public Visitor {
 
 struct Interpreter : public Visitor {
 private:
-  std::stack<DataType> stack_;
+  std::stack<FlatBValue> stack_;
+  std::map<std::string, FlatBValue> env_;
+  ast::Program *root_;
+  FlatBType current_type_;
+  std::map<std::string, ast::Code *> table_;
 
-  DataType pop_stack() {
-    DataType data_type = stack_.top();
+  FlatBValue pop_stack() {
+    FlatBValue data_type = stack_.top();
     stack_.pop();
     return data_type;
   }
 
 public:
-  std::map<std::string, DataType> env;
-  ast::Program *root;
-  FlatBType currentType;
-  std::map<std::string, ast::Code *> table;
-
   void label(std::map<std::string, ast::Code *> m) final;
 
-  void visit(ast::Node *node_) final;
+  void visit(ast::Node *node) final;
   void visit(ast::Program *program) final;
   void visit(ast::Declarations *declarations) final;
   void visit(ast::Id *id) final;
-  void visit(ast::IdArrayAccess *id_) final;
-  void visit(ast::Expr *e) final;
-  void visit(ast::Code *c) final;
-  void visit(ast::Statement *s) final;
-  void visit(ast::Assign *a) final;
-  void visit(ast::While *w) final;
-  void visit(ast::If *ib) final;
-  void visit(ast::For *fb) final;
+  void visit(ast::IdArrayAccess *id_array_access) final;
+  void visit(ast::Expr *expr) final;
+  void visit(ast::Code *code) final;
+  void visit(ast::Statement *statement) final;
+  void visit(ast::Assign *assign) final;
+  void visit(ast::While *while_block) final;
+  void visit(ast::If *if_block) final;
+  void visit(ast::For *for_block) final;
   void visit(ast::Print *print) final;
-  void visit(ast::TypedIds *t_ids) final;
+  void visit(ast::TypedIds *typed_ids) final;
   void visit(ast::NoOp *no_op) final;
   void visit(ast::Goto *goto_) final;
   void visit(ast::Integer *integer) final;
   void visit(ast::IdDef *id_def) final;
-  void visit(ast::IdArrayDef *idA_def) final;
-  void visit(ast::BinOp *binOp) final;
+  void visit(ast::IdArrayDef *id_array_def) final;
+  void visit(ast::BinOp *bin_op) final;
   void visit(ast::IdRef *id_ref) final;
-  void visit(ast::IdArrayRef *idA_ref) final;
+  void visit(ast::IdArrayRef *id_array_ref) final;
   void visit(ast::Literal *literal) final;
   void visit(ast::Read *read) final;
   void visit(ast::Labelled *labelled) final;
 };
 
 struct Compiler : public Visitor {
-  std::map<std::string, DataType> env;
-  std::stack<DataType> evalStack;
   ast::Program *root;
   FlatBType currentType;
   std::map<std::string, ast::Code *> table;
@@ -207,7 +204,7 @@ struct Compiler : public Visitor {
   void visit(ast::If *if_block) final;
   void visit(ast::For *for_block) final;
   void visit(ast::Print *print) final;
-  void visit(ast::TypedIds *type_ids) final;
+  void visit(ast::TypedIds *typed_ids) final;
   void visit(ast::NoOp *no_op) final;
   void visit(ast::Goto *goto_) final;
   void visit(ast::Integer *integer) final;

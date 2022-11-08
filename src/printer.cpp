@@ -1,5 +1,4 @@
 #include "ast.h"
-#include "dtype.h"
 #include "visitor.h"
 
 namespace visitor {
@@ -64,31 +63,31 @@ void PrettyPrinter::visit(ast::Print *print) {
   // std::cout << "Code" << std::endl;
 }
 
-void PrettyPrinter::visit(ast::TypedIds *tIdWrapper) {
+void PrettyPrinter::visit(ast::TypedIds *typed_ids) {
   // std::cout << "Typed ids" << std::endl;
-  std::string dtype;
-  switch (tIdWrapper->dtype) {
+  std::string type;
+  switch (typed_ids->type) {
   case FlatBType::Int:
-    dtype = "int";
+    type = "int";
     break;
   case FlatBType::Bool:
-    dtype = "bool";
+    type = "bool";
     break;
   case FlatBType::Char:
-    dtype = "char";
+    type = "char";
     break;
   default:
     break;
   }
-  std::cout << dtype << " ";
+  std::cout << type << " ";
   bool first = true;
-  auto *ps = tIdWrapper->t_ids;
-  reverse(ps->begin(), ps->end());
-  for (auto &p : *ps) {
+  auto *id_defs = typed_ids->id_defs;
+  reverse(id_defs->begin(), id_defs->end());
+  for (auto &id_def : *id_defs) {
     if (not first)
       std::cout << ", ";
     first = false;
-    p->accept(this);
+    id_def->accept(this);
   }
   std::cout << ";\n";
 }
