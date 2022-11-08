@@ -78,6 +78,8 @@ struct pprinter : public Visitor {
   void visit(ast::Literal *literal) final;
   void visit(ast::Read *read) final;
   void visit(ast::Labelled *labelled) final;
+
+  void label(map<string, ast::Code *> m) final;
 };
 
 struct interpreter : public Visitor {
@@ -251,4 +253,3 @@ inline std::unique_ptr<Visitor> make_visitor(std::string type) {
 }
 
 } // namespace visitor
-  //
