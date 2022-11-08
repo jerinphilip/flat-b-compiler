@@ -23,14 +23,14 @@ void Interpreter::visit(ast::Program *program) {
 }
 
 void Interpreter::visit(ast::Declarations *declarations) {
-  for (auto &p : *(declarations->ds)) {
-    p->accept(this);
+  for (auto &typed_ids : *(declarations->typed_ids)) {
+    typed_ids->accept(this);
   }
 }
 
 void Interpreter::visit(ast::Code *code) {
-  for (auto &p : *(code->statements)) {
-    p->accept(this);
+  for (auto &statement : *(code->statements)) {
+    statement->accept(this);
   }
 }
 
@@ -103,23 +103,23 @@ void Interpreter::visit(ast::Assign *assign) {
 }
 
 void Interpreter::visit(ast::While *while_block) {
-  FlatBValue cond;
-  while_block->cond->accept(this);
-  cond = pop_stack();
-  while (cond.underlying.Int) {
+  FlatBValue condition;
+  while_block->condition->accept(this);
+  condition = pop_stack();
+  while (condition.underlying.Int) {
     while_block->block->accept(this);
 
     /* Step */
-    while_block->cond->accept(this);
-    cond = pop_stack();
+    while_block->condition->accept(this);
+    condition = pop_stack();
   }
 }
 
 void Interpreter::visit(ast::If *if_) {
-  FlatBValue cond;
-  if_->cond->accept(this);
-  cond = pop_stack();
-  if (cond.underlying.Int) {
+  FlatBValue condition;
+  if_->condition->accept(this);
+  condition = pop_stack();
+  if (condition.underlying.Int) {
     if_->block->accept(this);
   } else {
     if (if_->otherwise != NULL) {
@@ -140,18 +140,18 @@ void Interpreter::visit(ast::For *for_block) {
   ast::Assign *step = new ast::Assign(for_block->init->ref, rhs);
   ast::BinOp *check = new ast::BinOp(Op::le, ivar, for_block->end);
 
-  FlatBValue cond;
-  cond.type = FlatBType::Int;
-  cond.underlying.Int = 1;
+  FlatBValue condition;
+  condition.type = FlatBType::Int;
+  condition.underlying.Int = 1;
   do {
     check->accept(this);
-    // evalStack.push(cond);
-    cond = pop_stack();
-    if (cond.underlying.Int) {
+    // evalStack.push(condition);
+    condition = pop_stack();
+    if (condition.underlying.Int) {
       for_block->body->accept(this); /* Evaluate body */
       step->accept(this);
     }
-  } while (cond.underlying.Int);
+  } while (condition.underlying.Int);
 }
 
 void Interpreter::visit(ast::Print *print) {
@@ -196,13 +196,13 @@ void Interpreter::visit(ast::TypedIds *typed_ids) {
 void Interpreter::visit(ast::NoOp *no_op) {}
 
 void Interpreter::visit(ast::Goto *goto_) {
-  if (goto_->cond == NULL) {
+  if (goto_->condition == NULL) {
     ast::Code *code = table_[goto_->label];
     code->accept(this);
     exit(0);
   } else {
     FlatBValue value;
-    goto_->cond->accept(this);
+    goto_->condition->accept(this);
     value = pop_stack();
     if (value.underlying.Int) {
       ast::Code *code = table_[goto_->label];

@@ -13,8 +13,8 @@ void PrettyPrinter::visit(ast::Program *program) {
 
 void PrettyPrinter::visit(ast::Declarations *declarations) {
   std::cout << "decl {" << std::endl;
-  for (auto &p : *(declarations->ds)) {
-    p->accept(this);
+  for (auto &typed_ids : *(declarations->typed_ids)) {
+    typed_ids->accept(this);
   }
   std::cout << "}\n";
 }

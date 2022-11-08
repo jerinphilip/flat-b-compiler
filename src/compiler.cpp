@@ -52,14 +52,14 @@ void Compiler::visit(ast::Program *program) {
 }
 
 void Compiler::visit(ast::Declarations *declarations) {
-  for (auto &p : *(declarations->ds)) {
-    p->accept(this);
+  for (ast::TypedIds *declaration : *(declarations->typed_ids)) {
+    declaration->accept(this);
   }
 }
 
 void Compiler::visit(ast::Code *code) {
-  for (auto &p : *(code->statements)) {
-    p->accept(this);
+  for (ast::Statement *statement : *(code->statements)) {
+    statement->accept(this);
   }
 }
 
@@ -109,22 +109,22 @@ void Compiler::visit(ast::IdRef *id_ref) {
   eval.push((void *)r);
 }
 
-void Compiler::visit(ast::IdArrayRef *idA_ref) {
-  if (not declared_before(idA_ref->name)) {
-    std::cerr << "Undefined variable " << idA_ref->name << std::endl;
+void Compiler::visit(ast::IdArrayRef *id_array_ref) {
+  if (not declared_before(id_array_ref->name)) {
+    std::cerr << "Undefined variable " << id_array_ref->name << std::endl;
     // exit(-1);
   }
 
   Value *ret_val = (Value *)eval.top();
   eval.pop();
 
-  idA_ref->subscript->accept(this);
+  id_array_ref->subscript->accept(this);
   auto start = ConstantInt::get(context, APInt(64, StringRef("0"), 10));
   auto offset = (Value *)eval.top();
   eval.pop();
   std::vector<Value *> index_params = {start, offset};
   // Value *location = GetElementPtrInst::CreateInBounds(
-  //     value_table[idA_ref->name], index_params, "vr", entry.top());
+  //     value_table[id_array_ref->name], index_params, "vr", entry.top());
   Value *location = nullptr;
 
   Value *instruction = new StoreInst(ret_val, location, false, entry.top());
@@ -151,13 +151,13 @@ void Compiler::visit(ast::While *while_) {
   post = BasicBlock::Create(context, "post", parent->getParent(), 0);
 
   entry.push(pre);
-  while_->cond->accept(this);
-  ZExtInst *condition = (ZExtInst *)eval.top();
+  while_->condition->accept(this);
+  ZExtInst *conditionition = (ZExtInst *)eval.top();
   eval.pop();
-  // Value *comparison = condition;
+  // Value *comparison = conditionition;
   ConstantInt *zero = ConstantInt::get(Type::getInt64Ty(context), 0, true);
   ICmpInst *comparison =
-      new ICmpInst(*pre, ICmpInst::ICMP_NE, condition, zero, "vr");
+      new ICmpInst(*pre, ICmpInst::ICMP_NE, conditionition, zero, "vr");
   entry.pop();
 
   BranchInst::Create(body, post, comparison, pre);
@@ -183,13 +183,13 @@ void Compiler::visit(ast::If *if_) {
   BasicBlock *parent = entry.top();
   assert(parent != NULL);
 
-  if_->cond->accept(this);
-  ZExtInst *condition = (ZExtInst *)eval.top();
+  if_->condition->accept(this);
+  ZExtInst *conditionition = (ZExtInst *)eval.top();
   eval.pop();
-  // Value *comparison = condition;
+  // Value *comparison = conditionition;
   ConstantInt *zero = ConstantInt::get(Type::getInt64Ty(context), 0, true);
   ICmpInst *comparison =
-      new ICmpInst(*parent, ICmpInst::ICMP_NE, condition, zero, "vr");
+      new ICmpInst(*parent, ICmpInst::ICMP_NE, conditionition, zero, "vr");
 
   if_block = BasicBlock::Create(context, "if_block", parent->getParent());
   merge_block = BasicBlock::Create(context, "merge_block", parent->getParent());
@@ -215,10 +215,10 @@ void Compiler::visit(ast::If *if_) {
       // cerr << "terminator Happening! " << endl;
       BranchInst::Create(merge_block, ret_block);
     }
-    // BranchInst::Create(if_block, else_block, condition, parent);
+    // BranchInst::Create(if_block, else_block, conditionition, parent);
     BranchInst::Create(if_block, else_block, comparison, parent);
   } else {
-    // BranchInst::Create(if_block, merge_block, condition, parent);
+    // BranchInst::Create(if_block, merge_block, conditionition, parent);
     BranchInst::Create(if_block, merge_block, comparison, parent);
   }
 
@@ -248,12 +248,12 @@ void Compiler::visit(ast::For *for_block) {
 
   entry.push(pre);
   check->accept(this);
-  ZExtInst *condition = (ZExtInst *)eval.top();
+  ZExtInst *conditionition = (ZExtInst *)eval.top();
   eval.pop();
-  // Value *comparison = condition;
+  // Value *comparison = conditionition;
   ConstantInt *zero = ConstantInt::get(Type::getInt64Ty(context), 0, true);
   ICmpInst *comparison =
-      new ICmpInst(*pre, ICmpInst::ICMP_NE, condition, zero, "vr");
+      new ICmpInst(*pre, ICmpInst::ICMP_NE, conditionition, zero, "vr");
   BranchInst::Create(body, post, comparison, pre);
   BranchInst::Create(pre, parent);
   entry.pop();
@@ -320,14 +320,14 @@ void Compiler::visit(ast::Goto *goto_) {
     BasicBlock *parent, *follow, *non_follow;
     parent = entry.top();
     follow = label_table[goto_->label];
-    if (goto_->cond) {
-      goto_->cond->accept(this);
-      ZExtInst *condition = (ZExtInst *)eval.top();
+    if (goto_->condition) {
+      goto_->condition->accept(this);
+      ZExtInst *conditionition = (ZExtInst *)eval.top();
       eval.pop();
-      // Value *comparison = condition;
+      // Value *comparison = conditionition;
       ConstantInt *zero = ConstantInt::get(Type::getInt64Ty(context), 0, true);
       ICmpInst *comparison =
-          new ICmpInst(*parent, ICmpInst::ICMP_NE, condition, zero, "vr");
+          new ICmpInst(*parent, ICmpInst::ICMP_NE, conditionition, zero, "vr");
 
       non_follow =
           BasicBlock::Create(context, "post-target", parent->getParent(), 0);
@@ -339,14 +339,14 @@ void Compiler::visit(ast::Goto *goto_) {
     }
   }
   /*
-     if(goto_->cond == NULL){
+     if(goto_->condition == NULL){
      ast::code *code = table[goto_->label];
      code->accept(this);
      exit(0);
      }
      else{
      dataType dt;
-     goto_->cond->accept(this);
+     goto_->condition->accept(this);
      dt = evalStack.top(); evalStack.pop();
      if (dt.T.i){
      ast::code *code = table[goto_->label];
@@ -437,19 +437,20 @@ void Compiler::visit(ast::IdDef *id_def) {
   }
 }
 
-void Compiler::visit(ast::IdArrayDef *idA_def) {
-  if (declared_before(idA_def->name)) {
-    std::cerr << "Redeclaration of variable " << idA_def->name << std::endl;
+void Compiler::visit(ast::IdArrayDef *id_array_def) {
+  if (declared_before(id_array_def->name)) {
+    std::cerr << "Redeclaration of variable " << id_array_def->name
+              << std::endl;
     // exit(-1);
   } else {
     GlobalVariable *var = new GlobalVariable(
-        *module, ArrayType::get(Type::getInt64Ty(context), idA_def->size),
-        false, GlobalValue::CommonLinkage, NULL, idA_def->name);
+        *module, ArrayType::get(Type::getInt64Ty(context), id_array_def->size),
+        false, GlobalValue::CommonLinkage, NULL, id_array_def->name);
     var->setInitializer(ConstantAggregateZero::get(
-        ArrayType::get(Type::getInt64Ty(context), idA_def->size)));
+        ArrayType::get(Type::getInt64Ty(context), id_array_def->size)));
 
-    value_table[idA_def->name] = var;
-    // cerr << "Declaration of variable " << idA_def->name << endl;
+    value_table[id_array_def->name] = var;
+    // cerr << "Declaration of variable " << id_array_def->name << endl;
   }
 }
 

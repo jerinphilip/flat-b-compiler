@@ -53,8 +53,8 @@ struct Program : public Node {
 /* declarations */
 
 struct Declarations : public Node {
-  std::vector<TypedIds *> *ds;
-  Declarations(std::vector<TypedIds *> *v) : ds(v) {}
+  std::vector<TypedIds *> *typed_ids;
+  Declarations(std::vector<TypedIds *> *v) : typed_ids(v) {}
 
   void accept(visitor::PrettyPrinter *p);
   void accept(visitor::Interpreter *p);
@@ -198,9 +198,9 @@ struct Assign : public Statement {
 };
 
 struct CodeBlock : public Statement {
-  Expr *cond;
+  Expr *condition;
   Code *block;
-  CodeBlock(Expr *c, Code *b) : cond(c), block(b) {}
+  CodeBlock(Expr *c, Code *b) : condition(c), block(b) {}
   virtual void accept(visitor::PrettyPrinter *p);
   virtual void accept(visitor::Interpreter *p);
   virtual void accept(visitor::Compiler *p);
@@ -236,9 +236,9 @@ struct For : public Statement {
 };
 
 struct Goto : public Statement {
-  Expr *cond;
+  Expr *condition;
   std::string label;
-  Goto(std::string label, Expr *e = NULL) : label(label), cond(e) {}
+  Goto(std::string label, Expr *e = NULL) : label(label), condition(e) {}
   void accept(visitor::PrettyPrinter *p);
   void accept(visitor::Interpreter *p);
   void accept(visitor::Compiler *p);
