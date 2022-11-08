@@ -43,7 +43,7 @@ void Interpreter::visit(ast::Id *id) {
   /* TODO, Ascertain dtype from pointer type */
   dt.dtype = FlatBType::Int;
   dt.T.i = env[id->name].T.i;
-  evalStack.push(dt);
+  stack_.push(dt);
 }
 
 void Interpreter::visit(ast::IdArrayAccess *id_) {
@@ -55,14 +55,13 @@ void Interpreter::visit(ast::IdArrayAccess *id_) {
 
   id_->subscript->accept(this);
 
-  DataType sc = evalStack.top();
-  evalStack.pop();
+  DataType sc = pop_stack();
   int sub = sc.T.i;
   DataType d = env[id_->name];
   dt.T.i = env[id_->name].T.A[sub];
   /*
    */
-  evalStack.push(dt);
+  stack_.push(dt);
 }
 
 void Interpreter::visit(ast::IdRef *id_ref) {
@@ -73,7 +72,7 @@ void Interpreter::visit(ast::IdRef *id_ref) {
     std::cerr << "Undefined variable" << std::endl;
 
   dt.T.p = &(env[id_ref->name].T.i);
-  evalStack.push(dt);
+  stack_.push(dt);
 }
 
 void Interpreter::visit(ast::IdArrayRef *idA_ref) {
@@ -84,11 +83,10 @@ void Interpreter::visit(ast::IdArrayRef *idA_ref) {
     std::cerr << "Undefined variable" << std::endl;
 
   idA_ref->subscript->accept(this);
-  DataType sc = evalStack.top();
-  evalStack.pop();
+  DataType sc = pop_stack();
   int sub = sc.T.i;
   dt.T.p = &(env[idA_ref->name].T.A[sub]);
-  evalStack.push(dt);
+  stack_.push(dt);
 }
 
 void Interpreter::visit(ast::Expr *expr) {}
@@ -97,34 +95,29 @@ void Interpreter::visit(ast::Statement *statement) {}
 
 void Interpreter::visit(ast::Assign *assign) {
   assign->ref->accept(this);
-  DataType ref = evalStack.top();
-  evalStack.pop();
+  DataType ref = pop_stack();
   assign->tree->accept(this);
-  DataType value = evalStack.top();
-  evalStack.pop();
+  DataType value = pop_stack();
   *(ref.T.p) = value.T.i;
 }
 
 void Interpreter::visit(ast::While *while_) {
   DataType cond;
   while_->cond->accept(this);
-  cond = evalStack.top();
-  evalStack.pop();
+  cond = pop_stack();
   while (cond.T.i) {
     while_->block->accept(this);
 
     /* Step */
     while_->cond->accept(this);
-    cond = evalStack.top();
-    evalStack.pop();
+    cond = pop_stack();
   }
 }
 
 void Interpreter::visit(ast::If *if_) {
   DataType cond;
   if_->cond->accept(this);
-  cond = evalStack.top();
-  evalStack.pop();
+  cond = pop_stack();
   if (cond.T.i) {
     if_->block->accept(this);
   } else {
@@ -152,8 +145,7 @@ void Interpreter::visit(ast::For *for_) {
   do {
     check->accept(this);
     // evalStack.push(cond);
-    cond = evalStack.top();
-    evalStack.pop();
+    cond = pop_stack();
     if (cond.T.i) {
       for_->block->accept(this); /* Evaluate body */
       step->accept(this);
@@ -171,8 +163,7 @@ void Interpreter::visit(ast::Print *print) {
     }
     first = false;
     p->accept(this);
-    DataType dt = evalStack.top();
-    evalStack.pop();
+    DataType dt = pop_stack();
     switch (dt.dtype) {
     case FlatBType::Int:
       std::cout << dt.T.i;
@@ -211,8 +202,7 @@ void Interpreter::visit(ast::Goto *goto_) {
   } else {
     DataType dt;
     goto_->cond->accept(this);
-    dt = evalStack.top();
-    evalStack.pop();
+    dt = pop_stack();
     if (dt.T.i) {
       ast::Code *code = table[goto_->label];
       code->accept(this);
@@ -225,18 +215,16 @@ void Interpreter::visit(ast::Integer *integer) {
   DataType dt;
   dt.dtype = FlatBType::Int;
   dt.T.i = integer->value;
-  evalStack.push(dt);
+  stack_.push(dt);
 }
 
 void Interpreter::visit(ast::BinOp *binOp) {
 
   /* Evaluate and put on stack */
   binOp->left->accept(this);
-  DataType left = evalStack.top();
-  evalStack.pop();
+  DataType left = pop_stack();
   binOp->right->accept(this);
-  DataType right = evalStack.top();
-  evalStack.pop();
+  DataType right = pop_stack();
 
   /* TODO Generalize for types */
 
@@ -244,31 +232,31 @@ void Interpreter::visit(ast::BinOp *binOp) {
   } else {
     switch (binOp->op) {
     case Op::add:
-      evalStack.push(left + right);
+      stack_.push(left + right);
       break;
     case Op::sub:
-      evalStack.push(left - right);
+      stack_.push(left - right);
       break;
     case Op::mul:
-      evalStack.push(left * right);
+      stack_.push(left * right);
       break;
     case Op::quot:
-      evalStack.push(left / right);
+      stack_.push(left / right);
       break;
     case Op::lt:
-      evalStack.push(left < right);
+      stack_.push(left < right);
       break;
     case Op::gt:
-      evalStack.push(left > right);
+      stack_.push(left > right);
       break;
     case Op::le:
-      evalStack.push(left <= right);
+      stack_.push(left <= right);
       break;
     case Op::ge:
-      evalStack.push(left >= right);
+      stack_.push(left >= right);
       break;
     case Op::eq:
-      evalStack.push(left == right);
+      stack_.push(left == right);
       break;
     default:
       break;
@@ -312,13 +300,12 @@ void Interpreter::visit(ast::Literal *literal) {
   DataType dt;
   dt.dtype = FlatBType::CharArray;
   dt.T.s = (char *)literal->value.c_str();
-  evalStack.push(dt);
+  stack_.push(dt);
 }
 
 void Interpreter::visit(ast::Read *read) {
   read->var->accept(this);
-  DataType ref = evalStack.top();
-  evalStack.pop();
+  DataType ref = pop_stack();
   int value;
   std::cin >> value;
   *(ref.T.p) = value;

@@ -84,8 +84,17 @@ struct PrettyPrinter : public Visitor {
 };
 
 struct Interpreter : public Visitor {
+private:
+  std::stack<DataType> stack_;
+
+  DataType pop_stack() {
+    DataType data_type = stack_.top();
+    stack_.pop();
+    return data_type;
+  }
+
+public:
   std::map<std::string, DataType> env;
-  std::stack<DataType> evalStack;
   ast::Program *root;
   FlatBType currentType;
   std::map<std::string, ast::Code *> table;
