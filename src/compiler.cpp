@@ -3,11 +3,43 @@
 
 namespace visitor {
 
-void compiler::label(map<string, ast::Code *> m) { table = m; }
+Compiler::Compiler() {
+  module = new Module("main", context);
+  module->setTargetTriple("x86_64-pc-linux-gnu");
+  main_fn = Function::Create(FunctionType::get(Type::getVoidTy(context), false),
+                             GlobalValue::ExternalLinkage, "main", module);
+  printf = Function::Create(FunctionType::get(Type::getInt64Ty(context), true),
+                            GlobalValue::ExternalLinkage, "printf", module);
+  scanf = Function::Create(FunctionType::get(Type::getInt64Ty(context), true),
+                           GlobalValue::ExternalLinkage, "scanf", module);
+}
 
-void compiler::visit(ast::Node *node) {}
+Value *Compiler::string_to_Value(string s) {
+  GlobalVariable *var = new GlobalVariable(
+      *module, ArrayType::get(IntegerType::get(context, 8), (s.size() + 1)),
+      true, GlobalVariable::InternalLinkage, NULL, "literal");
 
-void compiler::visit(ast::Program *program) {
+  var->setInitializer(ConstantDataArray::getString(context, s, true));
+  return var;
+}
+
+Value *Compiler::int_to_Value(int x) {
+  GlobalVariable *var =
+      new GlobalVariable(*module, Type::getInt64Ty(context), false,
+                         GlobalValue::CommonLinkage, NULL, "integer");
+  var->setInitializer(ConstantInt::get(context, APInt(64, x, true)));
+  return var;
+}
+
+bool Compiler::declared_before(const string &s) {
+  return v_table.find(s) != v_table.end();
+}
+
+void Compiler::label(map<string, ast::Code *> m) { table = m; }
+
+void Compiler::visit(ast::Node *node) {}
+
+void Compiler::visit(ast::Program *program) {
   main_block = BasicBlock::Create(context, "main_fn", main_fn);
   entry.push(main_block);
 
@@ -20,19 +52,19 @@ void compiler::visit(ast::Program *program) {
   module->print(outs(), nullptr);
 }
 
-void compiler::visit(ast::Declarations *declarations) {
+void Compiler::visit(ast::Declarations *declarations) {
   for (auto &p : *(declarations->ds)) {
     p->accept(this);
   }
 }
 
-void compiler::visit(ast::Code *code) {
+void Compiler::visit(ast::Code *code) {
   for (auto &p : *(code->statements)) {
     p->accept(this);
   }
 }
 
-void compiler::visit(ast::Id *id) {
+void Compiler::visit(ast::Id *id) {
   if (not declared_before(id->name)) {
     cerr << "Undefined variable " << id->name << endl;
     // exit(-1);
@@ -44,7 +76,7 @@ void compiler::visit(ast::Id *id) {
   format.place("%d", r);
 }
 
-void compiler::visit(ast::IdArrayAccess *id_) {
+void Compiler::visit(ast::IdArrayAccess *id_) {
   if (not declared_before(id_->name)) {
     cerr << "Undefined variable " << id_->name << endl;
     // exit(-1);
@@ -65,7 +97,7 @@ void compiler::visit(ast::IdArrayAccess *id_) {
   format.place("%d", r);
 }
 
-void compiler::visit(ast::IdRef *id_ref) {
+void Compiler::visit(ast::IdRef *id_ref) {
   if (not declared_before(id_ref->name)) {
     cerr << "Undefined variable " << id_ref->name << endl;
     // exit(-1);
@@ -78,7 +110,7 @@ void compiler::visit(ast::IdRef *id_ref) {
   eval.push((void *)r);
 }
 
-void compiler::visit(ast::IdArrayRef *idA_ref) {
+void Compiler::visit(ast::IdArrayRef *idA_ref) {
   if (not declared_before(idA_ref->name)) {
     cerr << "Undefined variable " << idA_ref->name << endl;
     // exit(-1);
@@ -100,16 +132,16 @@ void compiler::visit(ast::IdArrayRef *idA_ref) {
   eval.push((void *)instruction);
 }
 
-void compiler::visit(ast::Expr *expr) {}
+void Compiler::visit(ast::Expr *expr) {}
 
-void compiler::visit(ast::Statement *statement) {}
+void Compiler::visit(ast::Statement *statement) {}
 
-void compiler::visit(ast::Assign *assign) {
+void Compiler::visit(ast::Assign *assign) {
   assign->tree->accept(this);
   assign->ref->accept(this);
 }
 
-void compiler::visit(ast::While *while_) {
+void Compiler::visit(ast::While *while_) {
   BasicBlock *parent, *pre, *body, *post;
   parent = entry.top();
 
@@ -144,7 +176,7 @@ void compiler::visit(ast::While *while_) {
   entry.push(post);
 }
 
-void compiler::visit(ast::If *if_) {
+void Compiler::visit(ast::If *if_) {
   BasicBlock *if_block, *merge_block, *else_block;
   if_block = merge_block = else_block = NULL;
 
@@ -194,7 +226,7 @@ void compiler::visit(ast::If *if_) {
   entry.push(merge_block);
 }
 
-void compiler::visit(ast::For *for_) {
+void Compiler::visit(ast::For *for_) {
   BasicBlock *parent = entry.top();
   BasicBlock *pre, *body, *post;
 
@@ -242,7 +274,7 @@ void compiler::visit(ast::For *for_) {
   entry.push(post);
 }
 
-void compiler::visit(ast::Print *print) {
+void Compiler::visit(ast::Print *print) {
   /* Reset */
   format.init();
 
@@ -274,7 +306,7 @@ void compiler::visit(ast::Print *print) {
   format.finish();
 }
 
-void compiler::visit(ast::TypedIds *twrap) {
+void Compiler::visit(ast::TypedIds *twrap) {
   currentType = twrap->dtype;
   auto *ps = twrap->t_ids;
   for (auto &p : *ps) {
@@ -282,9 +314,9 @@ void compiler::visit(ast::TypedIds *twrap) {
   }
 }
 
-void compiler::visit(ast::NoOp *no_op) {}
+void Compiler::visit(ast::NoOp *no_op) {}
 
-void compiler::visit(ast::Goto *goto_) {
+void Compiler::visit(ast::Goto *goto_) {
   if (l_table.find(goto_->label) != l_table.end()) {
     BasicBlock *parent, *follow, *non_follow;
     parent = entry.top();
@@ -326,13 +358,13 @@ void compiler::visit(ast::Goto *goto_) {
      */
 }
 
-void compiler::visit(ast::Integer *integer) {
+void Compiler::visit(ast::Integer *integer) {
   Constant *r = ConstantInt::get(Type::getInt64Ty(context), integer->value);
   eval.push((void *)r);
   format.place("%d", r);
 }
 
-void compiler::visit(ast::BinOp *binOp) {
+void Compiler::visit(ast::BinOp *binOp) {
 
   binOp->left->accept(this);
   Value *left = (Value *)eval.top();
@@ -388,7 +420,7 @@ void compiler::visit(ast::BinOp *binOp) {
   }
 }
 
-void compiler::visit(ast::IdDef *id_def) {
+void Compiler::visit(ast::IdDef *id_def) {
 
   if (declared_before(id_def->name)) {
     cerr << "Redeclaration of variable " << id_def->name << endl;
@@ -406,7 +438,7 @@ void compiler::visit(ast::IdDef *id_def) {
   }
 }
 
-void compiler::visit(ast::IdArrayDef *idA_def) {
+void Compiler::visit(ast::IdArrayDef *idA_def) {
   if (declared_before(idA_def->name)) {
     cerr << "Redeclaration of variable " << idA_def->name << endl;
     // exit(-1);
@@ -422,13 +454,13 @@ void compiler::visit(ast::IdArrayDef *idA_def) {
   }
 }
 
-void compiler::visit(ast::Literal *literal) {
+void Compiler::visit(ast::Literal *literal) {
   auto var = string_to_Value(literal->value);
   eval.push(var);
   format.place("%s", var);
 }
 
-void compiler::visit(ast::Read *read) {
+void Compiler::visit(ast::Read *read) {
   format.init();
   /*
   Value *location = GetElementPtrInst::Create(
@@ -448,7 +480,7 @@ void compiler::visit(ast::Read *read) {
   format.finish();
 }
 
-void compiler::visit(ast::Labelled *labelled) {
+void Compiler::visit(ast::Labelled *labelled) {
   BasicBlock *parent, *follow;
   parent = entry.top();
   follow = BasicBlock::Create(context, "target", parent->getParent(), 0);

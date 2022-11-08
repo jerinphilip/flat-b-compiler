@@ -208,9 +208,9 @@ int main(int argc, char *argv[]) {
     exit(1);
   }
 
-  if (argc > 2) {
+  if (argc > 3) {
     fprintf(stderr, "Passing more arguments than necessary.\n");
-    fprintf(stderr, "Correct usage: %s filename\n", argv[0]);
+    // fprintf(stderr, "Correct usage: \n\t %s filename\n", argv[0]);
   }
 
   std::unique_ptr<visitor::Visitor> visitor = visitor::make_visitor(argv[1]);

@@ -17,9 +17,9 @@ enum FlatBType {
 enum class Op { add, sub, mul, quot, lt, gt, le, ge, eq };
 
 namespace visitor {
-struct pprinter;
-struct interpreter;
-struct compiler;
+struct PrettyPrinter;
+struct Interpreter;
+struct Compiler;
 } // namespace visitor
 
 namespace ast {
@@ -43,9 +43,9 @@ struct TypedIds;
 
 struct Node {
 
-  virtual void accept(visitor::pprinter *) = 0;
-  virtual void accept(visitor::interpreter *) = 0;
-  virtual void accept(visitor::compiler *) = 0;
+  virtual void accept(visitor::PrettyPrinter *) = 0;
+  virtual void accept(visitor::Interpreter *) = 0;
+  virtual void accept(visitor::Compiler *) = 0;
 
   virtual ~Node() = default;
 };
@@ -54,9 +54,9 @@ struct Program : public Node {
   Declarations *decl;
   Code *block;
   Program(Declarations *d, Code *c) : decl(d), block(c) {}
-  void accept(visitor::pprinter *p);
-  void accept(visitor::interpreter *p);
-  void accept(visitor::compiler *p);
+  void accept(visitor::PrettyPrinter *p);
+  void accept(visitor::Interpreter *p);
+  void accept(visitor::Compiler *p);
 };
 
 /* declarations */
@@ -65,16 +65,16 @@ struct Declarations : public Node {
   vector<TypedIds *> *ds;
   Declarations(vector<TypedIds *> *v) : ds(v) {}
 
-  void accept(visitor::pprinter *p);
-  void accept(visitor::interpreter *p);
-  void accept(visitor::compiler *p);
+  void accept(visitor::PrettyPrinter *p);
+  void accept(visitor::Interpreter *p);
+  void accept(visitor::Compiler *p);
 };
 
 /* Auxiliary types for declations and onward */
 struct Expr : public Node {
-  virtual void accept(visitor::pprinter *p);
-  virtual void accept(visitor::interpreter *p);
-  virtual void accept(visitor::compiler *p);
+  virtual void accept(visitor::PrettyPrinter *p);
+  virtual void accept(visitor::Interpreter *p);
+  virtual void accept(visitor::Compiler *p);
   virtual ~Expr() = default;
 };
 
@@ -84,9 +84,9 @@ struct Id : public Expr {
     // cerr << "Initializing: " << name << endl;
   }
 
-  virtual void accept(visitor::pprinter *p);
-  virtual void accept(visitor::interpreter *p);
-  virtual void accept(visitor::compiler *p);
+  virtual void accept(visitor::PrettyPrinter *p);
+  virtual void accept(visitor::Interpreter *p);
+  virtual void accept(visitor::Compiler *p);
 
   virtual ~Id() = default;
 };
@@ -97,9 +97,9 @@ struct IdArrayAccess : public Id {
     // cerr << "Initializing: " << s << endl;
     // cerr << "Other: "<< name << endl;
   }
-  void accept(visitor::pprinter *p);
-  void accept(visitor::interpreter *p);
-  void accept(visitor::compiler *p);
+  void accept(visitor::PrettyPrinter *p);
+  void accept(visitor::Interpreter *p);
+  void accept(visitor::Compiler *p);
 };
 
 struct IdBase : public Node {
@@ -112,9 +112,9 @@ struct IdRef : public IdBase {
   IdRef(string s) : name(s) {
     // cerr << "Initializing: " << name << endl;
   }
-  virtual void accept(visitor::pprinter *p);
-  virtual void accept(visitor::interpreter *p);
-  virtual void accept(visitor::compiler *p);
+  virtual void accept(visitor::PrettyPrinter *p);
+  virtual void accept(visitor::Interpreter *p);
+  virtual void accept(visitor::Compiler *p);
   virtual void vnode(void **p) { *p = new Id(name); }
   virtual ~IdRef() = default;
 };
@@ -122,44 +122,44 @@ struct IdRef : public IdBase {
 struct IdArrayRef : public IdRef {
   Expr *subscript;
   IdArrayRef(string s, Expr *e) : IdRef(s), subscript(e) {}
-  void accept(visitor::pprinter *p);
-  void accept(visitor::interpreter *p);
-  void accept(visitor::compiler *p);
+  void accept(visitor::PrettyPrinter *p);
+  void accept(visitor::Interpreter *p);
+  void accept(visitor::Compiler *p);
   void vnode(void **p) { *p = new IdArrayAccess(name, subscript); }
 };
 
 struct IdDef : public Node {
   string name;
   IdDef(string s) : name(s) {}
-  virtual void accept(visitor::pprinter *p);
-  virtual void accept(visitor::interpreter *p);
-  virtual void accept(visitor::compiler *p);
+  virtual void accept(visitor::PrettyPrinter *p);
+  virtual void accept(visitor::Interpreter *p);
+  virtual void accept(visitor::Compiler *p);
   virtual ~IdDef() = default;
 };
 
 struct IdArrayDef : public IdDef {
   int size;
   IdArrayDef(string s, int sz) : IdDef(s), size(sz) {}
-  void accept(visitor::pprinter *p);
-  void accept(visitor::interpreter *p);
-  void accept(visitor::compiler *p);
+  void accept(visitor::PrettyPrinter *p);
+  void accept(visitor::Interpreter *p);
+  void accept(visitor::Compiler *p);
 };
 
 struct TypedIds : public Node {
   FlatBType dtype;
   vector<IdDef *> *t_ids;
   TypedIds(FlatBType d, vector<IdDef *> *v) : dtype(d), t_ids(v) {}
-  void accept(visitor::pprinter *p);
-  void accept(visitor::interpreter *p);
-  void accept(visitor::compiler *p);
+  void accept(visitor::PrettyPrinter *p);
+  void accept(visitor::Interpreter *p);
+  void accept(visitor::Compiler *p);
 };
 
 struct Integer : public Expr {
   int value;
   Integer(int v) : value(v) {}
-  void accept(visitor::pprinter *p);
-  void accept(visitor::interpreter *p);
-  void accept(visitor::compiler *p);
+  void accept(visitor::PrettyPrinter *p);
+  void accept(visitor::Interpreter *p);
+  void accept(visitor::Compiler *p);
 };
 
 struct BinOp : public Expr {
@@ -168,15 +168,15 @@ struct BinOp : public Expr {
   Expr *right;
 
   BinOp(Op op, Expr *l, Expr *r) : op(op), left(l), right(r) {}
-  void accept(visitor::pprinter *p);
-  void accept(visitor::interpreter *p);
-  void accept(visitor::compiler *p);
+  void accept(visitor::PrettyPrinter *p);
+  void accept(visitor::Interpreter *p);
+  void accept(visitor::Compiler *p);
 };
 
 struct Statement : public Node {
-  virtual void accept(visitor::pprinter *p);
-  virtual void accept(visitor::interpreter *p);
-  virtual void accept(visitor::compiler *p);
+  virtual void accept(visitor::PrettyPrinter *p);
+  virtual void accept(visitor::Interpreter *p);
+  virtual void accept(visitor::Compiler *p);
   virtual ~Statement() = default;
 };
 
@@ -184,18 +184,18 @@ struct Statement : public Node {
 struct Code : public Statement {
   vector<Statement *> *statements;
   Code(vector<Statement *> *s) : statements(s) {}
-  void accept(visitor::pprinter *p);
-  void accept(visitor::interpreter *p);
-  void accept(visitor::compiler *p);
+  void accept(visitor::PrettyPrinter *p);
+  void accept(visitor::Interpreter *p);
+  void accept(visitor::Compiler *p);
 };
 
 struct Labelled : public Statement {
   string label;
   Code *block;
   Labelled(string label, Code *s) : label(label), block(s) {}
-  void accept(visitor::pprinter *p);
-  void accept(visitor::interpreter *p);
-  void accept(visitor::compiler *p);
+  void accept(visitor::PrettyPrinter *p);
+  void accept(visitor::Interpreter *p);
+  void accept(visitor::Compiler *p);
 };
 
 struct Assign : public Statement {
@@ -204,34 +204,34 @@ struct Assign : public Statement {
 
   Assign(IdRef *ref, Expr *e) : ref(ref), tree(e) {}
 
-  void accept(visitor::pprinter *p);
-  void accept(visitor::interpreter *p);
-  void accept(visitor::compiler *p);
+  void accept(visitor::PrettyPrinter *p);
+  void accept(visitor::Interpreter *p);
+  void accept(visitor::Compiler *p);
 };
 
 struct CodeBlock : public Statement {
   Expr *cond;
   Code *block;
   CodeBlock(Expr *c, Code *b) : cond(c), block(b) {}
-  virtual void accept(visitor::pprinter *p);
-  virtual void accept(visitor::interpreter *p);
-  virtual void accept(visitor::compiler *p);
+  virtual void accept(visitor::PrettyPrinter *p);
+  virtual void accept(visitor::Interpreter *p);
+  virtual void accept(visitor::Compiler *p);
   virtual ~CodeBlock() = default;
 };
 
 struct While : public CodeBlock {
   While(Expr *c, Code *b) : CodeBlock(c, b) {}
-  void accept(visitor::pprinter *p);
-  void accept(visitor::interpreter *p);
-  void accept(visitor::compiler *p);
+  void accept(visitor::PrettyPrinter *p);
+  void accept(visitor::Interpreter *p);
+  void accept(visitor::Compiler *p);
 };
 
 struct If : public CodeBlock {
   Code *otherwise;
   If(Expr *c, Code *b, Code *o = NULL) : CodeBlock(c, b), otherwise(o) {}
-  void accept(visitor::pprinter *p) final;
-  void accept(visitor::interpreter *p) final;
-  void accept(visitor::compiler *p) final;
+  void accept(visitor::PrettyPrinter *p) final;
+  void accept(visitor::Interpreter *p) final;
+  void accept(visitor::Compiler *p) final;
 };
 
 struct For : public Statement {
@@ -249,18 +249,18 @@ struct For : public Statement {
       Expr *delta, Expr *end, Code *b)
       : /*var(i), start(init), */
         init(init), step(delta), end(end), block(b) {}
-  void accept(visitor::pprinter *p) final;
-  void accept(visitor::interpreter *p) final;
-  void accept(visitor::compiler *p) final;
+  void accept(visitor::PrettyPrinter *p) final;
+  void accept(visitor::Interpreter *p) final;
+  void accept(visitor::Compiler *p) final;
 };
 
 struct Goto : public Statement {
   Expr *cond;
   string label;
   Goto(string label, Expr *e = NULL) : label(label), cond(e) {}
-  void accept(visitor::pprinter *p);
-  void accept(visitor::interpreter *p);
-  void accept(visitor::compiler *p);
+  void accept(visitor::PrettyPrinter *p);
+  void accept(visitor::Interpreter *p);
+  void accept(visitor::Compiler *p);
 };
 
 struct Print : public Statement {
@@ -270,32 +270,32 @@ struct Print : public Statement {
   Print(vector<ast::Expr *> *args, bool newline)
       : args(args), newline(newline) {}
 
-  void accept(visitor::pprinter *p);
-  void accept(visitor::interpreter *p);
-  void accept(visitor::compiler *p);
+  void accept(visitor::PrettyPrinter *p);
+  void accept(visitor::Interpreter *p);
+  void accept(visitor::Compiler *p);
 };
 
 struct NoOp : public Statement {
   NoOp() {}
-  void accept(visitor::pprinter *p);
-  void accept(visitor::interpreter *p);
-  void accept(visitor::compiler *p);
+  void accept(visitor::PrettyPrinter *p);
+  void accept(visitor::Interpreter *p);
+  void accept(visitor::Compiler *p);
 };
 
 struct Literal : public Expr {
   string value;
   Literal(string s) { value = s.substr(1, s.size() - 2); }
-  void accept(visitor::pprinter *p);
-  void accept(visitor::interpreter *p);
-  void accept(visitor::compiler *p);
+  void accept(visitor::PrettyPrinter *p);
+  void accept(visitor::Interpreter *p);
+  void accept(visitor::Compiler *p);
 };
 
 struct Read : public Statement {
   IdRef *var;
 
   Read(IdRef *var) : var(var) {}
-  void accept(visitor::pprinter *p) final;
-  void accept(visitor::interpreter *p) final;
-  void accept(visitor::compiler *p) final;
+  void accept(visitor::PrettyPrinter *p) final;
+  void accept(visitor::Interpreter *p) final;
+  void accept(visitor::Compiler *p) final;
 };
 } // namespace ast

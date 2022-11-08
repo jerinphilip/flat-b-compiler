@@ -52,7 +52,7 @@ struct Visitor {
   virtual ~Visitor() = default;
 };
 
-struct pprinter : public Visitor {
+struct PrettyPrinter : public Visitor {
   void visit(ast::Node *node_) final;
   void visit(ast::Program *program) final;
   void visit(ast::Declarations *declarations) final;
@@ -82,7 +82,7 @@ struct pprinter : public Visitor {
   void label(map<string, ast::Code *> m) final;
 };
 
-struct interpreter : public Visitor {
+struct Interpreter : public Visitor {
   map<string, DataType> env;
   stack<DataType> evalStack;
   ast::Program *root;
@@ -118,7 +118,7 @@ struct interpreter : public Visitor {
   void visit(ast::Labelled *labelled) final;
 };
 
-struct compiler : public Visitor {
+struct Compiler : public Visitor {
   map<string, DataType> env;
   stack<DataType> evalStack;
   ast::Program *root;
@@ -177,42 +177,13 @@ struct compiler : public Visitor {
   /* Variable and Label Tables */
   map<string, Value *> v_table;
   map<string, BasicBlock *> l_table;
-
   void label(map<string, ast::Code *> m) final;
+  Compiler();
+  Value *string_to_Value(string s);
 
-  compiler() {
-    module = new Module("main", context);
-    module->setTargetTriple("x86_64-pc-linux-gnu");
-    main_fn =
-        Function::Create(FunctionType::get(Type::getVoidTy(context), false),
-                         GlobalValue::ExternalLinkage, "main", module);
-    printf =
-        Function::Create(FunctionType::get(Type::getInt64Ty(context), true),
-                         GlobalValue::ExternalLinkage, "printf", module);
-    scanf = Function::Create(FunctionType::get(Type::getInt64Ty(context), true),
-                             GlobalValue::ExternalLinkage, "scanf", module);
-  }
+  Value *int_to_Value(int x);
 
-  Value *string_to_Value(string s) {
-    GlobalVariable *var = new GlobalVariable(
-        *module, ArrayType::get(IntegerType::get(context, 8), (s.size() + 1)),
-        true, GlobalVariable::InternalLinkage, NULL, "literal");
-
-    var->setInitializer(ConstantDataArray::getString(context, s, true));
-    return var;
-  }
-
-  Value *int_to_Value(int x) {
-    GlobalVariable *var =
-        new GlobalVariable(*module, Type::getInt64Ty(context), false,
-                           GlobalValue::CommonLinkage, NULL, "integer");
-    var->setInitializer(ConstantInt::get(context, APInt(64, x, true)));
-    return var;
-  }
-
-  bool declared_before(const string &s) {
-    return v_table.find(s) != v_table.end();
-  }
+  bool declared_before(const string &s);
 
   void visit(ast::Node *node_) final;
   void visit(ast::Program *program) final;
@@ -242,12 +213,17 @@ struct compiler : public Visitor {
 };
 
 inline std::unique_ptr<Visitor> make_visitor(std::string type) {
-  if (type == "interpreter") {
-    return std::make_unique<visitor::interpreter>();
+  if (type == "-r") {
+    return std::make_unique<visitor::Interpreter>();
   }
-  if (type == "compiler") {
-    return std::make_unique<visitor::compiler>();
+  if (type == "-c") {
+    return std::make_unique<visitor::Compiler>();
   }
+
+  if (type == "-f") {
+    return std::make_unique<visitor::PrettyPrinter>();
+  }
+
   std::abort();
   return nullptr;
 }

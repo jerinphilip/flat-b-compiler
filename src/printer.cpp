@@ -3,16 +3,16 @@
 #include "visitor.h"
 
 namespace visitor {
-void pprinter::label(map<string, ast::Code *> m) {}
+void PrettyPrinter::label(map<string, ast::Code *> m) {}
 
-void pprinter::visit(ast::Node *node) {}
+void PrettyPrinter::visit(ast::Node *node) {}
 
-void pprinter::visit(ast::Program *program) {
+void PrettyPrinter::visit(ast::Program *program) {
   program->decl->accept(this);
   program->block->accept(this);
 }
 
-void pprinter::visit(ast::Declarations *declarations) {
+void PrettyPrinter::visit(ast::Declarations *declarations) {
   cout << "decl {" << endl;
   for (auto &p : *(declarations->ds)) {
     p->accept(this);
@@ -20,51 +20,51 @@ void pprinter::visit(ast::Declarations *declarations) {
   cout << "}\n";
 }
 
-void pprinter::visit(ast::Code *code) {
+void PrettyPrinter::visit(ast::Code *code) {
   // cout << "Code" << endl;
 }
 
-void pprinter::visit(ast::Id *id) {
+void PrettyPrinter::visit(ast::Id *id) {
   // cout << "Code" << endl;
   cout << id->name;
 }
 
-void pprinter::visit(ast::IdArrayAccess *id_) {
+void PrettyPrinter::visit(ast::IdArrayAccess *id_) {
   // cout << "Code" << endl;
   cout << id_->name << "[";
   id_->subscript->accept(this);
   cout << "]";
 }
 
-void pprinter::visit(ast::Expr *expr) {
+void PrettyPrinter::visit(ast::Expr *expr) {
   // cout << "Code" << endl;
 }
 
-void pprinter::visit(ast::Statement *statement) {
+void PrettyPrinter::visit(ast::Statement *statement) {
   // cout << "Code" << endl;
 }
 
-void pprinter::visit(ast::Assign *assign) {
+void PrettyPrinter::visit(ast::Assign *assign) {
   // cout << "Code" << endl;
 }
 
-void pprinter::visit(ast::While *while_) {
+void PrettyPrinter::visit(ast::While *while_) {
   // cout << "Code" << endl;
 }
 
-void pprinter::visit(ast::If *if_) {
+void PrettyPrinter::visit(ast::If *if_) {
   // cout << "Code" << endl;
 }
 
-void pprinter::visit(ast::For *for_) {
+void PrettyPrinter::visit(ast::For *for_) {
   // cout << "Code" << endl;
 }
 
-void pprinter::visit(ast::Print *print) {
+void PrettyPrinter::visit(ast::Print *print) {
   // cout << "Code" << endl;
 }
 
-void pprinter::visit(ast::TypedIds *tIdWrapper) {
+void PrettyPrinter::visit(ast::TypedIds *tIdWrapper) {
   // cout << "Typed ids" << endl;
   string dtype;
   switch (tIdWrapper->dtype) {
@@ -93,22 +93,22 @@ void pprinter::visit(ast::TypedIds *tIdWrapper) {
   cout << ";\n";
 }
 
-void pprinter::visit(ast::NoOp *no_op) { cout << "No-Op" << endl; }
+void PrettyPrinter::visit(ast::NoOp *no_op) { cout << "No-Op" << endl; }
 
-void pprinter::visit(ast::Goto *goto_) { cout << "Go-To" << endl; }
+void PrettyPrinter::visit(ast::Goto *goto_) { cout << "Go-To" << endl; }
 
-void pprinter::visit(ast::Integer *integer) { cout << integer->value; }
+void PrettyPrinter::visit(ast::Integer *integer) { cout << integer->value; }
 
-void pprinter::visit(ast::IdDef *id_def) {}
+void PrettyPrinter::visit(ast::IdDef *id_def) {}
 
-void pprinter::visit(ast::IdArrayDef *idA_def) {}
+void PrettyPrinter::visit(ast::IdArrayDef *idA_def) {}
 
-void pprinter::visit(ast::BinOp *binOp) {}
+void PrettyPrinter::visit(ast::BinOp *binOp) {}
 
-void pprinter::visit(ast::IdRef *id_ref) {}
+void PrettyPrinter::visit(ast::IdRef *id_ref) {}
 
-void pprinter::visit(ast::IdArrayRef *idA_ref) {}
-void pprinter::visit(ast::Literal *literal) {}
-void pprinter::visit(ast::Read *read) {}
-void pprinter::visit(ast::Labelled *labelled) {}
+void PrettyPrinter::visit(ast::IdArrayRef *idA_ref) {}
+void PrettyPrinter::visit(ast::Literal *literal) {}
+void PrettyPrinter::visit(ast::Read *read) {}
+void PrettyPrinter::visit(ast::Labelled *labelled) {}
 } // namespace visitor
