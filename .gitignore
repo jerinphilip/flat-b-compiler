@@ -1,2 +1,5 @@
 .*.sw*
 build
+
+.cache/
+.vscode/
