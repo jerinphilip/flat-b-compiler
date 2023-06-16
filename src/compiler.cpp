@@ -157,12 +157,12 @@ void Compiler::visit(ast::While *while_) {
 
   entry.push(pre);
   while_->condition->accept(this);
-  auto *conditionition = static_cast<ZExtInst *>(eval.top());
+  auto *condition = static_cast<ZExtInst *>(eval.top());
   eval.pop();
-  // Value *comparison = conditionition;
+  // Value *comparison = condition;
   ConstantInt *zero = ConstantInt::get(Type::getInt64Ty(context), 0, true);
   auto *comparison =
-      new ICmpInst(*pre, ICmpInst::ICMP_NE, conditionition, zero, "vr");
+      new ICmpInst(*pre, ICmpInst::ICMP_NE, condition, zero, "vr");
   entry.pop();
 
   BranchInst::Create(body, post, comparison, pre);
@@ -191,12 +191,12 @@ void Compiler::visit(ast::If *if_) {
   assert(parent != nullptr);
 
   if_->condition->accept(this);
-  auto *conditionition = static_cast<ZExtInst *>(eval.top());
+  auto *condition = static_cast<ZExtInst *>(eval.top());
   eval.pop();
-  // Value *comparison = conditionition;
+  // Value *comparison = condition;
   ConstantInt *zero = ConstantInt::get(Type::getInt64Ty(context), 0, true);
   auto *comparison =
-      new ICmpInst(*parent, ICmpInst::ICMP_NE, conditionition, zero, "vr");
+      new ICmpInst(*parent, ICmpInst::ICMP_NE, condition, zero, "vr");
 
   if_block = BasicBlock::Create(context, "if_block", parent->getParent());
   merge_block = BasicBlock::Create(context, "merge_block", parent->getParent());
@@ -221,10 +221,10 @@ void Compiler::visit(ast::If *if_) {
       // cerr << "terminator Happening! " << endl;
       BranchInst::Create(merge_block, ret_block);
     }
-    // BranchInst::Create(if_block, else_block, conditionition, parent);
+    // BranchInst::Create(if_block, else_block, condition, parent);
     BranchInst::Create(if_block, else_block, comparison, parent);
   } else {
-    // BranchInst::Create(if_block, merge_block, conditionition, parent);
+    // BranchInst::Create(if_block, merge_block, condition, parent);
     BranchInst::Create(if_block, merge_block, comparison, parent);
   }
 
@@ -252,12 +252,12 @@ void Compiler::visit(ast::For *for_block) {
 
   entry.push(pre);
   check->accept(this);
-  auto *conditionition = static_cast<ZExtInst *>(eval.top());
+  auto *condition = static_cast<ZExtInst *>(eval.top());
   eval.pop();
-  // Value *comparison = conditionition;
+  // Value *comparison = condition;
   ConstantInt *zero = ConstantInt::get(Type::getInt64Ty(context), 0, true);
   auto *comparison =
-      new ICmpInst(*pre, ICmpInst::ICMP_NE, conditionition, zero, "vr");
+      new ICmpInst(*pre, ICmpInst::ICMP_NE, condition, zero, "vr");
   BranchInst::Create(body, post, comparison, pre);
   BranchInst::Create(pre, parent);
   entry.pop();
@@ -328,12 +328,11 @@ void Compiler::visit(ast::Goto *goto_) {
     follow = label_table[goto_->label];
     if (goto_->condition) {
       goto_->condition->accept(this);
-      auto *conditionition = static_cast<ZExtInst *>(eval.top());
+      auto *condition = static_cast<ZExtInst *>(eval.top());
       eval.pop();
-      // Value *comparison = conditionition;
       ConstantInt *zero = ConstantInt::get(Type::getInt64Ty(context), 0, true);
       auto *comparison =
-          new ICmpInst(*parent, ICmpInst::ICMP_NE, conditionition, zero, "vr");
+          new ICmpInst(*parent, ICmpInst::ICMP_NE, condition, zero, "vr");
 
       non_follow = BasicBlock::Create(context, "post-target",
                                       parent->getParent(), nullptr);
@@ -458,7 +457,7 @@ void Compiler::visit(ast::IdArrayDef *id_array_def) {
 }
 
 void Compiler::visit(ast::Literal *literal) {
-  auto *var = string_to_Value(literal->value);
+  Value *var = string_to_Value(literal->value);
   eval.push(var);
   format.place("%s", var);
 }
