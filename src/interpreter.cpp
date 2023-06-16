@@ -39,8 +39,7 @@ void Interpreter::visit(ast::Code *code) {
 void Interpreter::visit(ast::Id *id) {
   FlatBValue value;
   bool declared = env_.find(id->name) != env_.end();
-  if (not declared)
-    std::cerr << "Undefined variable" << std::endl;
+  if (not declared) std::cerr << "Undefined variable" << std::endl;
 
   /* TODO, Ascertain type from pointer type */
   value.type = FlatBType::Int;
@@ -52,8 +51,7 @@ void Interpreter::visit(ast::IdArrayAccess *id_array_access) {
   FlatBValue value;
   value.type = FlatBType::Int;
   bool declared = env_.find(id_array_access->name) != env_.end();
-  if (not declared)
-    std::cerr << "Undefined variable" << std::endl;
+  if (not declared) std::cerr << "Undefined variable" << std::endl;
 
   id_array_access->subscript->accept(this);
 
@@ -70,8 +68,7 @@ void Interpreter::visit(ast::IdRef *id_ref) {
   FlatBValue value;
   value.type = FlatBType::Pointer;
   bool declared = env_.find(id_ref->name) != env_.end();
-  if (not declared)
-    std::cerr << "Undefined variable" << std::endl;
+  if (not declared) std::cerr << "Undefined variable" << std::endl;
 
   value.underlying.Pointer = &(env_[id_ref->name].underlying.Int);
   stack_.push(value);
@@ -81,8 +78,7 @@ void Interpreter::visit(ast::IdArrayRef *id_array_ref) {
   FlatBValue value;
   value.type = FlatBType::Pointer;
   bool declared = env_.find(id_array_ref->name) != env_.end();
-  if (not declared)
-    std::cerr << "Undefined variable" << std::endl;
+  if (not declared) std::cerr << "Undefined variable" << std::endl;
 
   id_array_ref->subscript->accept(this);
   FlatBValue sc = pop_stack();
@@ -168,17 +164,17 @@ void Interpreter::visit(ast::Print *print) {
     p->accept(this);
     FlatBValue value = pop_stack();
     switch (value.type) {
-    case FlatBType::Int:
-      std::cout << value.underlying.Int;
-      break;
-    case FlatBType::CharArray:
-      std::cout << value.underlying.CharArray;
-      break;
-    case FlatBType::Bool:
-      std::cout << value.underlying.Bool;
-      break;
-    default:
-      break;
+      case FlatBType::Int:
+        std::cout << value.underlying.Int;
+        break;
+      case FlatBType::CharArray:
+        std::cout << value.underlying.CharArray;
+        break;
+      case FlatBType::Bool:
+        std::cout << value.underlying.Bool;
+        break;
+      default:
+        break;
     }
   }
 
@@ -222,7 +218,6 @@ void Interpreter::visit(ast::Integer *integer) {
 }
 
 void Interpreter::visit(ast::BinOp *bin_op) {
-
   /* Evaluate and put on stack */
   bin_op->left->accept(this);
   FlatBValue left = pop_stack();
@@ -234,35 +229,35 @@ void Interpreter::visit(ast::BinOp *bin_op) {
   if (left.type != right.type) {
   } else {
     switch (bin_op->op) {
-    case Op::add:
-      stack_.push(left + right);
-      break;
-    case Op::sub:
-      stack_.push(left - right);
-      break;
-    case Op::mul:
-      stack_.push(left * right);
-      break;
-    case Op::quot:
-      stack_.push(left / right);
-      break;
-    case Op::lt:
-      stack_.push(left < right);
-      break;
-    case Op::gt:
-      stack_.push(left > right);
-      break;
-    case Op::le:
-      stack_.push(left <= right);
-      break;
-    case Op::ge:
-      stack_.push(left >= right);
-      break;
-    case Op::eq:
-      stack_.push(left == right);
-      break;
-    default:
-      break;
+      case Op::add:
+        stack_.push(left + right);
+        break;
+      case Op::sub:
+        stack_.push(left - right);
+        break;
+      case Op::mul:
+        stack_.push(left * right);
+        break;
+      case Op::quot:
+        stack_.push(left / right);
+        break;
+      case Op::lt:
+        stack_.push(left < right);
+        break;
+      case Op::gt:
+        stack_.push(left > right);
+        break;
+      case Op::le:
+        stack_.push(left <= right);
+        break;
+      case Op::ge:
+        stack_.push(left >= right);
+        break;
+      case Op::eq:
+        stack_.push(left == right);
+        break;
+      default:
+        break;
     }
   }
 }
@@ -271,11 +266,11 @@ void Interpreter::visit(ast::IdDef *id_def) {
   FlatBValue value;
   value.type = current_type_;
   switch (value.type) {
-  case FlatBType::Int:
-    value.underlying.Int = 0;
-    break;
-  default:
-    break;
+    case FlatBType::Int:
+      value.underlying.Int = 0;
+      break;
+    default:
+      break;
   }
 
   std::string name = id_def->name;
@@ -288,12 +283,12 @@ void Interpreter::visit(ast::IdArrayDef *id_array_def) {
   FlatBValue value;
   value.type = current_type_;
   switch (value.type) {
-  case FlatBType::Int:
-    value.underlying.IntArray = new int[size];
-    value.type = FlatBType::IntArray;
-    break;
-  default:
-    break;
+    case FlatBType::Int:
+      value.underlying.IntArray = new int[size];
+      value.type = FlatBType::IntArray;
+      break;
+    default:
+      break;
   }
 
   env_[name] = value;
@@ -317,4 +312,4 @@ void Interpreter::visit(ast::Read *read) {
 void Interpreter::visit(ast::Labelled *labelled) {
   labelled->block->accept(this);
 }
-} // namespace visitor
+}  // namespace visitor

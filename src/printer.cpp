@@ -70,25 +70,24 @@ void PrettyPrinter::visit(ast::TypedIds *typed_ids) {
   // std::cout << "Typed ids" << std::endl;
   std::string type;
   switch (typed_ids->type) {
-  case FlatBType::Int:
-    type = "int";
-    break;
-  case FlatBType::Bool:
-    type = "bool";
-    break;
-  case FlatBType::Char:
-    type = "char";
-    break;
-  default:
-    break;
+    case FlatBType::Int:
+      type = "int";
+      break;
+    case FlatBType::Bool:
+      type = "bool";
+      break;
+    case FlatBType::Char:
+      type = "char";
+      break;
+    default:
+      break;
   }
   std::cout << type << " ";
   bool first = true;
   auto *id_defs = typed_ids->id_defs;
   reverse(id_defs->begin(), id_defs->end());
   for (auto &id_def : *id_defs) {
-    if (not first)
-      std::cout << ", ";
+    if (not first) std::cout << ", ";
     first = false;
     id_def->accept(this);
   }
@@ -119,4 +118,4 @@ void PrettyPrinter::visit(ast::IdArrayRef *idA_ref) {}
 void PrettyPrinter::visit(ast::Literal *literal) {}
 void PrettyPrinter::visit(ast::Read *read) {}
 void PrettyPrinter::visit(ast::Labelled *labelled) {}
-} // namespace visitor
+}  // namespace visitor

@@ -1,8 +1,5 @@
 #pragma once
 
-#include "ast.h"
-#include "types.h"
-#include "llvm/IR/Instructions.h"
 #include <llvm/ADT/APFloat.h>
 #include <llvm/ADT/STLExtras.h>
 #include <llvm/IR/BasicBlock.h>
@@ -14,9 +11,14 @@
 #include <llvm/IR/Type.h>
 #include <llvm/IR/Value.h>
 #include <llvm/IR/Verifier.h>
+
 #include <map>
 #include <memory>
 #include <stack>
+
+#include "ast.h"
+#include "llvm/IR/Instructions.h"
+#include "types.h"
 using namespace llvm;
 
 namespace visitor {
@@ -55,4 +57,4 @@ struct Visitor {
 
 std::unique_ptr<Visitor> make_visitor(std::string type);
 
-} // namespace visitor
+}  // namespace visitor

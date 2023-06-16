@@ -23,11 +23,11 @@ struct FlatBValue {
     FlatBValue result;
     result.type = type;
     switch (type) {
-    case FlatBType::Int:
-      result.underlying.Int = underlying.Int + x.underlying.Int;
-      break;
-    default:
-      break;
+      case FlatBType::Int:
+        result.underlying.Int = underlying.Int + x.underlying.Int;
+        break;
+      default:
+        break;
     }
     return result;
   }
@@ -36,11 +36,11 @@ struct FlatBValue {
     FlatBValue result;
     result.type = type;
     switch (type) {
-    case FlatBType::Int:
-      result.underlying.Int = underlying.Int - x.underlying.Int;
-      break;
-    default:
-      break;
+      case FlatBType::Int:
+        result.underlying.Int = underlying.Int - x.underlying.Int;
+        break;
+      default:
+        break;
     }
     return result;
   }
@@ -49,11 +49,11 @@ struct FlatBValue {
     FlatBValue result;
     result.type = type;
     switch (type) {
-    case FlatBType::Int:
-      result.underlying.Int = underlying.Int * x.underlying.Int;
-      break;
-    default:
-      break;
+      case FlatBType::Int:
+        result.underlying.Int = underlying.Int * x.underlying.Int;
+        break;
+      default:
+        break;
     }
     return result;
   }
@@ -62,11 +62,11 @@ struct FlatBValue {
     FlatBValue result;
     result.type = type;
     switch (type) {
-    case FlatBType::Int:
-      result.underlying.Int = underlying.Int / x.underlying.Int;
-      break;
-    default:
-      break;
+      case FlatBType::Int:
+        result.underlying.Int = underlying.Int / x.underlying.Int;
+        break;
+      default:
+        break;
     }
     return result;
   }
@@ -75,11 +75,11 @@ struct FlatBValue {
     FlatBValue result;
     result.type = FlatBType::Bool;
     switch (type) {
-    case FlatBType::Int:
-      result.underlying.Int = underlying.Int < x.underlying.Int;
-      break;
-    default:
-      break;
+      case FlatBType::Int:
+        result.underlying.Int = underlying.Int < x.underlying.Int;
+        break;
+      default:
+        break;
     }
     return result;
   }
@@ -88,11 +88,11 @@ struct FlatBValue {
     FlatBValue result;
     result.type = FlatBType::Bool;
     switch (type) {
-    case FlatBType::Int:
-      result.underlying.Int = underlying.Int > x.underlying.Int;
-      break;
-    default:
-      break;
+      case FlatBType::Int:
+        result.underlying.Int = underlying.Int > x.underlying.Int;
+        break;
+      default:
+        break;
     }
     return result;
   }
@@ -101,11 +101,11 @@ struct FlatBValue {
     FlatBValue result;
     result.type = FlatBType::Bool;
     switch (type) {
-    case FlatBType::Int:
-      result.underlying.Int = underlying.Int <= x.underlying.Int;
-      break;
-    default:
-      break;
+      case FlatBType::Int:
+        result.underlying.Int = underlying.Int <= x.underlying.Int;
+        break;
+      default:
+        break;
     }
     return result;
   }
@@ -114,11 +114,11 @@ struct FlatBValue {
     FlatBValue result;
     result.type = FlatBType::Bool;
     switch (type) {
-    case FlatBType::Int:
-      result.underlying.Int = underlying.Int >= x.underlying.Int;
-      break;
-    default:
-      break;
+      case FlatBType::Int:
+        result.underlying.Int = underlying.Int >= x.underlying.Int;
+        break;
+      default:
+        break;
     }
     return result;
   }
@@ -127,11 +127,11 @@ struct FlatBValue {
     FlatBValue result;
     result.type = FlatBType::Bool;
     switch (type) {
-    case FlatBType::Int:
-      result.underlying.Int = underlying.Int == x.underlying.Int;
-      break;
-    default:
-      break;
+      case FlatBType::Int:
+        result.underlying.Int = underlying.Int == x.underlying.Int;
+        break;
+      default:
+        break;
     }
     return result;
   }

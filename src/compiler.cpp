@@ -15,7 +15,7 @@ Compiler::Compiler() {
                            GlobalValue::ExternalLinkage, "scanf", module);
 }
 
-Value *Compiler::string_to_Value(const std::string& s) {
+Value *Compiler::string_to_Value(const std::string &s) {
   auto *var = new GlobalVariable(
       *module, ArrayType::get(IntegerType::get(context, 8), (s.size() + 1)),
       true, GlobalVariable::InternalLinkage, nullptr, "literal");
@@ -211,7 +211,6 @@ void Compiler::visit(ast::If *if_) {
   }
 
   if (if_->otherwise != nullptr) {
-
     else_block = BasicBlock::Create(context, "else_block", parent->getParent());
     entry.push(else_block);
     if_->otherwise->accept(this);
@@ -340,8 +339,8 @@ void Compiler::visit(ast::Goto *goto_) {
       auto *comparison =
           new ICmpInst(*parent, ICmpInst::ICMP_NE, conditionition, zero, "vr");
 
-      non_follow =
-          BasicBlock::Create(context, "post-target", parent->getParent(), nullptr);
+      non_follow = BasicBlock::Create(context, "post-target",
+                                      parent->getParent(), nullptr);
       BranchInst::Create(follow, non_follow, comparison, parent);
       entry.push(non_follow);
 
@@ -375,7 +374,6 @@ void Compiler::visit(ast::Integer *integer) {
 }
 
 void Compiler::visit(ast::BinOp *binOp) {
-
   binOp->left->accept(this);
   auto *left = static_cast<Value *>(eval.top());
   eval.pop();
@@ -398,45 +396,43 @@ void Compiler::visit(ast::BinOp *binOp) {
   };
 
   switch (binOp->op) {
-  case Op::add:
-    binary_operator(Instruction::Add);
-    break;
-  case Op::sub:
-    binary_operator(Instruction::Sub);
-    break;
-  case Op::mul:
-    binary_operator(Instruction::Mul);
-    break;
-  case Op::quot:
-    binary_operator(Instruction::SDiv);
-    break;
-  case Op::lt:
-    cmp_operator(ICmpInst::ICMP_SLT);
-    break;
-  case Op::gt:
-    cmp_operator(ICmpInst::ICMP_SGT);
-    break;
-  case Op::le:
-    cmp_operator(ICmpInst::ICMP_SLE);
-    break;
-  case Op::ge:
-    cmp_operator(ICmpInst::ICMP_SGE);
-    break;
-  case Op::eq:
-    cmp_operator(ICmpInst::ICMP_EQ);
-    break;
-  default:
-    break;
+    case Op::add:
+      binary_operator(Instruction::Add);
+      break;
+    case Op::sub:
+      binary_operator(Instruction::Sub);
+      break;
+    case Op::mul:
+      binary_operator(Instruction::Mul);
+      break;
+    case Op::quot:
+      binary_operator(Instruction::SDiv);
+      break;
+    case Op::lt:
+      cmp_operator(ICmpInst::ICMP_SLT);
+      break;
+    case Op::gt:
+      cmp_operator(ICmpInst::ICMP_SGT);
+      break;
+    case Op::le:
+      cmp_operator(ICmpInst::ICMP_SLE);
+      break;
+    case Op::ge:
+      cmp_operator(ICmpInst::ICMP_SGE);
+      break;
+    case Op::eq:
+      cmp_operator(ICmpInst::ICMP_EQ);
+      break;
+    default:
+      break;
   }
 }
 
 void Compiler::visit(ast::IdDef *id_def) {
-
   if (declared_before(id_def->name)) {
     std::cerr << "Redeclaration of variable " << id_def->name << std::endl;
     // exit(-1);
   } else {
-
     auto *var =
         new GlobalVariable(*module, Type::getInt64Ty(context), false,
                            GlobalValue::CommonLinkage, nullptr, id_def->name);
@@ -502,4 +498,4 @@ void Compiler::visit(ast::Labelled *labelled) {
   entry.push(follow);
   labelled->block->accept(this);
 }
-} // namespace visitor
+}  // namespace visitor

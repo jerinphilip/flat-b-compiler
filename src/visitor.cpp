@@ -21,4 +21,4 @@ std::unique_ptr<Visitor> make_visitor(std::string type) {
   std::abort();
   return nullptr;
 }
-}
+}  // namespace visitor

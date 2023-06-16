@@ -34,4 +34,4 @@ struct PrettyPrinter : public Visitor {
   void label(std::map<std::string, ast::Code *> m) final;
 };
 
-}
+}  // namespace visitor

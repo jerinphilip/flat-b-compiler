@@ -92,4 +92,4 @@ struct Compiler : public Visitor {
   void visit(ast::Read *read) final;
   void visit(ast::Labelled *labelled) final;
 };
-}
+}  // namespace visitor

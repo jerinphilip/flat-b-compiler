@@ -1,9 +1,10 @@
 #pragma once
 
-#include "types.h"
 #include <iostream>
 #include <string>
 #include <vector>
+
+#include "types.h"
 
 enum class Op { add, sub, mul, quot, lt, gt, le, ge, eq };
 
@@ -12,7 +13,7 @@ namespace visitor {
 struct PrettyPrinter;
 struct Interpreter;
 struct Compiler;
-} // namespace visitor
+}  // namespace visitor
 
 namespace ast {
 
@@ -33,7 +34,6 @@ struct Print;
 struct TypedIds;
 
 struct Node {
-
   virtual void accept(visitor::PrettyPrinter *) = 0;
   virtual void accept(visitor::Interpreter *) = 0;
   virtual void accept(visitor::Compiler *) = 0;
@@ -279,4 +279,4 @@ struct Read : public Statement {
   void accept(visitor::Interpreter *p) final;
   void accept(visitor::Compiler *p) final;
 };
-} // namespace ast
+}  // namespace ast
