@@ -122,7 +122,7 @@ void Interpreter::visit(ast::If *if_) {
   if (condition.underlying.Int) {
     if_->block->accept(this);
   } else {
-    if (if_->otherwise != NULL) {
+    if (if_->otherwise != nullptr) {
       if_->otherwise->accept(this);
     }
   }
@@ -134,11 +134,11 @@ void Interpreter::visit(ast::For *for_block) {
   void *location;
   void **var = &location;
   for_block->init->ref->vnode(var);
-  ast::Id *ivar = (ast::Id *)location;
+  auto *ivar = static_cast<ast::Id *>(location);
 
-  ast::BinOp *rhs = new ast::BinOp(Op::add, ivar, for_block->step);
-  ast::Assign *step = new ast::Assign(for_block->init->ref, rhs);
-  ast::BinOp *check = new ast::BinOp(Op::le, ivar, for_block->end);
+  auto *rhs = new ast::BinOp(Op::add, ivar, for_block->step);
+  auto *step = new ast::Assign(for_block->init->ref, rhs);
+  auto *check = new ast::BinOp(Op::le, ivar, for_block->end);
 
   FlatBValue condition;
   condition.type = FlatBType::Int;
@@ -151,7 +151,7 @@ void Interpreter::visit(ast::For *for_block) {
       for_block->body->accept(this); /* Evaluate body */
       step->accept(this);
     }
-  } while (condition.underlying.Int);
+  } while (condition.underlying.Int != 0);
 }
 
 void Interpreter::visit(ast::Print *print) {
@@ -196,7 +196,7 @@ void Interpreter::visit(ast::TypedIds *typed_ids) {
 void Interpreter::visit(ast::NoOp *no_op) {}
 
 void Interpreter::visit(ast::Goto *goto_) {
-  if (goto_->condition == NULL) {
+  if (goto_->condition == nullptr) {
     ast::Code *code = table_[goto_->label];
     code->accept(this);
     exit(0);
@@ -300,7 +300,7 @@ void Interpreter::visit(ast::IdArrayDef *id_array_def) {
 void Interpreter::visit(ast::Literal *literal) {
   FlatBValue value;
   value.type = FlatBType::CharArray;
-  value.underlying.CharArray = (char *)literal->value.c_str();
+  value.underlying.CharArray = const_cast<char *>(literal->value.c_str());
   stack_.push(value);
 }
 

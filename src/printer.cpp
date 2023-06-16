@@ -92,11 +92,11 @@ void PrettyPrinter::visit(ast::TypedIds *typed_ids) {
   std::cout << ";\n";
 }
 
-void PrettyPrinter::visit(ast::NoOp *no_op) {
+void PrettyPrinter::visit(ast::NoOp * /*no_op*/) {
   std::cout << "No-Op" << std::endl;
 }
 
-void PrettyPrinter::visit(ast::Goto *goto_) {
+void PrettyPrinter::visit(ast::Goto * /*goto_*/) {
   std::cout << "Go-To" << std::endl;
 }
 

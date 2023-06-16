@@ -13,19 +13,19 @@ Compiler::Compiler() {
                            GlobalValue::ExternalLinkage, "scanf", module);
 }
 
-Value *Compiler::string_to_Value(std::string s) {
-  GlobalVariable *var = new GlobalVariable(
+Value *Compiler::string_to_Value(const std::string& s) {
+  auto *var = new GlobalVariable(
       *module, ArrayType::get(IntegerType::get(context, 8), (s.size() + 1)),
-      true, GlobalVariable::InternalLinkage, NULL, "literal");
+      true, GlobalVariable::InternalLinkage, nullptr, "literal");
 
   var->setInitializer(ConstantDataArray::getString(context, s, true));
   return var;
 }
 
 Value *Compiler::int_to_Value(int x) {
-  GlobalVariable *var =
+  auto *var =
       new GlobalVariable(*module, Type::getInt64Ty(context), false,
-                         GlobalValue::CommonLinkage, NULL, "integer");
+                         GlobalValue::CommonLinkage, nullptr, "integer");
   var->setInitializer(ConstantInt::get(context, APInt(64, x, true)));
   return var;
 }
@@ -45,7 +45,7 @@ void Compiler::visit(ast::Program *program) {
   program->decl->accept(this);
   program->block->accept(this);
 
-  // TODO: New
+  // TODO(jerin): New
   ReturnInst::Create(context, entry.top());
   entry.pop();
   module->print(outs(), nullptr);
@@ -82,8 +82,8 @@ void Compiler::visit(ast::IdArrayAccess *id_) {
   }
 
   id_->subscript->accept(this);
-  auto start = ConstantInt::get(context, APInt(64, StringRef("0"), 10));
-  auto offset = (Value *)eval.top();
+  auto *start = ConstantInt::get(context, APInt(64, StringRef("0"), 10));
+  auto *offset = static_cast<Value *>(eval.top());
   eval.pop();
 
   std::vector<Value *> index_params = {start, offset};
@@ -102,9 +102,9 @@ void Compiler::visit(ast::IdRef *id_ref) {
     // exit(-1);
   }
 
-  Value *ret_val = (Value *)eval.top();
+  auto *ret_val = static_cast<Value *>(eval.top());
   eval.pop();
-  StoreInst *r =
+  auto *r =
       new StoreInst(ret_val, value_table[id_ref->name], false, entry.top());
   eval.push((void *)r);
 }
@@ -115,12 +115,12 @@ void Compiler::visit(ast::IdArrayRef *id_array_ref) {
     // exit(-1);
   }
 
-  Value *ret_val = (Value *)eval.top();
+  auto *ret_val = static_cast<Value *>(eval.top());
   eval.pop();
 
   id_array_ref->subscript->accept(this);
-  auto start = ConstantInt::get(context, APInt(64, StringRef("0"), 10));
-  auto offset = (Value *)eval.top();
+  auto *start = ConstantInt::get(context, APInt(64, StringRef("0"), 10));
+  auto *offset = static_cast<Value *>(eval.top());
   eval.pop();
   std::vector<Value *> index_params = {start, offset};
   // Value *location = GetElementPtrInst::CreateInBounds(
@@ -141,22 +141,25 @@ void Compiler::visit(ast::Assign *assign) {
 }
 
 void Compiler::visit(ast::While *while_) {
-  BasicBlock *parent, *pre, *body, *post;
+  BasicBlock *parent;
+  BasicBlock *pre;
+  BasicBlock *body;
+  BasicBlock *post;
   parent = entry.top();
 
-  pre = body = post = NULL;
+  pre = body = post = nullptr;
 
-  pre = BasicBlock::Create(context, "pre", parent->getParent(), 0);
-  body = BasicBlock::Create(context, "body", parent->getParent(), 0);
-  post = BasicBlock::Create(context, "post", parent->getParent(), 0);
+  pre = BasicBlock::Create(context, "pre", parent->getParent(), nullptr);
+  body = BasicBlock::Create(context, "body", parent->getParent(), nullptr);
+  post = BasicBlock::Create(context, "post", parent->getParent(), nullptr);
 
   entry.push(pre);
   while_->condition->accept(this);
-  ZExtInst *conditionition = (ZExtInst *)eval.top();
+  auto *conditionition = static_cast<ZExtInst *>(eval.top());
   eval.pop();
   // Value *comparison = conditionition;
   ConstantInt *zero = ConstantInt::get(Type::getInt64Ty(context), 0, true);
-  ICmpInst *comparison =
+  auto *comparison =
       new ICmpInst(*pre, ICmpInst::ICMP_NE, conditionition, zero, "vr");
   entry.pop();
 
@@ -176,19 +179,21 @@ void Compiler::visit(ast::While *while_) {
 }
 
 void Compiler::visit(ast::If *if_) {
-  BasicBlock *if_block, *merge_block, *else_block;
-  if_block = merge_block = else_block = NULL;
+  BasicBlock *if_block;
+  BasicBlock *merge_block;
+  BasicBlock *else_block;
+  if_block = merge_block = else_block = nullptr;
 
-  BasicBlock *ret_block = NULL;
+  BasicBlock *ret_block = nullptr;
   BasicBlock *parent = entry.top();
-  assert(parent != NULL);
+  assert(parent != nullptr);
 
   if_->condition->accept(this);
-  ZExtInst *conditionition = (ZExtInst *)eval.top();
+  auto *conditionition = static_cast<ZExtInst *>(eval.top());
   eval.pop();
   // Value *comparison = conditionition;
   ConstantInt *zero = ConstantInt::get(Type::getInt64Ty(context), 0, true);
-  ICmpInst *comparison =
+  auto *comparison =
       new ICmpInst(*parent, ICmpInst::ICMP_NE, conditionition, zero, "vr");
 
   if_block = BasicBlock::Create(context, "if_block", parent->getParent());
@@ -203,7 +208,7 @@ void Compiler::visit(ast::If *if_) {
     BranchInst::Create(merge_block, ret_block);
   }
 
-  if (if_->otherwise != NULL) {
+  if (if_->otherwise != nullptr) {
 
     else_block = BasicBlock::Create(context, "else_block", parent->getParent());
     entry.push(else_block);
@@ -227,32 +232,34 @@ void Compiler::visit(ast::If *if_) {
 
 void Compiler::visit(ast::For *for_block) {
   BasicBlock *parent = entry.top();
-  BasicBlock *pre, *body, *post;
+  BasicBlock *pre;
+  BasicBlock *body;
+  BasicBlock *post;
 
-  pre = body = post = NULL;
+  pre = body = post = nullptr;
 
-  pre = BasicBlock::Create(context, "for_pre", parent->getParent(), 0);
-  body = BasicBlock::Create(context, "for_body", parent->getParent(), 0);
-  post = BasicBlock::Create(context, "for_post", parent->getParent(), 0);
+  pre = BasicBlock::Create(context, "for_pre", parent->getParent(), nullptr);
+  body = BasicBlock::Create(context, "for_body", parent->getParent(), nullptr);
+  post = BasicBlock::Create(context, "for_post", parent->getParent(), nullptr);
 
   /* Initialize before entering loop, hopefully in parent */
   for_block->init->accept(this);
   void *location;
   void **var = &location;
   for_block->init->ref->vnode(var);
-  ast::Id *ivar = (ast::Id *)location;
+  auto *ivar = static_cast<ast::Id *>(location);
 
-  ast::BinOp *rhs = new ast::BinOp(Op::add, ivar, for_block->step);
-  ast::Assign *step = new ast::Assign(for_block->init->ref, rhs);
-  ast::BinOp *check = new ast::BinOp(Op::le, ivar, for_block->end);
+  auto *rhs = new ast::BinOp(Op::add, ivar, for_block->step);
+  auto *step = new ast::Assign(for_block->init->ref, rhs);
+  auto *check = new ast::BinOp(Op::le, ivar, for_block->end);
 
   entry.push(pre);
   check->accept(this);
-  ZExtInst *conditionition = (ZExtInst *)eval.top();
+  auto *conditionition = static_cast<ZExtInst *>(eval.top());
   eval.pop();
   // Value *comparison = conditionition;
   ConstantInt *zero = ConstantInt::get(Type::getInt64Ty(context), 0, true);
-  ICmpInst *comparison =
+  auto *comparison =
       new ICmpInst(*pre, ICmpInst::ICMP_NE, conditionition, zero, "vr");
   BranchInst::Create(body, post, comparison, pre);
   BranchInst::Create(pre, parent);
@@ -286,7 +293,7 @@ void Compiler::visit(ast::Print *print) {
     }
     first = false;
     p->accept(this);
-    Value *r = (Value *)eval.top();
+    auto *r = static_cast<Value *>(eval.top());
     eval.pop();
     format.update();
   }
@@ -317,20 +324,22 @@ void Compiler::visit(ast::NoOp *no_op) {}
 
 void Compiler::visit(ast::Goto *goto_) {
   if (label_table.find(goto_->label) != label_table.end()) {
-    BasicBlock *parent, *follow, *non_follow;
+    BasicBlock *parent;
+    BasicBlock *follow;
+    BasicBlock *non_follow;
     parent = entry.top();
     follow = label_table[goto_->label];
     if (goto_->condition) {
       goto_->condition->accept(this);
-      ZExtInst *conditionition = (ZExtInst *)eval.top();
+      auto *conditionition = static_cast<ZExtInst *>(eval.top());
       eval.pop();
       // Value *comparison = conditionition;
       ConstantInt *zero = ConstantInt::get(Type::getInt64Ty(context), 0, true);
-      ICmpInst *comparison =
+      auto *comparison =
           new ICmpInst(*parent, ICmpInst::ICMP_NE, conditionition, zero, "vr");
 
       non_follow =
-          BasicBlock::Create(context, "post-target", parent->getParent(), 0);
+          BasicBlock::Create(context, "post-target", parent->getParent(), nullptr);
       BranchInst::Create(follow, non_follow, comparison, parent);
       entry.push(non_follow);
 
@@ -366,13 +375,13 @@ void Compiler::visit(ast::Integer *integer) {
 void Compiler::visit(ast::BinOp *binOp) {
 
   binOp->left->accept(this);
-  Value *left = (Value *)eval.top();
+  auto *left = static_cast<Value *>(eval.top());
   eval.pop();
   binOp->right->accept(this);
-  Value *right = (Value *)eval.top();
+  auto *right = static_cast<Value *>(eval.top());
   eval.pop();
 
-  auto parent = entry.top();
+  auto *parent = entry.top();
   auto binary_operator = [&left, &right, &parent,
                           this](Instruction::BinaryOps Op) {
     auto *b = BinaryOperator::Create(Op, left, right, "vr", parent);
@@ -426,9 +435,9 @@ void Compiler::visit(ast::IdDef *id_def) {
     // exit(-1);
   } else {
 
-    GlobalVariable *var =
+    auto *var =
         new GlobalVariable(*module, Type::getInt64Ty(context), false,
-                           GlobalValue::CommonLinkage, NULL, id_def->name);
+                           GlobalValue::CommonLinkage, nullptr, id_def->name);
     var->setInitializer(
         ConstantInt::get(context, APInt(64, StringRef("0"), 10)));
 
@@ -443,9 +452,9 @@ void Compiler::visit(ast::IdArrayDef *id_array_def) {
               << std::endl;
     // exit(-1);
   } else {
-    GlobalVariable *var = new GlobalVariable(
+    auto *var = new GlobalVariable(
         *module, ArrayType::get(Type::getInt64Ty(context), id_array_def->size),
-        false, GlobalValue::CommonLinkage, NULL, id_array_def->name);
+        false, GlobalValue::CommonLinkage, nullptr, id_array_def->name);
     var->setInitializer(ConstantAggregateZero::get(
         ArrayType::get(Type::getInt64Ty(context), id_array_def->size)));
 
@@ -455,12 +464,12 @@ void Compiler::visit(ast::IdArrayDef *id_array_def) {
 }
 
 void Compiler::visit(ast::Literal *literal) {
-  auto var = string_to_Value(literal->value);
+  auto *var = string_to_Value(literal->value);
   eval.push(var);
   format.place("%s", var);
 }
 
-void Compiler::visit(ast::Read *read) {
+void Compiler::visit(ast::Read * /*read*/) {
   format.init();
   /*
   Value *location = GetElementPtrInst::Create(
@@ -481,9 +490,10 @@ void Compiler::visit(ast::Read *read) {
 }
 
 void Compiler::visit(ast::Labelled *labelled) {
-  BasicBlock *parent, *follow;
+  BasicBlock *parent;
+  BasicBlock *follow;
   parent = entry.top();
-  follow = BasicBlock::Create(context, "target", parent->getParent(), 0);
+  follow = BasicBlock::Create(context, "target", parent->getParent(), nullptr);
   BranchInst::Create(follow, parent);
 
   label_table[labelled->label] = follow;

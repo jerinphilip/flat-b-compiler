@@ -186,7 +186,7 @@ struct Compiler : public Visitor {
   std::map<std::string, BasicBlock *> label_table;
 
   Compiler();
-  Value *string_to_Value(std::string s);
+  Value *string_to_Value(const std::string& s);
   Value *int_to_Value(int x);
   bool declared_before(const std::string &s);
 
@@ -210,7 +210,7 @@ struct Compiler : public Visitor {
   void visit(ast::Integer *integer) final;
   void visit(ast::IdDef *id_def) final;
   void visit(ast::IdArrayDef *id_array_def) final;
-  void visit(ast::BinOp *bin_op) final;
+  void visit(ast::BinOp *binOp) final;
   void visit(ast::IdRef *id_ref) final;
   void visit(ast::IdArrayRef *id_array_ref) final;
   void visit(ast::Literal *literal) final;
