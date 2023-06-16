@@ -20,7 +20,7 @@ void Interpreter::visit(ast::Node *node) {}
 
 void Interpreter::visit(ast::Program *program) {
   root_ = program;
-  program->decl->accept(this);
+  program->declarations->accept(this);
   program->block->accept(this);
 }
 

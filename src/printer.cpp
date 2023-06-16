@@ -10,12 +10,12 @@ void PrettyPrinter::label(std::map<std::string, ast::Code *> m) {}
 void PrettyPrinter::visit(ast::Node *node) {}
 
 void PrettyPrinter::visit(ast::Program *program) {
-  program->decl->accept(this);
+  program->declarations->accept(this);
   program->block->accept(this);
 }
 
 void PrettyPrinter::visit(ast::Declarations *declarations) {
-  std::cout << "decl {" << std::endl;
+  std::cout << "declarations {" << std::endl;
   for (auto &typed_ids : *(declarations->typed_ids)) {
     typed_ids->accept(this);
   }

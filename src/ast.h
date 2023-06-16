@@ -42,9 +42,9 @@ struct Node {
 };
 
 struct Program : public Node {
-  Declarations *decl;
+  Declarations *declarations;
   Code *block;
-  Program(Declarations *d, Code *c) : decl(d), block(c) {}
+  Program(Declarations *d, Code *c) : declarations(d), block(c) {}
   void accept(visitor::PrettyPrinter *p);
   void accept(visitor::Interpreter *p);
   void accept(visitor::Compiler *p);

@@ -44,7 +44,7 @@ void Compiler::visit(ast::Program *program) {
   main_block = BasicBlock::Create(context, "main_fn", main_fn);
   entry.push(main_block);
 
-  program->decl->accept(this);
+  program->declarations->accept(this);
   program->block->accept(this);
 
   // TODO(jerin): New
