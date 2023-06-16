@@ -340,23 +340,6 @@ void Compiler::visit(ast::Goto *goto_) {
       BranchInst::Create(follow, parent);
     }
   }
-  /*
-     if(goto_->condition == NULL){
-     ast::code *code = table[goto_->label];
-     code->accept(this);
-     exit(0);
-     }
-     else{
-     dataType dt;
-     goto_->condition->accept(this);
-     dt = evalStack.top(); evalStack.pop();
-     if (dt.T.i){
-     ast::code *code = table[goto_->label];
-     code->accept(this);
-     exit(0);
-     }
-     }
-     */
 }
 
 void Compiler::visit(ast::Integer *integer) {
