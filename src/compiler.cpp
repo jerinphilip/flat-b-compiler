@@ -36,7 +36,7 @@ bool Compiler::declared_before(const std::string &s) {
   return value_table.find(s) != value_table.end();
 }
 
-void Compiler::label(std::map<std::string, ast::Code *> m) { table = m; }
+void Compiler::label(std::map<std::string, ast::Block *> m) { table = m; }
 
 void Compiler::visit(ast::Node *node) {}
 
@@ -59,7 +59,7 @@ void Compiler::visit(ast::Declarations *declarations) {
   }
 }
 
-void Compiler::visit(ast::Code *code) {
+void Compiler::visit(ast::Block *code) {
   for (ast::Statement *statement : *(code->statements)) {
     statement->accept(this);
   }

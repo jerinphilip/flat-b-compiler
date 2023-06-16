@@ -23,7 +23,7 @@ struct Declarations;
 struct Id;
 struct IdArrayAccess;
 struct Expr;
-struct Code;
+struct Block;
 struct Labelled;
 struct Statement;
 struct Assign;
@@ -43,8 +43,8 @@ struct Node {
 
 struct Program : public Node {
   Declarations *declarations;
-  Code *block;
-  Program(Declarations *d, Code *c) : declarations(d), block(c) {}
+  Block *block;
+  Program(Declarations *d, Block *c) : declarations(d), block(c) {}
   void accept(visitor::PrettyPrinter *p);
   void accept(visitor::Interpreter *p);
   void accept(visitor::Compiler *p);
@@ -169,9 +169,9 @@ struct Statement : public Node {
 };
 
 /* Statements */
-struct Code : public Statement {
+struct Block : public Node {
   std::vector<Statement *> *statements;
-  Code(std::vector<Statement *> *s) : statements(s) {}
+  Block(std::vector<Statement *> *s) : statements(s) {}
   void accept(visitor::PrettyPrinter *p);
   void accept(visitor::Interpreter *p);
   void accept(visitor::Compiler *p);
@@ -179,8 +179,8 @@ struct Code : public Statement {
 
 struct Labelled : public Statement {
   std::string label;
-  Code *block;
-  Labelled(std::string label, Code *s) : label(label), block(s) {}
+  Block *block;
+  Labelled(std::string label, Block *s) : label(label), block(s) {}
   void accept(visitor::PrettyPrinter *p);
   void accept(visitor::Interpreter *p);
   void accept(visitor::Compiler *p);
@@ -199,8 +199,8 @@ struct Assign : public Statement {
 
 struct While : public Statement {
   Expr *condition;
-  Code *block;
-  While(Expr *c, Code *b) : condition(c), block(b) {}
+  Block *block;
+  While(Expr *c, Block *b) : condition(c), block(b) {}
   void accept(visitor::PrettyPrinter *p);
   void accept(visitor::Interpreter *p);
   void accept(visitor::Compiler *p);
@@ -208,9 +208,10 @@ struct While : public Statement {
 
 struct If : public Statement {
   Expr *condition;
-  Code *block;
-  Code *otherwise;
-  If(Expr *c, Code *b, Code *o = NULL) : condition(c), block(b), otherwise(o) {}
+  Block *block;
+  Block *otherwise;
+  If(Expr *c, Block *b, Block *o = NULL)
+      : condition(c), block(b), otherwise(o) {}
   void accept(visitor::PrettyPrinter *p) final;
   void accept(visitor::Interpreter *p) final;
   void accept(visitor::Compiler *p) final;
@@ -220,9 +221,9 @@ struct For : public Statement {
   Assign *init;
   Expr *step;
   Expr *end;
-  Code *body;
+  Block *body;
 
-  For(Assign *init, Expr *delta, Expr *end, Code *b)
+  For(Assign *init, Expr *delta, Expr *end, Block *b)
       : init(init), step(delta), end(end), body(b) {}
   void accept(visitor::PrettyPrinter *p) final;
   void accept(visitor::Interpreter *p) final;

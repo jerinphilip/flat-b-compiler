@@ -30,7 +30,7 @@ struct Visitor {
   virtual void visit(ast::Id *id) = 0;
   virtual void visit(ast::IdArrayAccess *id_arry_access) = 0;
   virtual void visit(ast::Expr *expr) = 0;
-  virtual void visit(ast::Code *code) = 0;
+  virtual void visit(ast::Block *code) = 0;
   virtual void visit(ast::Statement *statement) = 0;
   virtual void visit(ast::Assign *assign) = 0;
   virtual void visit(ast::While *while_block) = 0;
@@ -50,7 +50,7 @@ struct Visitor {
   virtual void visit(ast::Read *read) = 0;
   virtual void visit(ast::Labelled *labelled) = 0;
 
-  virtual void label(std::map<std::string, ast::Code *> m) = 0;
+  virtual void label(std::map<std::string, ast::Block *> m) = 0;
 
   virtual ~Visitor() = default;
 };

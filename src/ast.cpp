@@ -11,7 +11,7 @@ void ast::Declarations::accept(visitor::PrettyPrinter *p) { p->visit(this); }
 void ast::Id::accept(visitor::PrettyPrinter *p) { p->visit(this); }
 void ast::IdArrayAccess::accept(visitor::PrettyPrinter *p) { p->visit(this); }
 void ast::Expr::accept(visitor::PrettyPrinter *p) { p->visit(this); }
-void ast::Code::accept(visitor::PrettyPrinter *p) { p->visit(this); }
+void ast::Block::accept(visitor::PrettyPrinter *p) { p->visit(this); }
 void ast::Statement::accept(visitor::PrettyPrinter *p) { p->visit(this); }
 void ast::Assign::accept(visitor::PrettyPrinter *p) { p->visit(this); }
 void ast::While::accept(visitor::PrettyPrinter *p) { p->visit(this); }
@@ -37,7 +37,7 @@ void ast::Declarations::accept(visitor::Interpreter *p) { p->visit(this); }
 void ast::Id::accept(visitor::Interpreter *p) { p->visit(this); }
 void ast::IdArrayAccess::accept(visitor::Interpreter *p) { p->visit(this); }
 void ast::Expr::accept(visitor::Interpreter *p) { p->visit(this); }
-void ast::Code::accept(visitor::Interpreter *p) { p->visit(this); }
+void ast::Block::accept(visitor::Interpreter *p) { p->visit(this); }
 void ast::Statement::accept(visitor::Interpreter *p) { p->visit(this); }
 void ast::Assign::accept(visitor::Interpreter *p) { p->visit(this); }
 void ast::While::accept(visitor::Interpreter *p) { p->visit(this); }
@@ -63,7 +63,7 @@ void ast::Declarations::accept(visitor::Compiler *p) { p->visit(this); }
 void ast::Id::accept(visitor::Compiler *p) { p->visit(this); }
 void ast::IdArrayAccess::accept(visitor::Compiler *p) { p->visit(this); }
 void ast::Expr::accept(visitor::Compiler *p) { p->visit(this); }
-void ast::Code::accept(visitor::Compiler *p) { p->visit(this); }
+void ast::Block::accept(visitor::Compiler *p) { p->visit(this); }
 void ast::Statement::accept(visitor::Compiler *p) { p->visit(this); }
 void ast::Assign::accept(visitor::Compiler *p) { p->visit(this); }
 void ast::While::accept(visitor::Compiler *p) { p->visit(this); }

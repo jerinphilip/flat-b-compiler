@@ -11,7 +11,7 @@ struct Interpreter : public Visitor {
   std::map<std::string, FlatBValue> env_;
   ast::Program *root_;
   FlatBType current_type_;
-  std::map<std::string, ast::Code *> table_;
+  std::map<std::string, ast::Block *> table_;
 
   FlatBValue pop_stack() {
     FlatBValue data_type = stack_.top();
@@ -20,7 +20,7 @@ struct Interpreter : public Visitor {
   }
 
  public:
-  void label(std::map<std::string, ast::Code *> m) final;
+  void label(std::map<std::string, ast::Block *> m) final;
 
   void visit(ast::Node *node) final;
   void visit(ast::Program *program) final;
@@ -28,7 +28,7 @@ struct Interpreter : public Visitor {
   void visit(ast::Id *id) final;
   void visit(ast::IdArrayAccess *id_array_access) final;
   void visit(ast::Expr *expr) final;
-  void visit(ast::Code *code) final;
+  void visit(ast::Block *code) final;
   void visit(ast::Statement *statement) final;
   void visit(ast::Assign *assign) final;
   void visit(ast::While *while_block) final;

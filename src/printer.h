@@ -11,7 +11,7 @@ struct PrettyPrinter : public Visitor {
   void visit(ast::Id *id) final;
   void visit(ast::IdArrayAccess *id_array_access) final;
   void visit(ast::Expr *expr) final;
-  void visit(ast::Code *code) final;
+  void visit(ast::Block *code) final;
   void visit(ast::Statement *statement) final;
   void visit(ast::Assign *assign) final;
   void visit(ast::While *while_block) final;
@@ -31,7 +31,7 @@ struct PrettyPrinter : public Visitor {
   void visit(ast::Read *read) final;
   void visit(ast::Labelled *labelled) final;
 
-  void label(std::map<std::string, ast::Code *> m) final;
+  void label(std::map<std::string, ast::Block *> m) final;
 };
 
 }  // namespace visitor

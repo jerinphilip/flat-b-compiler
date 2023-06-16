@@ -5,7 +5,7 @@ namespace visitor {
 struct Compiler : public Visitor {
   ast::Program *root;
   FlatBType currentType;
-  std::map<std::string, ast::Code *> table;
+  std::map<std::string, ast::Block *> table;
 
   struct {
     struct {
@@ -65,14 +65,14 @@ struct Compiler : public Visitor {
   Value *int_to_Value(int x);
   bool declared_before(const std::string &s);
 
-  void label(std::map<std::string, ast::Code *> m) final;
+  void label(std::map<std::string, ast::Block *> m) final;
   void visit(ast::Node *node) final;
   void visit(ast::Program *program) final;
   void visit(ast::Declarations *declarations) final;
   void visit(ast::Id *id) final;
   void visit(ast::IdArrayAccess *id_array_access) final;
   void visit(ast::Expr *expr) final;
-  void visit(ast::Code *code) final;
+  void visit(ast::Block *code) final;
   void visit(ast::Statement *statement) final;
   void visit(ast::Assign *assign) final;
   void visit(ast::While *while_block) final;

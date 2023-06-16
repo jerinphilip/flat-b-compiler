@@ -5,7 +5,7 @@
 
 namespace visitor {
 
-void Interpreter::label(std::map<std::string, ast::Code *> m) {
+void Interpreter::label(std::map<std::string, ast::Block *> m) {
   table_ = m;
   /*
   std::cerr << "labels: ";
@@ -30,7 +30,7 @@ void Interpreter::visit(ast::Declarations *declarations) {
   }
 }
 
-void Interpreter::visit(ast::Code *code) {
+void Interpreter::visit(ast::Block *code) {
   for (auto &statement : *(code->statements)) {
     statement->accept(this);
   }
@@ -195,7 +195,7 @@ void Interpreter::visit(ast::NoOp *no_op) {}
 
 void Interpreter::visit(ast::Goto *goto_) {
   if (goto_->condition == nullptr) {
-    ast::Code *code = table_[goto_->label];
+    ast::Block *code = table_[goto_->label];
     code->accept(this);
     exit(0);
   } else {
@@ -203,7 +203,7 @@ void Interpreter::visit(ast::Goto *goto_) {
     goto_->condition->accept(this);
     value = pop_stack();
     if (value.underlying.Int) {
-      ast::Code *code = table_[goto_->label];
+      ast::Block *code = table_[goto_->label];
       code->accept(this);
       exit(0);
     }

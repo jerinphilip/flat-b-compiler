@@ -5,7 +5,7 @@
 
 namespace visitor {
 
-void PrettyPrinter::label(std::map<std::string, ast::Code *> m) {}
+void PrettyPrinter::label(std::map<std::string, ast::Block *> m) {}
 
 void PrettyPrinter::visit(ast::Node *node) {}
 
@@ -22,7 +22,7 @@ void PrettyPrinter::visit(ast::Declarations *declarations) {
   std::cout << "}\n";
 }
 
-void PrettyPrinter::visit(ast::Code *code) {
+void PrettyPrinter::visit(ast::Block *code) {
   // std::cout << "Code" << std::endl;
 }
 
