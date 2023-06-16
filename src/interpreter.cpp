@@ -129,11 +129,7 @@ void Interpreter::visit(ast::If *if_) {
 void Interpreter::visit(ast::For *for_block) {
   for_block->init->accept(this);
 
-  void *location;
-  void **var = &location;
-  for_block->init->ref->vnode(var);
-  auto *ivar = static_cast<ast::Id *>(location);
-
+  auto *ivar = for_block->init->ref->id();
   auto *rhs = new ast::BinOp(Op::add, ivar, for_block->step);
   auto *step = new ast::Assign(for_block->init->ref, rhs);
   auto *check = new ast::BinOp(Op::le, ivar, for_block->end);

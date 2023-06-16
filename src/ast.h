@@ -90,12 +90,7 @@ struct IdArrayAccess : public Id {
   void accept(visitor::Compiler *p);
 };
 
-struct IdBase : public Node {
-  virtual void vnode(void **) = 0;
-  virtual ~IdBase() = default;
-};
-
-struct IdRef : public IdBase {
+struct IdRef : public Node {
   std::string name;
   IdRef(std::string s) : name(s) {
     // cerr << "Initializing: " << name << endl;
@@ -103,7 +98,7 @@ struct IdRef : public IdBase {
   virtual void accept(visitor::PrettyPrinter *p);
   virtual void accept(visitor::Interpreter *p);
   virtual void accept(visitor::Compiler *p);
-  virtual void vnode(void **p) { *p = new Id(name); }
+  Id *id() { return new Id(name); }
   virtual ~IdRef() = default;
 };
 
@@ -113,7 +108,9 @@ struct IdArrayRef : public IdRef {
   void accept(visitor::PrettyPrinter *p);
   void accept(visitor::Interpreter *p);
   void accept(visitor::Compiler *p);
-  void vnode(void **p) { *p = new IdArrayAccess(name, subscript); }
+  IdArrayAccess *id_array_access() {
+    return new IdArrayAccess(name, subscript);
+  }
 };
 
 struct IdDef : public Node {
