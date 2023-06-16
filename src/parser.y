@@ -12,7 +12,7 @@
   #include "lexer.h"
   using namespace std;
 
-  ast::Program *pgm = NULL;
+  ast::Program *program = NULL;
   ast::Code *code = NULL;
 
   map<string, ast::Code*> labels;
@@ -110,7 +110,7 @@
 
 %%
 
-program            :  decl_block code_block                                     { $$ = new ast::Program($1, $2); pgm = $$;}
+program            :  decl_block code_block                                     { $$ = new ast::Program($1, $2); program = $$;}
                    ;
 decl_block         :  k_declaration '{' declaration_list '}'                    { $$ = new ast::Declarations($3); }
                    ;
@@ -218,7 +218,7 @@ int main(int argc, char *argv[]) {
   yyin = fopen(argv[2], "r");
   if (yyparse() == 0) {
     visitor->label(labels);
-    visitor->visit(pgm);
+    visitor->visit(program);
   }
 
   return 0;
