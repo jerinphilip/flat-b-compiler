@@ -1,9 +1,11 @@
 declblock {
     int i;    
+    int x;
+    int y;
 }
 
 codeblock {
-    print "Hello";
+    println "Hello";
     x = 2;
     x = 3 + 4 - 2;
     y = 3 < 5;
