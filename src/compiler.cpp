@@ -73,7 +73,7 @@ void Compiler::visit(ast::Id *id) {
   Value *location = value_table[id->name];
   // Value *r = new LoadInst(location, "vr", entry.top());
   Value *r = nullptr;
-  eval.push((void *)r);
+  eval.push(r);
   format.place("%d", r);
 }
 
@@ -94,7 +94,7 @@ void Compiler::visit(ast::IdArrayAccess *id_) {
   // Value *r = new LoadInst(location, "vr", entry.top());
   Value *location = nullptr;
   Value *r = nullptr;
-  eval.push((void *)r);
+  eval.push(r);
   format.place("%d", r);
 }
 
@@ -108,7 +108,7 @@ void Compiler::visit(ast::IdRef *id_ref) {
   eval.pop();
   auto *r =
       new StoreInst(ret_val, value_table[id_ref->name], false, entry.top());
-  eval.push((void *)r);
+  eval.push(r);
 }
 
 void Compiler::visit(ast::IdArrayRef *id_array_ref) {
@@ -130,7 +130,7 @@ void Compiler::visit(ast::IdArrayRef *id_array_ref) {
   Value *location = nullptr;
 
   Value *instruction = new StoreInst(ret_val, location, false, entry.top());
-  eval.push((void *)instruction);
+  eval.push(instruction);
 }
 
 void Compiler::visit(ast::Expr *expr) {}
@@ -364,8 +364,8 @@ void Compiler::visit(ast::Goto *goto_) {
 }
 
 void Compiler::visit(ast::Integer *integer) {
-  Constant *r = ConstantInt::get(Type::getInt64Ty(context), integer->value);
-  eval.push((void *)r);
+  Value *r = ConstantInt::get(Type::getInt64Ty(context), integer->value);
+  eval.push(r);
   format.place("%d", r);
 }
 
@@ -380,15 +380,15 @@ void Compiler::visit(ast::BinOp *binOp) {
   auto *parent = entry.top();
   auto binary_operator = [&left, &right, &parent,
                           this](Instruction::BinaryOps Op) {
-    auto *b = BinaryOperator::Create(Op, left, right, "vr", parent);
-    eval.push((void *)b);
+    Value *b = BinaryOperator::Create(Op, left, right, "vr", parent);
+    eval.push(b);
   };
 
   auto cmp_operator = [&left, &right, &parent, this](CmpInst::Predicate pred) {
-    auto *z = new ZExtInst(
+    Value *z = new ZExtInst(
         CmpInst::Create(Instruction::ICmp, pred, left, right, "vr", parent),
         Type::getInt64Ty(context), "zext", parent);
-    eval.push((void *)z);
+    eval.push(z);
   };
 
   switch (binOp->op) {

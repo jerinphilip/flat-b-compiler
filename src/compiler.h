@@ -54,7 +54,7 @@ struct Compiler : public Visitor {
   std::stack<BasicBlock *> entry;
   std::stack<BasicBlock *> exit;
 
-  std::stack<void *> eval;
+  std::stack<Value *> eval;
 
   /* Variable and Label Tables */
   std::map<std::string, Value *> value_table;
