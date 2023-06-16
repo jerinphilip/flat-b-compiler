@@ -71,7 +71,7 @@ void Compiler::visit(ast::Id *id) {
     // exit(-1);
   }
   Value *location = value_table[id->name];
-  Type *type = Type::getInt32Ty(context);
+  Type *type = Type::getInt64Ty(context);
   Value *r = new LoadInst(type, location, "vr", entry.top());
   eval.push(r);
   format.place("%d", r);
@@ -89,7 +89,7 @@ void Compiler::visit(ast::IdArrayAccess *id_) {
   eval.pop();
 
   std::vector<Value *> index_params = {start, offset};
-  Type *type = Type::getInt32Ty(context);
+  Type *type = Type::getInt64Ty(context);
 
   Value *location = GetElementPtrInst::CreateInBounds(
       type, value_table[id_->name], index_params, "vr", entry.top());
@@ -126,7 +126,7 @@ void Compiler::visit(ast::IdArrayRef *id_array_ref) {
   auto *offset = static_cast<Value *>(eval.top());
   eval.pop();
   std::vector<Value *> index_params = {start, offset};
-  Type *type = Type::getInt32Ty(context);
+  Type *type = Type::getInt64Ty(context);
   Value *location = GetElementPtrInst::CreateInBounds(
       type, value_table[id_array_ref->name], index_params, "vr", entry.top());
 
