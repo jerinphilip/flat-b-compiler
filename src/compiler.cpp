@@ -160,7 +160,6 @@ void Compiler::visit(ast::While *while_) {
   while_->condition->accept(this);
   auto *condition = static_cast<ZExtInst *>(eval.top());
   eval.pop();
-  // Value *comparison = condition;
   ConstantInt *zero = ConstantInt::get(Type::getInt64Ty(context), 0, true);
   auto *comparison =
       new ICmpInst(*pre, ICmpInst::ICMP_NE, condition, zero, "vr");
@@ -219,13 +218,10 @@ void Compiler::visit(ast::If *if_) {
     entry.pop();
 
     if (not ret_block->getTerminator()) {
-      // cerr << "terminator Happening! " << endl;
       BranchInst::Create(merge_block, ret_block);
     }
-    // BranchInst::Create(if_block, else_block, condition, parent);
     BranchInst::Create(if_block, else_block, comparison, parent);
   } else {
-    // BranchInst::Create(if_block, merge_block, condition, parent);
     BranchInst::Create(if_block, merge_block, comparison, parent);
   }
 
