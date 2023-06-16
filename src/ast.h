@@ -108,9 +108,6 @@ struct IdArrayRef : public IdRef {
   void accept(visitor::PrettyPrinter *p);
   void accept(visitor::Interpreter *p);
   void accept(visitor::Compiler *p);
-  IdArrayAccess *id_array_access() {
-    return new IdArrayAccess(name, subscript);
-  }
 };
 
 struct IdDef : public Node {
