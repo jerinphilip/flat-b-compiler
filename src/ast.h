@@ -197,26 +197,20 @@ struct Assign : public Statement {
   void accept(visitor::Compiler *p);
 };
 
-struct CodeBlock : public Statement {
+struct While : public Statement {
   Expr *condition;
   Code *block;
-  CodeBlock(Expr *c, Code *b) : condition(c), block(b) {}
-  virtual void accept(visitor::PrettyPrinter *p);
-  virtual void accept(visitor::Interpreter *p);
-  virtual void accept(visitor::Compiler *p);
-  virtual ~CodeBlock() = default;
-};
-
-struct While : public CodeBlock {
-  While(Expr *c, Code *b) : CodeBlock(c, b) {}
+  While(Expr *c, Code *b) : condition(c), block(b) {}
   void accept(visitor::PrettyPrinter *p);
   void accept(visitor::Interpreter *p);
   void accept(visitor::Compiler *p);
 };
 
-struct If : public CodeBlock {
+struct If : public Statement {
+  Expr *condition;
+  Code *block;
   Code *otherwise;
-  If(Expr *c, Code *b, Code *o = NULL) : CodeBlock(c, b), otherwise(o) {}
+  If(Expr *c, Code *b, Code *o = NULL) : condition(c), block(b), otherwise(o) {}
   void accept(visitor::PrettyPrinter *p) final;
   void accept(visitor::Interpreter *p) final;
   void accept(visitor::Compiler *p) final;
