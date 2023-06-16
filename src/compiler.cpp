@@ -442,24 +442,23 @@ void Compiler::visit(ast::Literal *literal) {
   format.place("%s", var);
 }
 
-void Compiler::visit(ast::Read * /*read*/) {
-  format.init();
+void Compiler::visit(ast::Read *read) {
   /*
-  Value *location = GetElementPtrInst::Create(
-      PointerType::getInt64Ty(context),
-      var,
-      index_params,
-      "invar_ref",
-      entry.top());
-
+  format.init();
+  ArrayRef<Value *> index_params;
+  Value *location =
+      GetElementPtrInst::Create(PointerType::getInt64Ty(context), read->var,
+                                index_params, "invar_ref", entry.top());
 
   std::vector<Value*> new_args = {string_to_Value("%d"), location};
-  CallInst::Create(scanf, makeArrayRef(new_args), string("scanf"),
-  entry.top()); auto *r = new LoadInst(location, "invar", entry.top());
+  CallInst::Create(scanf, makeArrayRef(new_args), std::string("scanf"),
+                   entry.top());
+  Type *type = Type::getInt64Ty(context);
+  auto *r = new LoadInst(type, location, "invar", entry.top());
   eval.push(r);
   read->var->accept(this);
-  */
   format.finish();
+  */
 }
 
 void Compiler::visit(ast::Labelled *labelled) {
