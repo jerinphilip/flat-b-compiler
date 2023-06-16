@@ -1,7 +1,10 @@
+#include "printer.h"
+
 #include "ast.h"
 #include "visitor.h"
 
 namespace visitor {
+
 void PrettyPrinter::label(std::map<std::string, ast::Code *> m) {}
 
 void PrettyPrinter::visit(ast::Node *node) {}

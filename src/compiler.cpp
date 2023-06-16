@@ -1,3 +1,5 @@
+#include "compiler.h"
+
 #include "visitor.h"
 
 namespace visitor {

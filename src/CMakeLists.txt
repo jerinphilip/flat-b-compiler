@@ -30,7 +30,7 @@ execute_process(COMMAND llvm-config --libs all
 
 message(STATUS "Bison outputs: ${BISON_parser_OUTPUTS}")
 message(STATUS "Flex outputs: ${FLEX_lexer_OUTPUTS}")
-add_executable(fb ${BISON_parser_OUTPUTS} ${FLEX_lexer_OUTPUTS} compiler.cpp interpreter.cpp printer.cpp ast.cpp)
+add_executable(fb ${BISON_parser_OUTPUTS} ${FLEX_lexer_OUTPUTS} compiler.cpp interpreter.cpp printer.cpp ast.cpp visitor.cpp)
 message(STATUS "fb-link-libs: ${FLEX_LIBRARIES} ${llvm_libraries}")
 target_link_libraries(fb PRIVATE ${FLEX_LIBRARIES})
 target_link_libraries(fb PRIVATE ${llvm_libraries})

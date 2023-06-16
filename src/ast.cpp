@@ -1,4 +1,8 @@
 #include "ast.h"
+
+#include "compiler.h"
+#include "interpreter.h"
+#include "printer.h"
 #include "visitor.h"
 
 /* PPRINTER */
