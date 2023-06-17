@@ -13,9 +13,9 @@
   using namespace std;
 
   ast::Program *program = NULL;
-  ast::Code *code = NULL;
+  ast::Block *code = NULL;
 
-  map<string, ast::Code*> labels;
+  map<string, ast::Block*> labels;
 
 %}
 
@@ -35,7 +35,7 @@
     ast::IdDef *def;
     ast::IdRef *ref;
     ast::Expr *expr;
-    ast::Code *code;
+    ast::Block *code;
     FlatBType dtype;
     Op op;
     ast::While *while_;
@@ -116,13 +116,13 @@ decl_block         :  k_declaration '{' declaration_list '}'                    
                    ;
 code_block         :  k_statement block                                         { $$ = $2; }
                    ;
-block              : '{' statement_list '}'                                     { $$ =  new ast::Code($2); }
+block              : '{' statement_list '}'                                     { $$ =  new ast::Block($2); }
                    ;
 declaration_list   : declaration_list declaration                               { $1->push_back($2); $$ = $1; }
                    | %empty                                                     { $$ = new std::vector<ast::TypedIds*>(); }
                    ;
 
-labelled_block     : IDENTIFIER ':' statement_list                              { code = new ast::Code($3); $$ = new ast::Labelled($1, code); labels[($1)] = code;}
+labelled_block     : IDENTIFIER ':' statement_list                              { code = new ast::Block($3); $$ = new ast::Labelled($1, code); labels[($1)] = code;}
 statement_list     : statement_list statement                                   { $1->push_back($2); $$ = $1; }
                    | statement_list labelled_block                              { $1->push_back($2); $$ = $1; }
                    | %empty                                                     { $$ = new std::vector<ast::Statement*>(); } 

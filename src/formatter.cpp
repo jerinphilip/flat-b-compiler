@@ -22,52 +22,31 @@ void Formatter::visit(ast::Declarations *declarations) {
   std::cout << "}\n";
 }
 
-void Formatter::visit(ast::Block *code) {
-  // std::cout << "Code" << std::endl;
-}
+void Formatter::visit(ast::Block *code) {}
 
-void Formatter::visit(ast::Id *id) {
-  // std::cout << "Code" << std::endl;
-  std::cout << id->name;
-}
+void Formatter::visit(ast::Id *id) { std::cout << id->name; }
 
 void Formatter::visit(ast::IdArrayAccess *id_) {
-  // std::cout << "Code" << std::endl;
   std::cout << id_->name << "[";
   id_->subscript->accept(this);
   std::cout << "]";
 }
 
-void Formatter::visit(ast::Expr *expr) {
-  // std::cout << "Code" << std::endl;
-}
+void Formatter::visit(ast::Expr *expr) {}
 
-void Formatter::visit(ast::Statement *statement) {
-  // std::cout << "Code" << std::endl;
-}
+void Formatter::visit(ast::Statement *statement) {}
 
-void Formatter::visit(ast::Assign *assign) {
-  // std::cout << "Code" << std::endl;
-}
+void Formatter::visit(ast::Assign *assign) {}
 
-void Formatter::visit(ast::While *while_) {
-  // std::cout << "Code" << std::endl;
-}
+void Formatter::visit(ast::While *while_) {}
 
-void Formatter::visit(ast::If *if_) {
-  // std::cout << "Code" << std::endl;
-}
+void Formatter::visit(ast::If *if_) {}
 
-void Formatter::visit(ast::For *for_) {
-  // std::cout << "Code" << std::endl;
-}
+void Formatter::visit(ast::For *for_) {}
 
-void Formatter::visit(ast::Print *print) {
-  // std::cout << "Code" << std::endl;
-}
+void Formatter::visit(ast::Print *print) {}
 
 void Formatter::visit(ast::TypedIds *typed_ids) {
-  // std::cout << "Typed ids" << std::endl;
   std::string type;
   switch (typed_ids->type) {
     case FlatBType::Int:
@@ -102,9 +81,7 @@ void Formatter::visit(ast::Goto * /*goto_*/) {
   std::cout << "Go-To" << std::endl;
 }
 
-void Formatter::visit(ast::Integer *integer) {
-  std::cout << integer->value;
-}
+void Formatter::visit(ast::Integer *integer) { std::cout << integer->value; }
 
 void Formatter::visit(ast::IdDef *id_def) {}
 
