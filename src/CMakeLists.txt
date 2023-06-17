@@ -33,7 +33,7 @@ add_executable(
   ${FLEX_lexer_OUTPUTS}
   compiler.cpp
   interpreter.cpp
-  printer.cpp
+  formatter.cpp
   ast.cpp
   visitor.cpp)
 message(STATUS "flatb-link-libs: ${FLEX_LIBRARIES} ${llvm_libraries}")

@@ -2,7 +2,7 @@
 
 #include "compiler.h"
 #include "interpreter.h"
-#include "printer.h"
+#include "formatter.h"
 
 namespace visitor {
 
@@ -15,7 +15,7 @@ std::unique_ptr<Visitor> make_visitor(std::string type) {
   }
 
   if (type == "-f") {
-    return std::make_unique<visitor::PrettyPrinter>();
+    return std::make_unique<visitor::Formatter>();
   }
 
   std::abort();

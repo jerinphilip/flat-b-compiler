@@ -2,34 +2,34 @@
 
 #include "compiler.h"
 #include "interpreter.h"
-#include "printer.h"
+#include "formatter.h"
 #include "visitor.h"
 
 /* PPRINTER */
-void ast::Program::accept(visitor::PrettyPrinter *p) { p->visit(this); }
-void ast::Declarations::accept(visitor::PrettyPrinter *p) { p->visit(this); }
-void ast::Id::accept(visitor::PrettyPrinter *p) { p->visit(this); }
-void ast::IdArrayAccess::accept(visitor::PrettyPrinter *p) { p->visit(this); }
-void ast::Expr::accept(visitor::PrettyPrinter *p) { p->visit(this); }
-void ast::Block::accept(visitor::PrettyPrinter *p) { p->visit(this); }
-void ast::Statement::accept(visitor::PrettyPrinter *p) { p->visit(this); }
-void ast::Assign::accept(visitor::PrettyPrinter *p) { p->visit(this); }
-void ast::While::accept(visitor::PrettyPrinter *p) { p->visit(this); }
-void ast::If::accept(visitor::PrettyPrinter *p) { p->visit(this); }
-void ast::For::accept(visitor::PrettyPrinter *p) { p->visit(this); }
-void ast::Print::accept(visitor::PrettyPrinter *p) { p->visit(this); }
-void ast::TypedIds::accept(visitor::PrettyPrinter *p) { p->visit(this); }
-void ast::Integer::accept(visitor::PrettyPrinter *p) { p->visit(this); }
-void ast::BinOp::accept(visitor::PrettyPrinter *p) { p->visit(this); }
-void ast::NoOp::accept(visitor::PrettyPrinter *p) { p->visit(this); }
-void ast::Goto::accept(visitor::PrettyPrinter *p) { p->visit(this); }
-void ast::IdDef::accept(visitor::PrettyPrinter *p) { p->visit(this); }
-void ast::IdRef::accept(visitor::PrettyPrinter *p) { p->visit(this); }
-void ast::IdArrayDef::accept(visitor::PrettyPrinter *p) { p->visit(this); }
-void ast::IdArrayRef::accept(visitor::PrettyPrinter *p) { p->visit(this); }
-void ast::Literal::accept(visitor::PrettyPrinter *p) { p->visit(this); }
-void ast::Read::accept(visitor::PrettyPrinter *p) { p->visit(this); }
-void ast::Labelled::accept(visitor::PrettyPrinter *p) { p->visit(this); }
+void ast::Program::accept(visitor::Formatter *p) { p->visit(this); }
+void ast::Declarations::accept(visitor::Formatter *p) { p->visit(this); }
+void ast::Id::accept(visitor::Formatter *p) { p->visit(this); }
+void ast::IdArrayAccess::accept(visitor::Formatter *p) { p->visit(this); }
+void ast::Expr::accept(visitor::Formatter *p) { p->visit(this); }
+void ast::Block::accept(visitor::Formatter *p) { p->visit(this); }
+void ast::Statement::accept(visitor::Formatter *p) { p->visit(this); }
+void ast::Assign::accept(visitor::Formatter *p) { p->visit(this); }
+void ast::While::accept(visitor::Formatter *p) { p->visit(this); }
+void ast::If::accept(visitor::Formatter *p) { p->visit(this); }
+void ast::For::accept(visitor::Formatter *p) { p->visit(this); }
+void ast::Print::accept(visitor::Formatter *p) { p->visit(this); }
+void ast::TypedIds::accept(visitor::Formatter *p) { p->visit(this); }
+void ast::Integer::accept(visitor::Formatter *p) { p->visit(this); }
+void ast::BinOp::accept(visitor::Formatter *p) { p->visit(this); }
+void ast::NoOp::accept(visitor::Formatter *p) { p->visit(this); }
+void ast::Goto::accept(visitor::Formatter *p) { p->visit(this); }
+void ast::IdDef::accept(visitor::Formatter *p) { p->visit(this); }
+void ast::IdRef::accept(visitor::Formatter *p) { p->visit(this); }
+void ast::IdArrayDef::accept(visitor::Formatter *p) { p->visit(this); }
+void ast::IdArrayRef::accept(visitor::Formatter *p) { p->visit(this); }
+void ast::Literal::accept(visitor::Formatter *p) { p->visit(this); }
+void ast::Read::accept(visitor::Formatter *p) { p->visit(this); }
+void ast::Labelled::accept(visitor::Formatter *p) { p->visit(this); }
 
 /* INTERPRETER */
 void ast::Program::accept(visitor::Interpreter *p) { p->visit(this); }

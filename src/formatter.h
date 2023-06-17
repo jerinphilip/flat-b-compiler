@@ -4,7 +4,7 @@
 #include "visitor.h"
 
 namespace visitor {
-struct PrettyPrinter : public Visitor {
+struct Formatter : public Visitor {
   void visit(ast::Node *node_) final;
   void visit(ast::Program *program) final;
   void visit(ast::Declarations *declarations) final;
