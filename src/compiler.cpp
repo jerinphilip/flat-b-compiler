@@ -85,7 +85,7 @@ void Compiler::visit(ast::IdArrayAccess *id_) {
 
   id_->subscript->accept(this);
   auto *start = ConstantInt::get(context, APInt(64, StringRef("0"), 10));
-  auto *offset = static_cast<Value *>(eval.top());
+  auto *offset = eval.top();
   eval.pop();
 
   std::vector<Value *> index_params = {start, offset};
@@ -105,7 +105,7 @@ void Compiler::visit(ast::IdRef *id_ref) {
     // exit(-1);
   }
 
-  auto *ret_val = static_cast<Value *>(eval.top());
+  auto *ret_val = eval.top();
   eval.pop();
   auto *r =
       new StoreInst(ret_val, value_table[id_ref->name], false, entry.top());
@@ -118,12 +118,12 @@ void Compiler::visit(ast::IdArrayRef *id_array_ref) {
     // exit(-1);
   }
 
-  auto *ret_val = static_cast<Value *>(eval.top());
+  auto *ret_val = eval.top();
   eval.pop();
 
   id_array_ref->subscript->accept(this);
-  auto *start = ConstantInt::get(context, APInt(64, StringRef("0"), 10));
-  auto *offset = static_cast<Value *>(eval.top());
+  Value *start = ConstantInt::get(context, APInt(64, StringRef("0"), 10));
+  Value *offset = eval.top();
   eval.pop();
   std::vector<Value *> index_params = {start, offset};
   Type *type = Type::getInt64Ty(context);
@@ -287,7 +287,7 @@ void Compiler::visit(ast::Print *print) {
     }
     first = false;
     p->accept(this);
-    auto *r = static_cast<Value *>(eval.top());
+    auto *r = eval.top();
     eval.pop();
     format.update();
   }
@@ -350,10 +350,10 @@ void Compiler::visit(ast::Integer *integer) {
 
 void Compiler::visit(ast::BinOp *binOp) {
   binOp->left->accept(this);
-  auto *left = static_cast<Value *>(eval.top());
+  auto *left = eval.top();
   eval.pop();
   binOp->right->accept(this);
-  auto *right = static_cast<Value *>(eval.top());
+  auto *right = eval.top();
   eval.pop();
 
   auto *parent = entry.top();
