@@ -93,9 +93,9 @@ void Interpreter::visit(ast::Expr *expr) {}
 void Interpreter::visit(ast::Statement *statement) {}
 
 void Interpreter::visit(ast::Assign *assign) {
-  assign->ref->accept(this);
+  assign->lhs->accept(this);
   FlatBValue ref = pop_stack();
-  assign->tree->accept(this);
+  assign->rhs->accept(this);
   FlatBValue value = pop_stack();
   *(ref.underlying.Pointer) = value.underlying.Int;
 }
@@ -129,9 +129,9 @@ void Interpreter::visit(ast::If *if_) {
 void Interpreter::visit(ast::For *for_block) {
   for_block->init->accept(this);
 
-  auto *ivar = for_block->init->ref->id();
+  auto *ivar = for_block->init->lhs->id();
   auto *rhs = new ast::BinOp(Op::add, ivar, for_block->step);
-  auto *step = new ast::Assign(for_block->init->ref, rhs);
+  auto *step = new ast::Assign(for_block->init->lhs, rhs);
   auto *check = new ast::BinOp(Op::le, ivar, for_block->end);
 
   FlatBValue condition;

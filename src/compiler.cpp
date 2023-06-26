@@ -139,8 +139,8 @@ void Compiler::visit(ast::Expr *expr) {}
 void Compiler::visit(ast::Statement *statement) {}
 
 void Compiler::visit(ast::Assign *assign) {
-  assign->tree->accept(this);
-  assign->ref->accept(this);
+  assign->rhs->accept(this);
+  assign->lhs->accept(this);
 }
 
 void Compiler::visit(ast::While *while_) {
@@ -242,9 +242,9 @@ void Compiler::visit(ast::For *for_block) {
 
   /* Initialize before entering loop, hopefully in parent */
   for_block->init->accept(this);
-  auto *ivar = for_block->init->ref->id();
+  auto *ivar = for_block->init->lhs->id();
   auto *rhs = new ast::BinOp(Op::add, ivar, for_block->step);
-  auto *step = new ast::Assign(for_block->init->ref, rhs);
+  auto *step = new ast::Assign(for_block->init->lhs, rhs);
   auto *check = new ast::BinOp(Op::le, ivar, for_block->end);
 
   entry.push(pre);

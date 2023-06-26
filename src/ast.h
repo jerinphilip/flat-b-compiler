@@ -147,10 +147,10 @@ struct Labelled : public Statement {
 };
 
 struct Assign : public Statement {
-  IdRef *ref;
-  Expr *tree;
+  IdRef *lhs;
+  Expr *rhs;
 
-  Assign(IdRef *ref, Expr *e) : ref(ref), tree(e) {}
+  Assign(IdRef *ref, Expr *e) : lhs(ref), rhs(e) {}
 
   void accept(visitor::Visitor *p);
 };
