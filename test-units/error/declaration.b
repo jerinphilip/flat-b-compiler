@@ -3,6 +3,6 @@ declblock {
     int N;
     int B[N];
 }
+
 codeblock {
-    
 }

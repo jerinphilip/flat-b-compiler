@@ -1,6 +1,5 @@
 declblock{
     int x;
-    int y;
     int y[100];
     int s, t[100];
 }
