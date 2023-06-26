@@ -85,8 +85,7 @@ void Compiler::visit(ast::IdArrayAccess *id_) {
 
   id_->subscript->accept(this);
   auto *start = ConstantInt::get(context, APInt(64, StringRef("0"), 10));
-  auto *offset = eval.top();
-  eval.pop();
+  auto *offset = eval.consume();
 
   std::vector<Value *> index_params = {start, offset};
   Type *type = Type::getInt64Ty(context);
@@ -105,8 +104,7 @@ void Compiler::visit(ast::IdRef *id_ref) {
     // exit(-1);
   }
 
-  auto *ret_val = eval.top();
-  eval.pop();
+  auto *ret_val = eval.consume();
   auto *r =
       new StoreInst(ret_val, value_table[id_ref->name], false, entry.top());
   eval.push(r);
@@ -118,18 +116,15 @@ void Compiler::visit(ast::IdArrayRef *id_array_ref) {
     // exit(-1);
   }
 
-  auto *ret_val = eval.top();
-  eval.pop();
-
   id_array_ref->subscript->accept(this);
   Value *start = ConstantInt::get(context, APInt(64, StringRef("0"), 10));
-  Value *offset = eval.top();
-  eval.pop();
+  Value *offset = eval.consume();
   std::vector<Value *> index_params = {start, offset};
   Type *type = Type::getInt64Ty(context);
   Value *location = GetElementPtrInst::CreateInBounds(
       type, value_table[id_array_ref->name], index_params, "vr", entry.top());
 
+  auto *ret_val = eval.consume();
   Value *instruction = new StoreInst(ret_val, location, false, entry.top());
   eval.push(instruction);
 }
@@ -158,8 +153,7 @@ void Compiler::visit(ast::While *while_) {
 
   entry.push(pre);
   while_->condition->accept(this);
-  auto *condition = static_cast<ZExtInst *>(eval.top());
-  eval.pop();
+  auto *condition = static_cast<ZExtInst *>(eval.consume());
   ConstantInt *zero = ConstantInt::get(Type::getInt64Ty(context), 0, true);
   auto *comparison =
       new ICmpInst(*pre, ICmpInst::ICMP_NE, condition, zero, "vr");
@@ -191,8 +185,7 @@ void Compiler::visit(ast::If *if_) {
   assert(parent != nullptr);
 
   if_->condition->accept(this);
-  auto *condition = static_cast<ZExtInst *>(eval.top());
-  eval.pop();
+  auto *condition = static_cast<ZExtInst *>(eval.consume());
   // Value *comparison = condition;
   ConstantInt *zero = ConstantInt::get(Type::getInt64Ty(context), 0, true);
   auto *comparison =
@@ -249,8 +242,7 @@ void Compiler::visit(ast::For *for_block) {
 
   entry.push(pre);
   check->accept(this);
-  auto *condition = static_cast<ZExtInst *>(eval.top());
-  eval.pop();
+  auto *condition = static_cast<ZExtInst *>(eval.consume());
   // Value *comparison = condition;
   ConstantInt *zero = ConstantInt::get(Type::getInt64Ty(context), 0, true);
   auto *comparison =
@@ -287,8 +279,7 @@ void Compiler::visit(ast::Print *print) {
     }
     first = false;
     p->accept(this);
-    auto *r = eval.top();
-    eval.pop();
+    auto *r = eval.consume();
     format.update();
   }
 
@@ -325,8 +316,7 @@ void Compiler::visit(ast::Goto *goto_) {
     follow = label_table[goto_->label];
     if (goto_->condition) {
       goto_->condition->accept(this);
-      auto *condition = static_cast<ZExtInst *>(eval.top());
-      eval.pop();
+      auto *condition = static_cast<ZExtInst *>(eval.consume());
       ConstantInt *zero = ConstantInt::get(Type::getInt64Ty(context), 0, true);
       auto *comparison =
           new ICmpInst(*parent, ICmpInst::ICMP_NE, condition, zero, "vr");
@@ -350,11 +340,9 @@ void Compiler::visit(ast::Integer *integer) {
 
 void Compiler::visit(ast::BinOp *binOp) {
   binOp->left->accept(this);
-  auto *left = eval.top();
-  eval.pop();
+  auto *left = eval.consume();
   binOp->right->accept(this);
-  auto *right = eval.top();
-  eval.pop();
+  auto *right = eval.consume();
 
   auto *parent = entry.top();
   auto binary_operator = [&left, &right, &parent,

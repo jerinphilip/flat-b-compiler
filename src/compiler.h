@@ -2,6 +2,16 @@
 #include "visitor.h"
 
 namespace visitor {
+
+class EvalStack : public std::stack<Value *> {
+ public:
+  Value *consume() {
+    Value *tmp = top();
+    pop();
+    return tmp;
+  }
+};
+
 struct Compiler : public Visitor {
   ast::Program *root;
   FlatBType currentType;
@@ -54,7 +64,7 @@ struct Compiler : public Visitor {
   std::stack<BasicBlock *> entry;
   std::stack<BasicBlock *> exit;
 
-  std::stack<Value *> eval;
+  EvalStack eval;
 
   /* Variable and Label Tables */
   std::map<std::string, Value *> value_table;
