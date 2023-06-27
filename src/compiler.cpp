@@ -84,14 +84,16 @@ void Compiler::visit(ast::IdArrayAccess *id_) {
   }
 
   id_->subscript->accept(this);
-  auto *start = ConstantInt::get(context, APInt(64, StringRef("0"), 10));
-  auto *offset = eval.consume();
+  Value *ptr = value_table[id_->name];
+  size_t size = sizes_table[id_->name];
+  Value *start = ConstantInt::get(context, APInt(64, 0));
+  Value *offset = eval.consume();
 
-  std::vector<Value *> index_params = {start, offset};
-  Type *type = Type::getInt64Ty(context);
+  std::vector<Value *> index_params = {start};
+  Type *type = ArrayType::get(Type::getInt64Ty(context), size);
 
-  Value *location = GetElementPtrInst::CreateInBounds(
-      type, value_table[id_->name], index_params, "vr", entry.top());
+  Value *location = GetElementPtrInst::CreateInBounds(type, ptr, index_params,
+                                                      "vr", entry.top());
 
   Value *r = new LoadInst(type, location, "vr", entry.top());
   eval.push(r);
@@ -107,7 +109,6 @@ void Compiler::visit(ast::IdRef *id_ref) {
   auto *ret_val = eval.consume();
   auto *r =
       new StoreInst(ret_val, value_table[id_ref->name], false, entry.top());
-  eval.push(r);
 }
 
 void Compiler::visit(ast::IdArrayRef *id_array_ref) {
@@ -117,16 +118,19 @@ void Compiler::visit(ast::IdArrayRef *id_array_ref) {
   }
 
   id_array_ref->subscript->accept(this);
-  Value *start = ConstantInt::get(context, APInt(64, StringRef("0"), 10));
-  Value *offset = eval.consume();
-  std::vector<Value *> index_params = {start, offset};
-  Type *type = Type::getInt64Ty(context);
-  Value *location = GetElementPtrInst::CreateInBounds(
-      type, value_table[id_array_ref->name], index_params, "vr", entry.top());
+  Value *ptr = value_table[id_array_ref->name];
+  size_t size = sizes_table[id_array_ref->name];
+  Value *start = ConstantInt::get(context, APInt(64, 0));
 
-  auto *ret_val = eval.consume();
-  Value *instruction = new StoreInst(ret_val, location, false, entry.top());
-  eval.push(instruction);
+  Value *offset = eval.consume();
+  Value *rhs = eval.consume();
+
+  std::vector<Value *> index_params = {start, offset};
+  Type *type = ArrayType::get(Type::getInt64Ty(context), size);
+  Value *location = GetElementPtrInst::CreateInBounds(type, ptr, index_params,
+                                                      "vr", entry.top());
+
+  Value *instruction = new StoreInst(rhs, location, false, entry.top());
 }
 
 void Compiler::visit(ast::Expr *expr) {}
@@ -396,14 +400,16 @@ void Compiler::visit(ast::IdDef *id_def) {
     std::cerr << "Redeclaration of variable " << id_def->name << std::endl;
     // exit(-1);
   } else {
+    // All variables are global.
     auto *var =
         new GlobalVariable(*module, Type::getInt64Ty(context), false,
                            GlobalValue::CommonLinkage, nullptr, id_def->name);
-    var->setInitializer(
-        ConstantInt::get(context, APInt(64, StringRef("0"), 10)));
 
+    // Initialize values to 10 var->setInitializer(
+    ConstantInt::get(context, APInt(64, StringRef("0"), 10));
+
+    // Store in a global variable table.
     value_table[id_def->name] = var;
-    // cerr << "Declaration of variable " << id_def->name << endl;
   }
 }
 
@@ -420,6 +426,7 @@ void Compiler::visit(ast::IdArrayDef *id_array_def) {
         ArrayType::get(Type::getInt64Ty(context), id_array_def->size)));
 
     value_table[id_array_def->name] = var;
+    sizes_table[id_array_def->name] = id_array_def->size;
     // cerr << "Declaration of variable " << id_array_def->name << endl;
   }
 }

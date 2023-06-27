@@ -68,6 +68,7 @@ struct Compiler : public Visitor {
 
   /* Variable and Label Tables */
   std::map<std::string, Value *> value_table;
+  std::map<std::string, size_t> sizes_table;
   std::map<std::string, BasicBlock *> label_table;
 
   Compiler();
