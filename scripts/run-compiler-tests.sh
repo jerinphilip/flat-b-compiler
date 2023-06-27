@@ -1,6 +1,6 @@
 #!/bin/bash
 
-FILES=$(find test-units -iname "*.b")
+FILES=$(find test-units -iname "*.b" | sort)
 TIMEOUT=5s
 FLATB_EXECUTABLE=./build/flatb
 
