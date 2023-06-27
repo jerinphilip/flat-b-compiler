@@ -53,7 +53,7 @@ struct Compiler : public Visitor {
 
   } format;
 
-  LLVMContext context;
+  LLVMContext context_;
   Module *module;
   BasicBlock *main_block;
 

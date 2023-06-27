@@ -5,30 +5,31 @@
 namespace visitor {
 
 Compiler::Compiler() {
-  module = new Module("main", context);
+  module = new Module("main", context_);
   module->setTargetTriple("x86_64-pc-linux-gnu");
-  main_fn = Function::Create(FunctionType::get(Type::getVoidTy(context), false),
-                             GlobalValue::ExternalLinkage, "main", module);
-  printf = Function::Create(FunctionType::get(Type::getInt64Ty(context), true),
+  main_fn =
+      Function::Create(FunctionType::get(Type::getVoidTy(context_), false),
+                       GlobalValue::ExternalLinkage, "main", module);
+  printf = Function::Create(FunctionType::get(Type::getInt64Ty(context_), true),
                             GlobalValue::ExternalLinkage, "printf", module);
-  scanf = Function::Create(FunctionType::get(Type::getInt64Ty(context), true),
+  scanf = Function::Create(FunctionType::get(Type::getInt64Ty(context_), true),
                            GlobalValue::ExternalLinkage, "scanf", module);
 }
 
 Value *Compiler::string_to_Value(const std::string &s) {
   auto *var = new GlobalVariable(
-      *module, ArrayType::get(IntegerType::get(context, 8), (s.size() + 1)),
+      *module, ArrayType::get(IntegerType::get(context_, 8), (s.size() + 1)),
       true, GlobalVariable::InternalLinkage, nullptr, "literal");
 
-  var->setInitializer(ConstantDataArray::getString(context, s, true));
+  var->setInitializer(ConstantDataArray::getString(context_, s, true));
   return var;
 }
 
 Value *Compiler::int_to_Value(int x) {
   auto *var =
-      new GlobalVariable(*module, Type::getInt64Ty(context), false,
+      new GlobalVariable(*module, Type::getInt64Ty(context_), false,
                          GlobalValue::CommonLinkage, nullptr, "integer");
-  var->setInitializer(ConstantInt::get(context, APInt(64, x, true)));
+  var->setInitializer(ConstantInt::get(context_, APInt(64, x, true)));
   return var;
 }
 
@@ -41,14 +42,14 @@ void Compiler::label(std::map<std::string, ast::Block *> m) { table = m; }
 void Compiler::visit(ast::Node *node) {}
 
 void Compiler::visit(ast::Program *program) {
-  main_block = BasicBlock::Create(context, "main_fn", main_fn);
+  main_block = BasicBlock::Create(context_, "main_fn", main_fn);
   entry.push(main_block);
 
   program->declarations->accept(this);
   program->block->accept(this);
 
   // TODO(jerin): New
-  ReturnInst::Create(context, entry.top());
+  ReturnInst::Create(context_, entry.top());
   entry.pop();
   module->print(outs(), nullptr);
 }
@@ -71,7 +72,7 @@ void Compiler::visit(ast::Id *id) {
     // exit(-1);
   }
   Value *location = value_table[id->name];
-  Type *type = Type::getInt64Ty(context);
+  Type *type = Type::getInt64Ty(context_);
   Value *r = new LoadInst(type, location, "vr", entry.top());
   eval.push(r);
   format.place("%d", r);
@@ -86,16 +87,16 @@ void Compiler::visit(ast::IdArrayAccess *id_) {
   id_->subscript->accept(this);
   Value *ptr = value_table[id_->name];
   size_t size = sizes_table[id_->name];
-  Value *start = ConstantInt::get(context, APInt(64, 0));
+  Value *start = ConstantInt::get(context_, APInt(64, 0));
   Value *offset = eval.consume();
 
   std::vector<Value *> index_params = {start};
-  Type *type = ArrayType::get(Type::getInt64Ty(context), size);
+  Type *type = ArrayType::get(Type::getInt64Ty(context_), size);
 
   Value *location = GetElementPtrInst::CreateInBounds(type, ptr, index_params,
                                                       "vr", entry.top());
 
-  Type *element_type = Type::getInt64Ty(context);
+  Type *element_type = Type::getInt64Ty(context_);
   Value *r = new LoadInst(element_type, location, "vr", entry.top());
   eval.push(r);
   format.place("%d", r);
@@ -121,13 +122,13 @@ void Compiler::visit(ast::IdArrayRef *id_array_ref) {
   id_array_ref->subscript->accept(this);
   Value *ptr = value_table[id_array_ref->name];
   size_t size = sizes_table[id_array_ref->name];
-  Value *start = ConstantInt::get(context, APInt(64, 0));
+  Value *start = ConstantInt::get(context_, APInt(64, 0));
 
   Value *offset = eval.consume();
   Value *rhs = eval.consume();
 
   std::vector<Value *> index_params = {start, offset};
-  Type *type = ArrayType::get(Type::getInt64Ty(context), size);
+  Type *type = ArrayType::get(Type::getInt64Ty(context_), size);
   Value *location = GetElementPtrInst::CreateInBounds(type, ptr, index_params,
                                                       "vr", entry.top());
 
@@ -152,14 +153,14 @@ void Compiler::visit(ast::While *while_) {
 
   pre = body = post = nullptr;
 
-  pre = BasicBlock::Create(context, "pre", parent->getParent(), nullptr);
-  body = BasicBlock::Create(context, "body", parent->getParent(), nullptr);
-  post = BasicBlock::Create(context, "post", parent->getParent(), nullptr);
+  pre = BasicBlock::Create(context_, "pre", parent->getParent(), nullptr);
+  body = BasicBlock::Create(context_, "body", parent->getParent(), nullptr);
+  post = BasicBlock::Create(context_, "post", parent->getParent(), nullptr);
 
   entry.push(pre);
   while_->condition->accept(this);
   auto *condition = static_cast<ZExtInst *>(eval.consume());
-  ConstantInt *zero = ConstantInt::get(Type::getInt64Ty(context), 0, true);
+  ConstantInt *zero = ConstantInt::get(Type::getInt64Ty(context_), 0, true);
   auto *comparison =
       new ICmpInst(*pre, ICmpInst::ICMP_NE, condition, zero, "vr");
   entry.pop();
@@ -192,12 +193,13 @@ void Compiler::visit(ast::If *if_) {
   if_->condition->accept(this);
   auto *condition = static_cast<ZExtInst *>(eval.consume());
   // Value *comparison = condition;
-  ConstantInt *zero = ConstantInt::get(Type::getInt64Ty(context), 0, true);
+  ConstantInt *zero = ConstantInt::get(Type::getInt64Ty(context_), 0, true);
   auto *comparison =
       new ICmpInst(*parent, ICmpInst::ICMP_NE, condition, zero, "vr");
 
-  if_block = BasicBlock::Create(context, "if_block", parent->getParent());
-  merge_block = BasicBlock::Create(context, "merge_block", parent->getParent());
+  if_block = BasicBlock::Create(context_, "if_block", parent->getParent());
+  merge_block =
+      BasicBlock::Create(context_, "merge_block", parent->getParent());
 
   entry.push(if_block);
   if_->block->accept(this);
@@ -209,7 +211,8 @@ void Compiler::visit(ast::If *if_) {
   }
 
   if (if_->otherwise != nullptr) {
-    else_block = BasicBlock::Create(context, "else_block", parent->getParent());
+    else_block =
+        BasicBlock::Create(context_, "else_block", parent->getParent());
     entry.push(else_block);
     if_->otherwise->accept(this);
     ret_block = entry.top();
@@ -234,9 +237,9 @@ void Compiler::visit(ast::For *for_block) {
 
   pre = body = post = nullptr;
 
-  pre = BasicBlock::Create(context, "for_pre", parent->getParent(), nullptr);
-  body = BasicBlock::Create(context, "for_body", parent->getParent(), nullptr);
-  post = BasicBlock::Create(context, "for_post", parent->getParent(), nullptr);
+  pre = BasicBlock::Create(context_, "for_pre", parent->getParent(), nullptr);
+  body = BasicBlock::Create(context_, "for_body", parent->getParent(), nullptr);
+  post = BasicBlock::Create(context_, "for_post", parent->getParent(), nullptr);
 
   /* Initialize before entering loop, hopefully in parent */
   for_block->init->accept(this);
@@ -249,7 +252,7 @@ void Compiler::visit(ast::For *for_block) {
   check->accept(this);
   auto *condition = static_cast<ZExtInst *>(eval.consume());
   // Value *comparison = condition;
-  ConstantInt *zero = ConstantInt::get(Type::getInt64Ty(context), 0, true);
+  ConstantInt *zero = ConstantInt::get(Type::getInt64Ty(context_), 0, true);
   auto *comparison =
       new ICmpInst(*pre, ICmpInst::ICMP_NE, condition, zero, "vr");
   BranchInst::Create(body, post, comparison, pre);
@@ -322,11 +325,11 @@ void Compiler::visit(ast::Goto *goto_) {
     if (goto_->condition) {
       goto_->condition->accept(this);
       auto *condition = static_cast<ZExtInst *>(eval.consume());
-      ConstantInt *zero = ConstantInt::get(Type::getInt64Ty(context), 0, true);
+      ConstantInt *zero = ConstantInt::get(Type::getInt64Ty(context_), 0, true);
       auto *comparison =
           new ICmpInst(*parent, ICmpInst::ICMP_NE, condition, zero, "vr");
 
-      non_follow = BasicBlock::Create(context, "post-target",
+      non_follow = BasicBlock::Create(context_, "post-target",
                                       parent->getParent(), nullptr);
       BranchInst::Create(follow, non_follow, comparison, parent);
       entry.push(non_follow);
@@ -338,7 +341,7 @@ void Compiler::visit(ast::Goto *goto_) {
 }
 
 void Compiler::visit(ast::Integer *integer) {
-  Value *r = ConstantInt::get(Type::getInt64Ty(context), integer->value);
+  Value *r = ConstantInt::get(Type::getInt64Ty(context_), integer->value);
   eval.push(r);
   format.place("%d", r);
 }
@@ -359,7 +362,7 @@ void Compiler::visit(ast::BinOp *binOp) {
   auto cmp_operator = [&left, &right, &parent, this](CmpInst::Predicate pred) {
     Value *z = new ZExtInst(
         CmpInst::Create(Instruction::ICmp, pred, left, right, "vr", parent),
-        Type::getInt64Ty(context), "zext", parent);
+        Type::getInt64Ty(context_), "zext", parent);
     eval.push(z);
   };
 
@@ -403,11 +406,11 @@ void Compiler::visit(ast::IdDef *id_def) {
   } else {
     // All variables are global.
     auto *var =
-        new GlobalVariable(*module, Type::getInt64Ty(context), false,
+        new GlobalVariable(*module, Type::getInt64Ty(context_), false,
                            GlobalValue::CommonLinkage, nullptr, id_def->name);
 
     // Initialize values to 10
-    var->setInitializer(ConstantInt::get(context, APInt(64, 0)));
+    var->setInitializer(ConstantInt::get(context_, APInt(64, 0)));
 
     // Store in a global variable table.
     value_table[id_def->name] = var;
@@ -421,10 +424,10 @@ void Compiler::visit(ast::IdArrayDef *id_array_def) {
     // exit(-1);
   } else {
     auto *var = new GlobalVariable(
-        *module, ArrayType::get(Type::getInt64Ty(context), id_array_def->size),
+        *module, ArrayType::get(Type::getInt64Ty(context_), id_array_def->size),
         false, GlobalValue::CommonLinkage, nullptr, id_array_def->name);
     var->setInitializer(ConstantAggregateZero::get(
-        ArrayType::get(Type::getInt64Ty(context), id_array_def->size)));
+        ArrayType::get(Type::getInt64Ty(context_), id_array_def->size)));
 
     value_table[id_array_def->name] = var;
     sizes_table[id_array_def->name] = id_array_def->size;
@@ -443,13 +446,13 @@ void Compiler::visit(ast::Read *read) {
   format.init();
   ArrayRef<Value *> index_params;
   Value *location =
-      GetElementPtrInst::Create(PointerType::getInt64Ty(context), read->var,
+      GetElementPtrInst::Create(PointerType::getInt64Ty(context_), read->var,
                                 index_params, "invar_ref", entry.top());
 
   std::vector<Value*> new_args = {string_to_Value("%d"), location};
   CallInst::Create(scanf, makeArrayRef(new_args), std::string("scanf"),
                    entry.top());
-  Type *type = Type::getInt64Ty(context);
+  Type *type = Type::getInt64Ty(context_);
   auto *r = new LoadInst(type, location, "invar", entry.top());
   eval.push(r);
   read->var->accept(this);
@@ -461,7 +464,7 @@ void Compiler::visit(ast::Labelled *labelled) {
   BasicBlock *parent;
   BasicBlock *follow;
   parent = entry.top();
-  follow = BasicBlock::Create(context, "target", parent->getParent(), nullptr);
+  follow = BasicBlock::Create(context_, "target", parent->getParent(), nullptr);
   BranchInst::Create(follow, parent);
 
   label_table[labelled->label] = follow;
