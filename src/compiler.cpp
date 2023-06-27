@@ -4,21 +4,20 @@
 
 namespace visitor {
 
-Compiler::Compiler() {
-  module = new Module("main", context_);
-  module->setTargetTriple("x86_64-pc-linux-gnu");
+Compiler::Compiler() : module_("main", context_) {
+  module_.setTargetTriple("x86_64-pc-linux-gnu");
   main_fn =
       Function::Create(FunctionType::get(Type::getVoidTy(context_), false),
-                       GlobalValue::ExternalLinkage, "main", module);
+                       GlobalValue::ExternalLinkage, "main", module_);
   printf = Function::Create(FunctionType::get(Type::getInt64Ty(context_), true),
-                            GlobalValue::ExternalLinkage, "printf", module);
+                            GlobalValue::ExternalLinkage, "printf", module_);
   scanf = Function::Create(FunctionType::get(Type::getInt64Ty(context_), true),
-                           GlobalValue::ExternalLinkage, "scanf", module);
+                           GlobalValue::ExternalLinkage, "scanf", module_);
 }
 
 Value *Compiler::string_to_Value(const std::string &s) {
   auto *var = new GlobalVariable(
-      *module, ArrayType::get(IntegerType::get(context_, 8), (s.size() + 1)),
+      module_, ArrayType::get(IntegerType::get(context_, 8), (s.size() + 1)),
       true, GlobalVariable::InternalLinkage, nullptr, "literal");
 
   var->setInitializer(ConstantDataArray::getString(context_, s, true));
@@ -27,7 +26,7 @@ Value *Compiler::string_to_Value(const std::string &s) {
 
 Value *Compiler::int_to_Value(int x) {
   auto *var =
-      new GlobalVariable(*module, Type::getInt64Ty(context_), false,
+      new GlobalVariable(module_, Type::getInt64Ty(context_), false,
                          GlobalValue::CommonLinkage, nullptr, "integer");
   var->setInitializer(ConstantInt::get(context_, APInt(64, x, true)));
   return var;
@@ -51,7 +50,7 @@ void Compiler::visit(ast::Program *program) {
   // TODO(jerin): New
   ReturnInst::Create(context_, entry.top());
   entry.pop();
-  module->print(outs(), nullptr);
+  module_.print(outs(), nullptr);
 }
 
 void Compiler::visit(ast::Declarations *declarations) {
@@ -406,7 +405,7 @@ void Compiler::visit(ast::IdDef *id_def) {
   } else {
     // All variables are global.
     auto *var =
-        new GlobalVariable(*module, Type::getInt64Ty(context_), false,
+        new GlobalVariable(module_, Type::getInt64Ty(context_), false,
                            GlobalValue::CommonLinkage, nullptr, id_def->name);
 
     // Initialize values to 10
@@ -424,7 +423,7 @@ void Compiler::visit(ast::IdArrayDef *id_array_def) {
     // exit(-1);
   } else {
     auto *var = new GlobalVariable(
-        *module, ArrayType::get(Type::getInt64Ty(context_), id_array_def->size),
+        module_, ArrayType::get(Type::getInt64Ty(context_), id_array_def->size),
         false, GlobalValue::CommonLinkage, nullptr, id_array_def->name);
     var->setInitializer(ConstantAggregateZero::get(
         ArrayType::get(Type::getInt64Ty(context_), id_array_def->size)));

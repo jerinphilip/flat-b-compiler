@@ -54,7 +54,7 @@ struct Compiler : public Visitor {
   } format;
 
   LLVMContext context_;
-  Module *module;
+  Module module_;
   BasicBlock *main_block;
 
   Function *main_fn;
