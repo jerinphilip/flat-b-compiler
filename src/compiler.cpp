@@ -95,7 +95,8 @@ void Compiler::visit(ast::IdArrayAccess *id_) {
   Value *location = GetElementPtrInst::CreateInBounds(type, ptr, index_params,
                                                       "vr", entry.top());
 
-  Value *r = new LoadInst(type, location, "vr", entry.top());
+  Type *element_type = Type::getInt64Ty(context);
+  Value *r = new LoadInst(element_type, location, "vr", entry.top());
   eval.push(r);
   format.place("%d", r);
 }
