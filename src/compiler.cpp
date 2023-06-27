@@ -405,8 +405,8 @@ void Compiler::visit(ast::IdDef *id_def) {
         new GlobalVariable(*module, Type::getInt64Ty(context), false,
                            GlobalValue::CommonLinkage, nullptr, id_def->name);
 
-    // Initialize values to 10 var->setInitializer(
-    ConstantInt::get(context, APInt(64, StringRef("0"), 10));
+    // Initialize values to 10
+    var->setInitializer(ConstantInt::get(context, APInt(64, 0)));
 
     // Store in a global variable table.
     value_table[id_def->name] = var;
