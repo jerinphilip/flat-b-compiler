@@ -35,41 +35,40 @@ for i = 1, 100, 2 {
 ## `if-else` statement
 
 ```fortran
-	if expression {
-	....
-	}
-	....
+if expression {
+....
+}
+....
 
-	if expression {
-	...
-	}
-	else {
-	....
-	}
+if expression {
+...
+}
+else {
+....
+}
 ```
 
 ## `while` statment
 
 ```fortran
-	while expression {
+while expression {
 
-	}
-
+}
 ```
 
 ## conditional and unconditional `goto`
 
 ```fortran
-	got label
+got label
 
-	goto label if expression
+goto label if expression
 ```
 
 ## print/read
 
 ```fortran
-	print "blah...blah", val
-	println "new line at the end"
-	read sum
-	read data[i]
+print "blah...blah", val
+println "new line at the end"
+read sum
+read data[i]
 ```
