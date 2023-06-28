@@ -73,8 +73,8 @@ void Compiler::visit(ast::Id *id) {
   Value *location = value_table[id->name];
   Type *type = Type::getInt64Ty(context_);
   Value *r = new LoadInst(type, location, "vr", entry.top());
-  eval.push(r);
-  format.place("%d", r);
+  eval_.push(r);
+  format_.append("%d", r);
 }
 
 void Compiler::visit(ast::IdArrayAccess *id_) {
@@ -87,7 +87,7 @@ void Compiler::visit(ast::IdArrayAccess *id_) {
   Value *ptr = value_table[id_->name];
   size_t size = sizes_table[id_->name];
   Value *start = ConstantInt::get(context_, APInt(64, 0));
-  Value *offset = eval.consume();
+  Value *offset = eval_.consume();
 
   std::vector<Value *> index_params = {start};
   Type *type = ArrayType::get(Type::getInt64Ty(context_), size);
@@ -97,8 +97,8 @@ void Compiler::visit(ast::IdArrayAccess *id_) {
 
   Type *element_type = Type::getInt64Ty(context_);
   Value *r = new LoadInst(element_type, location, "vr", entry.top());
-  eval.push(r);
-  format.place("%d", r);
+  eval_.push(r);
+  format_.append("%d", r);
 }
 
 void Compiler::visit(ast::IdRef *id_ref) {
@@ -107,7 +107,7 @@ void Compiler::visit(ast::IdRef *id_ref) {
     // exit(-1);
   }
 
-  auto *ret_val = eval.consume();
+  auto *ret_val = eval_.consume();
   auto *r =
       new StoreInst(ret_val, value_table[id_ref->name], false, entry.top());
 }
@@ -123,8 +123,8 @@ void Compiler::visit(ast::IdArrayRef *id_array_ref) {
   size_t size = sizes_table[id_array_ref->name];
   Value *start = ConstantInt::get(context_, APInt(64, 0));
 
-  Value *offset = eval.consume();
-  Value *rhs = eval.consume();
+  Value *offset = eval_.consume();
+  Value *rhs = eval_.consume();
 
   std::vector<Value *> index_params = {start, offset};
   Type *type = ArrayType::get(Type::getInt64Ty(context_), size);
@@ -158,7 +158,7 @@ void Compiler::visit(ast::While *while_) {
 
   entry.push(pre);
   while_->condition->accept(this);
-  auto *condition = static_cast<ZExtInst *>(eval.consume());
+  auto *condition = static_cast<ZExtInst *>(eval_.consume());
   ConstantInt *zero = ConstantInt::get(Type::getInt64Ty(context_), 0, true);
   auto *comparison =
       new ICmpInst(*pre, ICmpInst::ICMP_NE, condition, zero, "vr");
@@ -190,7 +190,7 @@ void Compiler::visit(ast::If *if_) {
   assert(parent != nullptr);
 
   if_->condition->accept(this);
-  auto *condition = static_cast<ZExtInst *>(eval.consume());
+  auto *condition = static_cast<ZExtInst *>(eval_.consume());
   // Value *comparison = condition;
   ConstantInt *zero = ConstantInt::get(Type::getInt64Ty(context_), 0, true);
   auto *comparison =
@@ -249,7 +249,7 @@ void Compiler::visit(ast::For *for_block) {
 
   entry.push(pre);
   check->accept(this);
-  auto *condition = static_cast<ZExtInst *>(eval.consume());
+  auto *condition = static_cast<ZExtInst *>(eval_.consume());
   // Value *comparison = condition;
   ConstantInt *zero = ConstantInt::get(Type::getInt64Ty(context_), 0, true);
   auto *comparison =
@@ -275,37 +275,36 @@ void Compiler::visit(ast::For *for_block) {
 
 void Compiler::visit(ast::Print *print) {
   /* Reset */
-  format.init();
+  format_.init();
 
   bool first = true;
   auto args = *print->args;
   reverse(args.begin(), args.end());
   for (auto &p : args) {
     if (not first) {
-      format.str += " ";
+      format_.str += " ";
     }
     first = false;
     p->accept(this);
-    auto *r = eval.consume();
-    format.update();
+    auto *r = eval_.consume();
+    format_.update();
   }
 
   if (print->newline) {
-    format.str += "\n";
+    format_.str += "\n";
   }
 
   std::vector<Value *> new_args;
-  Value *fvar = string_to_Value(format.str);
+  Value *fvar = string_to_Value(format_.str);
   new_args.push_back(fvar);
-  new_args.insert(new_args.end(), format.args.begin(), format.args.end());
+  new_args.insert(new_args.end(), format_.args.begin(), format_.args.end());
   CallInst::Create(printf, makeArrayRef(new_args), std::string("printf"),
                    entry.top());
 
-  format.finish();
+  format_.finish();
 }
 
 void Compiler::visit(ast::TypedIds *typed_ids) {
-  currentType = typed_ids->type;
   auto *ps = typed_ids->id_defs;
   for (auto &p : *ps) {
     p->accept(this);
@@ -323,7 +322,7 @@ void Compiler::visit(ast::Goto *goto_) {
     follow = label_table[goto_->label];
     if (goto_->condition) {
       goto_->condition->accept(this);
-      auto *condition = static_cast<ZExtInst *>(eval.consume());
+      auto *condition = static_cast<ZExtInst *>(eval_.consume());
       ConstantInt *zero = ConstantInt::get(Type::getInt64Ty(context_), 0, true);
       auto *comparison =
           new ICmpInst(*parent, ICmpInst::ICMP_NE, condition, zero, "vr");
@@ -341,28 +340,28 @@ void Compiler::visit(ast::Goto *goto_) {
 
 void Compiler::visit(ast::Integer *integer) {
   Value *r = ConstantInt::get(Type::getInt64Ty(context_), integer->value);
-  eval.push(r);
-  format.place("%d", r);
+  eval_.push(r);
+  format_.append("%d", r);
 }
 
 void Compiler::visit(ast::BinOp *binOp) {
   binOp->left->accept(this);
-  auto *left = eval.consume();
+  auto *left = eval_.consume();
   binOp->right->accept(this);
-  auto *right = eval.consume();
+  auto *right = eval_.consume();
 
   auto *parent = entry.top();
   auto binary_operator = [&left, &right, &parent,
                           this](Instruction::BinaryOps Op) {
     Value *b = BinaryOperator::Create(Op, left, right, "vr", parent);
-    eval.push(b);
+    eval_.push(b);
   };
 
   auto cmp_operator = [&left, &right, &parent, this](CmpInst::Predicate pred) {
     Value *z = new ZExtInst(
         CmpInst::Create(Instruction::ICmp, pred, left, right, "vr", parent),
         Type::getInt64Ty(context_), "zext", parent);
-    eval.push(z);
+    eval_.push(z);
   };
 
   switch (binOp->op) {
@@ -436,13 +435,13 @@ void Compiler::visit(ast::IdArrayDef *id_array_def) {
 
 void Compiler::visit(ast::Literal *literal) {
   Value *var = string_to_Value(literal->value);
-  eval.push(var);
-  format.place("%s", var);
+  eval_.push(var);
+  format_.append("%s", var);
 }
 
 void Compiler::visit(ast::Read *read) {
   /*
-  format.init();
+  format_.init();
   ArrayRef<Value *> index_params;
   Value *location =
       GetElementPtrInst::Create(PointerType::getInt64Ty(context_), read->var,
@@ -453,9 +452,9 @@ void Compiler::visit(ast::Read *read) {
                    entry.top());
   Type *type = Type::getInt64Ty(context_);
   auto *r = new LoadInst(type, location, "invar", entry.top());
-  eval.push(r);
+  eval_.push(r);
   read->var->accept(this);
-  format.finish();
+  format_.finish();
   */
 }
 

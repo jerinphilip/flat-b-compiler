@@ -12,69 +12,45 @@ class EvalStack : public std::stack<Value *> {
   }
 };
 
-struct Compiler : public Visitor {
-  ast::Program *root;
-  FlatBType currentType;
-  std::map<std::string, ast::Block *> table;
-
+// Represents printf/scanf format-args.
+struct FormatArgs {
   struct {
-    struct {
-      std::string s;
-      Value *v;
-    } var;
+    std::string specifier;
+    Value *value;
+  } var;
 
-    std::string str;
-    std::vector<Value *> args;
-    bool flag;
+  std::string str;
+  std::vector<Value *> args;
+  bool flag;
 
-    void init() {
-      flag = true;
-      str = "";
-      args.clear();
+  void init() {
+    flag = true;
+    str = "";
+    args.clear();
+  }
+
+  void finish() {
+    flag = false;
+    str = "";
+    args.clear();
+  }
+
+  void append(std::string specifier, Value *value) {
+    if (flag) {
+      var.specifier = specifier;
+      var.value = value;
     }
+  }
 
-    void finish() {
-      flag = false;
-      str = "";
-      args.clear();
-    }
+  void update() {
+    str += var.specifier;
+    args.push_back(var.value);
+  }
+};
 
-    void place(std::string s_, Value *v_) {
-      if (flag) {
-        var.s = s_;
-        var.v = v_;
-      }
-    }
-
-    void update() {
-      str += var.s;
-      args.push_back(var.v);
-    }
-
-  } format;
-
-  LLVMContext context_;
-  Module module_;
-  BasicBlock *main_block;
-
-  Function *main_fn;
-  Function *printf, *scanf;
-
-  /* To circumvent void return type, stupid Visitor Pattern */
-  std::stack<BasicBlock *> entry;
-  std::stack<BasicBlock *> exit;
-
-  EvalStack eval;
-
-  /* Variable and Label Tables */
-  std::map<std::string, Value *> value_table;
-  std::map<std::string, size_t> sizes_table;
-  std::map<std::string, BasicBlock *> label_table;
-
+struct Compiler : public Visitor {
+ public:
   Compiler();
-  Value *string_to_Value(const std::string &s);
-  Value *int_to_Value(int x);
-  bool declared_before(const std::string &s);
 
   void label(std::map<std::string, ast::Block *> m) final;
   void visit(ast::Node *node) final;
@@ -102,5 +78,29 @@ struct Compiler : public Visitor {
   void visit(ast::Literal *literal) final;
   void visit(ast::Read *read) final;
   void visit(ast::Labelled *labelled) final;
+
+ private:
+  FormatArgs format_;
+  LLVMContext context_;
+  Module module_;
+
+  ast::Program *root;
+  std::map<std::string, ast::Block *> table;
+  std::map<std::string, BasicBlock *> label_table;
+  std::map<std::string, Value *> value_table;
+  std::map<std::string, size_t> sizes_table;
+  std::stack<BasicBlock *> entry;
+  std::stack<BasicBlock *> exit;
+  BasicBlock *main_block;
+  EvalStack eval_;
+
+  Function *main_fn;
+  Function *printf, *scanf;
+
+  /* Variable and Label Tables */
+
+  Value *string_to_Value(const std::string &s);
+  Value *int_to_Value(int x);
+  bool declared_before(const std::string &identifier);
 };
 }  // namespace visitor
